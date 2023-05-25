@@ -1,0 +1,13 @@
+on:
+  pull_request:
+    branches:
+    - master
+    - develop
+    
+jobs:
+  compile:
+    name: Compile TSX files
+    runs-on: 'ubuntu-latest'
+    steps:
+    - name: Typescript compiler
+      uses: iCrawl/action-tsc@v1
