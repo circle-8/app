@@ -1,0 +1,20 @@
+on:
+  pull_request:
+    branches:
+    - master
+    - develop
+    
+jobs:
+  compile:
+    name: Compile TSX files
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: actions/checkout@v1
+    - name: install node v19
+      uses: actions/setup-node@v1
+      with:
+        node-version: 19
+    - name: npm install
+      run: npm install
+    - name: tsc
+      uses: icrawl/action-tsc@v1
