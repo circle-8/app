@@ -1,0 +1,12 @@
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { HelloWorld } from '../screens/hw.screen';
+
+const HomeStack = createNativeStackNavigator();
+
+export const HelloWorldFlow = () => {
+	return (
+		<HomeStack.Navigator>
+			<HomeStack.Screen name="HelloWorld2" component={HelloWorld}/>
+		</HomeStack.Navigator>
+	);
+}
