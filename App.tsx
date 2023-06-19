@@ -1,15 +1,70 @@
 import React from "react";
-import { NativeBaseProvider, Box, Text, Heading, VStack, FormControl, Input, Link, Button, HStack, Center } from "native-base";
+import {
+  NativeBaseProvider,
+  Box,
+  Text,
+  Heading,
+  VStack,
+  FormControl,
+  Input,
+  Link,
+  Button,
+  HStack,
+  Center
+} from "native-base";
 import { StyleSheet } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Ionicons from '@expo/vector-icons/Ionicons';
+
+const LoginStack = createNativeStackNavigator();
+const HomeStack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
 export default function App() {
   return (
-    <NativeBaseProvider>
-      <Center flex={1} px="3">
-        <Login/>
-      </Center>
-    </NativeBaseProvider>
+    <NavigationContainer>
+      <NativeBaseProvider>
+        <Tab.Navigator
+          screenOptions={({route}) => ({
+            tabBarIcon: ({focused, color, size}) => {
+              let iconName;
+              if ( route.name === 'Login' ) {
+                iconName = focused
+                  ? 'ios-information-circle'
+                  : 'ios-information-circle-outline';
+              } else if ( route.name === 'HelloWorld' ) {
+                iconName = focused ? 'ios-list' : 'ios-list-outline';
+              }
+
+              return <Ionicons name={iconName} size={size} color={color}/>;
+            },
+            headerShown: false
+          })}
+        >
+          <Tab.Screen name="Login" component={LoginScreen} />
+          <Tab.Screen name="HelloWorld" component={HelloWorldScreen} />
+        </Tab.Navigator>
+      </NativeBaseProvider>
+    </NavigationContainer>
   )
+}
+
+const LoginScreen = () => {
+  return (
+    <LoginStack.Navigator>
+      <LoginStack.Screen name="Login" component={Login}/>
+      <LoginStack.Screen name="HelloWorld" component={HelloWorld}/>
+    </LoginStack.Navigator>
+  );
+}
+const HelloWorldScreen = () => {
+  return (
+    <HomeStack.Navigator>
+      <HomeStack.Screen name="HelloWorld2" component={HelloWorld}/>
+    </HomeStack.Navigator>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -21,7 +76,15 @@ const styles = StyleSheet.create({
   },
 });
 
-const Login = () => {
+const HelloWorld = () => {
+  return (
+    <Box>
+      Hello World
+    </Box>
+  );
+}
+
+const Login = ({navigation}) => {
   return <Center w="100%">
     <Box safeArea p="2" py="8" w="90%" maxW="290">
       <Heading size="lg" fontWeight="600" color="coolGray.800" _dark={{
@@ -51,7 +114,7 @@ const Login = () => {
             Forget Password?
           </Link>
         </FormControl>
-        <Button mt="2" colorScheme="indigo">
+        <Button mt="2" colorScheme="indigo" onPress={() => navigation.navigate('HelloWorld')}>
           Sign in
         </Button>
         <HStack mt="6" justifyContent="center">
