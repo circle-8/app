@@ -1,13 +1,16 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Login } from "../screens/login.screen";
+import { Login } from "../screens/login/login.screen";
+import { SignUp } from "../screens/login/signup.screen";
+import { LoginRoutes } from "../../constants/routes";
 
 const LoginStack = createNativeStackNavigator();
 
 export const LoginFlow = () => {
 	return (
 		<LoginStack.Navigator>
-			<LoginStack.Screen name="Login" component={Login} />
+			<LoginStack.Screen name={LoginRoutes.login} component={Login} />
+			<LoginStack.Screen name={LoginRoutes.signup} component={SignUp} />
 		</LoginStack.Navigator>
 	);
 };

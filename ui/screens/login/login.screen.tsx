@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 import {
 	Box,
 	Text,
@@ -11,13 +11,17 @@ import {
 	HStack,
 	Center,
 	useToast,
-} from 'native-base';
+} from 'native-base'
 
-import { AuthContext } from '../../context/auth.context';
-import { UserService } from '../../services/user.service';
-import { match } from '../../utils/either';
+import { AuthContext } from '../../../context/auth.context'
+import { UserService } from '../../../services/user.service'
+import { match } from '../../../utils/either'
+import { LoginRoutes, LoginRoutesParams } from '../../../constants/routes'
+import { NativeStackScreenProps } from '@react-navigation/native-stack'
 
-export const Login = ({ navigation }) => {
+type Props = NativeStackScreenProps<LoginRoutesParams, 'Login'>
+
+export const Login = ({ navigation }: Props) => {
 	return (
 		<Center w="100%">
 			<Box safeArea p="2" py="8" w="90%" maxW="290">
@@ -51,7 +55,9 @@ export const Login = ({ navigation }) => {
 								fontWeight: 'medium',
 								fontSize: 'sm',
 							}}
-							href="#"
+							onPress={() => {
+								navigation.navigate(LoginRoutes.signup)
+							}}
 						>
 							Quiero registrarme
 						</Link>
@@ -59,56 +65,56 @@ export const Login = ({ navigation }) => {
 				</VStack>
 			</Box>
 		</Center>
-	);
-};
+	)
+}
 
 type FormState = {
-	username?: string;
-	password?: string;
-};
+	username?: string
+	password?: string
+}
 
 type Errors = {
-	has: boolean;
-	username?: string;
-	password?: string;
-};
+	has: boolean
+	username?: string
+	password?: string
+}
 
 const Form = () => {
-	const { login } = React.useContext(AuthContext);
-	const [formData, setData] = React.useState<FormState>({});
-	const [errors, setErrors] = React.useState<Errors>({ has: false });
-	const [loading, setLoading] = React.useState(false);
-	const toast = useToast();
+	const { login } = React.useContext(AuthContext)
+	const [formData, setData] = React.useState<FormState>({})
+	const [errors, setErrors] = React.useState<Errors>({ has: false })
+	const [loading, setLoading] = React.useState(false)
+	const toast = useToast()
 
 	const isValid = () => {
-		const newErrors: Errors = { has: false };
+		const newErrors: Errors = { has: false }
 		if (!formData.username) {
-			newErrors.has = true;
-			newErrors.username = 'Usuario no puede estar vacío';
+			newErrors.has = true
+			newErrors.username = 'Usuario no puede estar vacío'
 		}
 
 		if (!formData.password) {
-			newErrors.has = true;
-			newErrors.password = 'Contraseña no puede estar vacío';
+			newErrors.has = true
+			newErrors.password = 'Contraseña no puede estar vacío'
 		}
 
-		setErrors(newErrors);
-		return !newErrors.has;
-	};
+		setErrors(newErrors)
+		return !newErrors.has
+	}
 	const onSubmit = async () => {
-		setLoading(true);
+		setLoading(true)
 
 		if (isValid()) {
-			const res = await UserService.token(formData.username, formData.password);
+			const res = await UserService.token(formData.username, formData.password)
 			match(
 				res,
-				(user) => login(user), // This will trigger the login in App.tsx, rendering the Home Screen
-				(err) => toast.show({ description: err })
-			);
+				user => login(user), // This will trigger the login in App.tsx, rendering the Home Screen
+				err => toast.show({ description: err })
+			)
 		}
 
-		setLoading(false);
-	};
+		setLoading(false)
+	}
 
 	return (
 		<>
@@ -116,7 +122,7 @@ const Form = () => {
 				<FormControl.Label>Usuario</FormControl.Label>
 				<Input
 					autoCapitalize="none"
-					onChangeText={(v) => setData({ ...formData, username: v })}
+					onChangeText={v => setData({ ...formData, username: v })}
 				/>
 				<FormControl.ErrorMessage _text={{ fontSize: 'xs' }}>
 					{errors.username}
@@ -127,7 +133,7 @@ const Form = () => {
 				<Input
 					autoCapitalize="none"
 					type="password"
-					onChangeText={(v) => setData({ ...formData, password: v })}
+					onChangeText={v => setData({ ...formData, password: v })}
 				/>
 				<FormControl.ErrorMessage _text={{ fontSize: 'xs' }}>
 					{errors.password}
@@ -153,5 +159,5 @@ const Form = () => {
 				Iniciar Sesión
 			</Button>
 		</>
-	);
-};
+	)
+}
