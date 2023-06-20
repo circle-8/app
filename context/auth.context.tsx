@@ -1,7 +1,7 @@
 import React from "react";
 
-type A = {
+type AuthFunctions = {
 	login: (data: any) => void;
 };
 
-export const AuthContext = React.createContext<A>({ login: () => {} });
+export const AuthContext = React.createContext<AuthFunctions>({ login: () => {} });
