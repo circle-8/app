@@ -46,7 +46,7 @@ export const Login = ({navigation}) => {
 						Forget Password?
 					</Link>
 				</FormControl>
-				<Button mt="2" colorScheme="indigo" onPress={() => login()}>
+				<Button mt="2" colorScheme="indigo" onPress={() => login({})}>
 					Sign in
 				</Button>
 				<HStack mt="6" justifyContent="center">

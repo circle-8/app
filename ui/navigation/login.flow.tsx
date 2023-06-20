@@ -1,5 +1,6 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Login } from '../screens/login.screen';
+import React from "react";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Login } from "../screens/login.screen";
 
 const LoginStack = createNativeStackNavigator();
 
@@ -9,4 +10,4 @@ export const LoginFlow = () => {
 			<LoginStack.Screen name="Login" component={Login} />
 		</LoginStack.Navigator>
 	);
-}
+};

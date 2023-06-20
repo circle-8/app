@@ -1,3 +1,7 @@
-import React from 'react';
+import React from "react";
 
-export const AuthContext = React.createContext();
+type A = {
+	login: (data: any) => void;
+};
+
+export const AuthContext = React.createContext<A>({ login: () => {} });
