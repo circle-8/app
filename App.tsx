@@ -1,40 +1,36 @@
 import React from "react";
-import { NativeBaseProvider, Box, } from "native-base";
+import { NativeBaseProvider } from "native-base";
 import { StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { LoginFlow } from './ui/navigation/login.flow';
-import { HelloWorldFlow } from './ui/navigation/hw.flow';
+import { MainTabsFlow } from './ui/navigation/main-tabs.flow';
+import { AuthContext } from './context/auth.context';
 
 const Tab = createBottomTabNavigator();
 
 export default function App() {
+  const [logged, setLogged] = React.useState(false);
+  const authContext = React.useMemo(
+    () => ({
+      login: async (data) => {
+        setLogged(true);
+      }
+   })
+  );
+
   return (
     <NavigationContainer>
-      <NativeBaseProvider>
-        <Tab.Navigator
-          screenOptions={({route}) => ({
-            tabBarIcon: ({focused, color, size}) => {
-              let iconName;
-              if ( route.name === 'LoginTab' ) {
-                iconName = focused
-                  ? 'ios-information-circle'
-                  : 'ios-information-circle-outline';
-              } else if ( route.name === 'HelloWorldTab' ) {
-                iconName = focused ? 'ios-list' : 'ios-list-outline';
-              }
-
-              return <Ionicons name={iconName} size={size} color={color}/>;
-            },
-            headerShown: false
-          })}
-        >
-          <Tab.Screen name="LoginTab" component={LoginFlow} />
-          <Tab.Screen name="HelloWorldTab" component={HelloWorldFlow} />
-        </Tab.Navigator>
-      </NativeBaseProvider>
+      <AuthContext.Provider value={authContext}>
+        <NativeBaseProvider>
+          { logged ? (
+            <MainTabsFlow/>
+          ) : (
+            <LoginFlow/>
+          )}
+        </NativeBaseProvider>
+      </AuthContext.Provider>
     </NavigationContainer>
   )
 }

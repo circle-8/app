@@ -6,7 +6,7 @@ const HomeStack = createNativeStackNavigator();
 export const HelloWorldFlow = () => {
 	return (
 		<HomeStack.Navigator>
-			<HomeStack.Screen name="HelloWorld2" component={HelloWorld}/>
+			<HomeStack.Screen name="HelloWorld" component={HelloWorld}/>
 		</HomeStack.Navigator>
 	);
 }

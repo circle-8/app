@@ -12,7 +12,11 @@ import {
   Center
 } from "native-base";
 
+import { AuthContext } from '../../context/auth.context';
+
 export const Login = ({navigation}) => {
+	const { login } = React.useContext(AuthContext);
+
 	return <Center w="100%">
 		<Box safeArea p="2" py="8" w="90%" maxW="290">
 			<Heading size="lg" fontWeight="600" color="coolGray.800" _dark={{
@@ -42,7 +46,7 @@ export const Login = ({navigation}) => {
 						Forget Password?
 					</Link>
 				</FormControl>
-				<Button mt="2" colorScheme="indigo" onPress={() => navigation.navigate('HelloWorld')}>
+				<Button mt="2" colorScheme="indigo" onPress={() => login()}>
 					Sign in
 				</Button>
 				<HStack mt="6" justifyContent="center">
