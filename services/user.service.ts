@@ -1,14 +1,19 @@
 import { User, ErrorMessage } from './types'
 import { TokenResponse, UserResponse } from './responses'
-import { Either, map } from '../utils/either'
+import { Either, ifLeft, map, match } from '../utils/either'
 import { Http } from '../api/api'
+import { TokenService } from './token.service'
 
 const token = async (
 	username: string,
 	password: string
 ): Promise<Either<User, ErrorMessage>> => {
 	const res = await Http.post<TokenResponse>('/token', { username, password })
-	// TODO: persist the token using AsyncStorage
+	ifLeft(res, t => {
+		TokenService.set('access', t.token)
+		TokenService.set('refresh', t.refreshToken)
+	})
+
 	return map(
 		res,
 		usr => usr.user,
@@ -45,7 +50,37 @@ const post = async ({
 	)
 }
 
+const isLogged = async () => {
+	return (
+		await TokenService.get('access') !== null && await TokenService.get('refresh') !== null
+	)
+}
+
+const refreshToken = async (): Promise<ErrorMessage | null> => {
+	const accessToken = await TokenService.get('access')
+	const refreshToken = await TokenService.get('refresh')
+	const res = await Http.post<TokenResponse>('/refresh_token', {
+		accessToken,
+		refreshToken,
+	})
+	ifLeft(res, async t => {
+		await TokenService.set('access', t.token)
+		await TokenService.set('refresh', t.refreshToken)
+	})
+
+	let ret: ErrorMessage | null
+	match(
+		res,
+		t => (ret = null),
+		err => (ret = err.message)
+	)
+
+	return ret
+}
+
 export const UserService = {
 	token,
 	post,
+	isLogged,
+	refreshToken,
 }

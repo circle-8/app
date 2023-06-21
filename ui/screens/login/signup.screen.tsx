@@ -113,8 +113,6 @@ const Form = ({
 		setLoading(false)
 	}
 
-	console.log(formData)
-
 	return (
 		<>
 			<FormControl isRequired isInvalid={'username' in errors}>
