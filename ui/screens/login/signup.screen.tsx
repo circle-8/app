@@ -51,7 +51,6 @@ type FormState = {
 	password?: string
 	nombre?: string
 	email?: string
-	isTransportista: boolean
 }
 
 type Errors = {
@@ -67,9 +66,8 @@ const Form = ({
 }: {
 	navigation: NativeStackNavigationProp<LoginRoutesParams>
 }) => {
-	const [formData, setData] = React.useState<FormState>({
-		isTransportista: false,
-	})
+	const [formData, setData] = React.useState<FormState>({})
+	const [isTransportista, setTransportista] = React.useState<boolean>(false)
 	const [errors, setErrors] = React.useState<Errors>({ has: false })
 	const [loading, setLoading] = React.useState(false)
 	const toast = useToast()
@@ -99,7 +97,7 @@ const Form = ({
 	const onSubmit = async () => {
 		setLoading(true)
 		if (isValid()) {
-			const res = await UserService.post(formData)
+			const res = await UserService.post({...formData, isTransportista})
 			match(
 				res,
 				usr => {
@@ -161,7 +159,7 @@ const Form = ({
 				<Checkbox
 					value={'true'}
 					accessibilityLabel="Quiero ser transportista"
-					onChange={v => setData({...formData, isTransportista: v})}
+					onChange={v => setTransportista(v)}
 					size="lg"
 				/>
 			</FormControl>
