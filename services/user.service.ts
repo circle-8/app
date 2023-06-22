@@ -52,7 +52,7 @@ const post = async ({
 
 const isLogged = async () => {
 	return (
-		await TokenService.get('access') !== null && await TokenService.get('refresh') !== null
+		await TokenService.get('access') && await TokenService.get('refresh')
 	)
 }
 
@@ -78,9 +78,15 @@ const refreshToken = async (): Promise<ErrorMessage | null> => {
 	return ret
 }
 
+const logout = async () => {
+	await TokenService.set('access', '')
+	await TokenService.set('refresh', '')
+}
+
 export const UserService = {
 	token,
 	post,
 	isLogged,
 	refreshToken,
+	logout,
 }

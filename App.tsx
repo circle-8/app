@@ -17,6 +17,9 @@ export default function App() {
 			login: async (usr?: User) => {
 				setLogged(true)
 			},
+			logout: () => {
+				setLogged(false)
+			},
 		}),
 		[]
 	)
