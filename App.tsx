@@ -1,20 +1,62 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react'
+import { NativeBaseProvider, useToast } from 'native-base'
+import { NavigationContainer } from '@react-navigation/native'
+
+import { LoginFlow } from './ui/navigation/login.flow'
+import { MainTabsFlow } from './ui/navigation/main-tabs.flow'
+import { AuthContext } from './context/auth.context'
+import { SplashScreen } from './ui/components/splash.component'
+import { User } from './services/types'
+import { UserService } from './services/user.service'
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+	const [loading, setLoading] = React.useState(true)
+	const [logged, setLogged] = React.useState(false)
+	const authContext = React.useMemo(
+		() => ({
+			login: async (usr?: User) => {
+				setLogged(true)
+			},
+			logout: () => {
+				setLogged(false)
+			},
+		}),
+		[]
+	)
+	const toast = useToast()
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+	React.useEffect(() => {
+		;(async () => {
+			if (await UserService.isLogged()) {
+				const error = await UserService.refreshToken()
+				if (error !== null) {
+					toast.show({
+						description: 'Hubo un error al iniciar sesión automáticamente',
+					})
+				} else {
+					await authContext.login()
+				}
+			}
+
+			setLoading(false)
+		})()
+	}, [])
+
+	if (loading) {
+		return (
+			<NativeBaseProvider>
+				<SplashScreen />
+			</NativeBaseProvider>
+		)
+	}
+
+	return (
+		<NavigationContainer>
+			<AuthContext.Provider value={authContext}>
+				<NativeBaseProvider>
+					{logged ? <MainTabsFlow /> : <LoginFlow />}
+				</NativeBaseProvider>
+			</AuthContext.Provider>
+		</NavigationContainer>
+	)
+}
