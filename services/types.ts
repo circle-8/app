@@ -3,14 +3,14 @@ export type TipoUsuario =
 	| 'TRANSPORTISTA'
 	| 'RECICLADOR_URBANO'
 	| 'RECICLADOR_PARTICULAR'
-	| 'ORGANIZACION';
+	| 'ORGANIZACION'
 
-export type ErrorMessage = string;
+export type ErrorMessage = string
 
 export type User = {
-	id: number;
-	username: string;
-	nombre: string;
-	email: string;
-	tipoUsuario: TipoUsuario;
-};
+	id: number
+	username: string
+	nombre: string
+	email: string
+	tipoUsuario: TipoUsuario
+}

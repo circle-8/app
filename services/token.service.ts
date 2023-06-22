@@ -6,7 +6,7 @@ const set = async (typ: TokenType, token: string) => {
 	await AsyncStorage.setItem(typ, token)
 }
 
-const get = async (typ: TokenType): Promise<string|null> => {
+const get = async (typ: TokenType): Promise<string | null> => {
 	return await AsyncStorage.getItem(typ)
 }
 

@@ -1,10 +1,10 @@
-import React from "react";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Login } from "../screens/login/login.screen";
-import { SignUp } from "../screens/login/signup.screen";
-import { LoginRoutes } from "../../constants/routes";
+import React from 'react'
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { Login } from '../screens/login/login.screen'
+import { SignUp } from '../screens/login/signup.screen'
+import { LoginRoutes } from '../../constants/routes'
 
-const LoginStack = createNativeStackNavigator();
+const LoginStack = createNativeStackNavigator()
 
 export const LoginFlow = () => {
 	return (
@@ -12,5 +12,5 @@ export const LoginFlow = () => {
 			<LoginStack.Screen name={LoginRoutes.login} component={Login} />
 			<LoginStack.Screen name={LoginRoutes.signup} component={SignUp} />
 		</LoginStack.Navigator>
-	);
-};
+	)
+}

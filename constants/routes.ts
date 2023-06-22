@@ -15,4 +15,4 @@ export const LoginRoutes: {
 export const TabRoutes = {
 	helloWorld: 'HelloWorldTab',
 	profile: 'ProfileTab',
-};
+}

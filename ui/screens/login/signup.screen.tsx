@@ -97,11 +97,11 @@ const Form = ({
 	const onSubmit = async () => {
 		setLoading(true)
 		if (isValid()) {
-			const res = await UserService.post({...formData, isTransportista})
+			const res = await UserService.post({ ...formData, isTransportista })
 			match(
 				res,
 				usr => {
-					toast.show({description: '¡Registro exitoso!'})
+					toast.show({ description: '¡Registro exitoso!' })
 					navigation.popToTop()
 				},
 				err => toast.show({ description: err })

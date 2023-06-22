@@ -52,7 +52,7 @@ const post = async ({
 
 const isLogged = async () => {
 	return (
-		await TokenService.get('access') && await TokenService.get('refresh')
+		(await TokenService.get('access')) && (await TokenService.get('refresh'))
 	)
 }
 
