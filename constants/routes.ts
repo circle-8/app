@@ -13,6 +13,6 @@ export const LoginRoutes: {
 }
 
 export const TabRoutes = {
-	helloWorld: 'HelloWorldTab',
+	home: 'HomeTab',
 	profile: 'ProfileTab',
 }

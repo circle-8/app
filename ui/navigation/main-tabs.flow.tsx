@@ -2,7 +2,7 @@ import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
-import { HelloWorldFlow } from './hw.flow'
+import { HomeFlow } from './home.flow'
 import { TabRoutes } from '../../constants/routes'
 import { ProfileFlow } from './profile.flow'
 
@@ -14,9 +14,9 @@ interface Icons {
 }
 
 const icons: Icons = {
-	[TabRoutes.helloWorld]: {
-		outline: 'ios-infinite-outline',
-		focused: 'ios-infinite',
+	[TabRoutes.home]: {
+		outline: 'home-outline',
+		focused: 'home',
 	},
 	[TabRoutes.profile]: {
 		outline: 'person-outline',
@@ -40,8 +40,8 @@ export const MainTabsFlow = () => {
 				headerShown: false,
 			})}
 		>
-			<Tab.Screen name={TabRoutes.helloWorld} component={HelloWorldFlow} />
-			<Tab.Screen name={TabRoutes.profile} component={ProfileFlow} />
+			<Tab.Screen name={TabRoutes.home} component={HomeFlow} options={{title: 'Inicio'}}/>
+			<Tab.Screen name={TabRoutes.profile} component={ProfileFlow} options={{title: 'Perfil'}}/>
 		</Tab.Navigator>
 	)
 }
