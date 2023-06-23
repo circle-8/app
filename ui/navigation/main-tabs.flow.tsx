@@ -5,6 +5,9 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { HomeFlow } from './home.flow'
 import { TabRoutes } from '../../constants/routes'
 import { ProfileFlow } from './profile.flow'
+import { ActivityFlow } from './activity.flow'
+import { MessagesFlow } from './messages.flow'
+import { LearnFlow } from './learn.flow'
 
 interface Icons {
 	[key: string]: {
@@ -15,8 +18,20 @@ interface Icons {
 
 const icons: Icons = {
 	[TabRoutes.home]: {
-		outline: 'home-outline',
-		focused: 'home',
+		outline: 'map-outline',
+		focused: 'map',
+	},
+	[TabRoutes.activity]: {
+		outline: 'newspaper-outline',
+		focused: 'newspaper',
+	},
+	[TabRoutes.messages]: {
+		outline: 'chatbox-ellipses-outline',
+		focused: 'chatbox-ellipses',
+	},
+	[TabRoutes.learn]: {
+		outline: 'book-outline',
+		focused: 'book',
 	},
 	[TabRoutes.profile]: {
 		outline: 'person-outline',
@@ -41,6 +56,9 @@ export const MainTabsFlow = () => {
 			})}
 		>
 			<Tab.Screen name={TabRoutes.home} component={HomeFlow} options={{title: 'Inicio'}}/>
+			<Tab.Screen name={TabRoutes.activity} component={ActivityFlow} options={{title: 'Actividad'}}/>
+			<Tab.Screen name={TabRoutes.messages} component={MessagesFlow} options={{title: 'Mensajes'}}/>
+			<Tab.Screen name={TabRoutes.learn} component={LearnFlow} options={{title: 'Aprende'}}/>
 			<Tab.Screen name={TabRoutes.profile} component={ProfileFlow} options={{title: 'Perfil'}}/>
 		</Tab.Navigator>
 	)

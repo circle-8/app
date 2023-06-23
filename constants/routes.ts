@@ -14,5 +14,8 @@ export const LoginRoutes: {
 
 export const TabRoutes = {
 	home: 'HomeTab',
+	activity: 'ActivityTab',
+	messages: 'MessagesTab',
+	learn: 'LearnTab',
 	profile: 'ProfileTab',
 }

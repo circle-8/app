@@ -9,32 +9,34 @@ import { SplashScreen } from './ui/components/splash.component'
 import { User } from './services/types'
 import { UserService } from './services/user.service'
 
+import { colors } from './constants/styles'
+
 const navigationTheme = {
 	...DefaultTheme,
 	colors: {
 		...DefaultTheme.colors,
-		primary: '#394637',
-		text: '#394637',
-		card: '#E0F5DD',
+		primary: colors.primaryText,
+		text: colors.primaryText,
+		card: colors.primary50,
 		border: 'lightgray',
-	}
+	},
 }
 
 const baseTheme = extendTheme({
 	colors: {
 		primary: {
-			50: '#E0F5DD',
-			100: '#D9F3D5',
-			200: '#C3DABF',
-			300: '#ADC2AA',
-			400: '#97AA95',
-			500: '#82917f',
-			600: '#6C796A',
-			700: '#566155',
-			800: '#41483F',
-			900: '#2B302A',
-		}
-	}
+			50: colors.primary50,
+			100: colors.primary100,
+			200: colors.primary200,
+			300: colors.primary300,
+			400: colors.primary400,
+			500: colors.primary500,
+			600: colors.primary600,
+			700: colors.primary700,
+			800: colors.primary800,
+			900: colors.primary900,
+		},
+	},
 })
 
 export default function App() {

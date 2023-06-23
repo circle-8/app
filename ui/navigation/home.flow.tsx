@@ -7,7 +7,7 @@ const HomeStack = createNativeStackNavigator()
 export const HomeFlow = () => {
 	return (
 		<HomeStack.Navigator>
-			<HomeStack.Screen name="Home" component={Home} />
+			<HomeStack.Screen name="Home" component={Home} options={{header: () => <></>}}/>
 		</HomeStack.Navigator>
 	)
 }
