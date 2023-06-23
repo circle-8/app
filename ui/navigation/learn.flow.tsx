@@ -7,7 +7,7 @@ const LearnStack = createNativeStackNavigator()
 export const LearnFlow = () => {
 	return (
 		<LearnStack.Navigator>
-			<LearnStack.Screen name="Learn" component={Learn} />
+			<LearnStack.Screen name="Learn" component={Learn} options={{title: 'Aprende'}}/>
 		</LearnStack.Navigator>
 	)
 }

@@ -7,7 +7,7 @@ const ActivityStack = createNativeStackNavigator()
 export const ActivityFlow = () => {
 	return (
 		<ActivityStack.Navigator>
-			<ActivityStack.Screen name="Activity" component={Activity} />
+			<ActivityStack.Screen name="Activity" component={Activity} options={{title: 'Actividad'}}/>
 		</ActivityStack.Navigator>
 	)
 }
