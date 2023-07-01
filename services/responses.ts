@@ -1,6 +1,13 @@
 import { TipoUsuario } from './types'
 
-type ErrorCode = 'INTERNAL_ERROR' | 'BAD_REQUEST' | 'NOT_FOUND'
+type ErrorCode =
+	| 'INTERNAL_ERROR'
+	| 'BAD_REQUEST'
+	| 'NOT_FOUND'
+	| 'TOKEN_ERROR'
+	| 'TOKEN_NOT_FOUND'
+	| 'TOKEN_EXPIRED'
+
 export type ErrorResponse = {
 	code: ErrorCode
 	message: string

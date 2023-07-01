@@ -6,6 +6,7 @@ import { FontAwesome } from '@expo/vector-icons'
 import { colors } from '../../../constants/styles'
 import * as Location from 'expo-location'
 import { LoadingScreen } from '../../components/loading.component'
+import { Http } from '../../../api/api'
 
 type Coord = {
 	latitude: number
