@@ -9,8 +9,8 @@ const LoginStack = createNativeStackNavigator()
 export const LoginFlow = () => {
 	return (
 		<LoginStack.Navigator>
-			<LoginStack.Screen name={LoginRoutes.login} component={Login} />
-			<LoginStack.Screen name={LoginRoutes.signup} component={SignUp} />
+			<LoginStack.Screen name={LoginRoutes.login} component={Login} options={{header: () => <></>}}/>
+			<LoginStack.Screen name={LoginRoutes.signup} component={SignUp} options={{title: 'Registrate'}}/>
 		</LoginStack.Navigator>
 	)
 }
