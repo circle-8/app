@@ -12,6 +12,11 @@ export const colors = {
 	primary800: '#41483F',
 	primary900: '#2B302A',
 	primaryText: '#394637',
+	byType: {
+		'RESIDUO': 'yellow',
+		'RECICLAJE': 'orange',
+		'VERDE': 'green',
+	}
 }
 
 export const styles = StyleSheet.create({
