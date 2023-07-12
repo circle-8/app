@@ -7,7 +7,7 @@ const MessagesStack = createNativeStackNavigator()
 export const MessagesFlow = () => {
 	return (
 		<MessagesStack.Navigator>
-			<MessagesStack.Screen name="Messages" component={Messages} />
+			<MessagesStack.Screen name="Messages" component={Messages} options={{title: 'Mensajes'}}/>
 		</MessagesStack.Navigator>
 	)
 }

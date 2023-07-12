@@ -56,9 +56,11 @@ export default function App() {
 	const toast = useToast()
 
 	React.useEffect(() => {
-		;(async () => {
+		(async () => {
 			if (await UserService.isLogged()) {
+				console.log('refreshing token')
 				const error = await UserService.refreshToken()
+
 				if (error !== null) {
 					toast.show({
 						description: 'Hubo un error al iniciar sesión automáticamente',
