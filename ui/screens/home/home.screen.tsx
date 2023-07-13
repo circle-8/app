@@ -1,15 +1,24 @@
-import React, { useState } from 'react'
-import { TouchableOpacity } from 'react-native';
+import React from 'react'
+import { TouchableOpacity } from 'react-native'
 import MapView, { Marker } from 'react-native-maps'
-import { Box, Center, Flex, Row, Text, Modal, Checkbox, Button } from 'native-base'
+import {
+	Box,
+	Center,
+	Flex,
+	Row,
+	Text,
+	Modal,
+	Checkbox,
+	Button,
+} from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { FontAwesome } from '@expo/vector-icons'
 import { colors } from '../../../constants/styles'
 import * as Location from 'expo-location'
 import { LoadingScreen } from '../../components/loading.component'
 import { PuntoServicio } from '../../../services/punto.service'
-import { Punto } from '../../../services/types'
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Punto, TipoPunto } from '../../../services/types'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 type Coord = {
 	latitude: number
@@ -23,8 +32,12 @@ export const Home = () => {
 	const [isLoading, setLoading] = React.useState(true)
 	const [userCoords, setUserCoords] = React.useState<Coord>()
 	const [points, setPoints] = React.useState<Punto[]>([])
-	const [isOpen, setIsOpen] = useState(false);
-	const [selectedValues, setSelectedValues] = useState<string[]>(["VERDE", "RECICLAJE", "RESIDUO"]);
+	const [isOpen, setIsOpen] = React.useState(false)
+	const [selectedValues, setSelectedValues] = React.useState<TipoPunto[]>([
+		'VERDE',
+		'RECICLAJE',
+		'RESIDUO',
+	])
 
 	const getUserLocation = async () => {
 		const status = await Location.requestForegroundPermissionsAsync()
@@ -41,29 +54,21 @@ export const Home = () => {
 	}
 
 	const getPoints = async () => {
-		const newPoints = await PuntoServicio.getAll()
+		const newPoints = await PuntoServicio.getAll(selectedValues)
 		setPoints(newPoints)
 	}
 
 	const handleFilterPress = () => {
-		setIsOpen(!isOpen);
-	};
+		setIsOpen(!isOpen)
+	}
 
 	const closePopover = () => {
-		setIsOpen(false);
-	};
-
-	const handleFilter = async () => {
-		setPoints([]);
-		const filterPoints = await PuntoServicio.getPuntosFiltro(selectedValues);
-		setPoints(filterPoints);
-		setIsOpen(false);
-	};
+		setIsOpen(false)
+	}
 
 	React.useEffect(() => {
 		getUserLocation()
 		getPoints()
-		handleFilter()
 	}, [])
 
 	if (isLoading) {
@@ -71,7 +76,10 @@ export const Home = () => {
 	}
 
 	return (
-		<SafeAreaView style={{ flex: 1, backgroundColor: colors.primary50 }} edges={['top']}>
+		<SafeAreaView
+			style={{ flex: 1, backgroundColor: colors.primary50 }}
+			edges={['top']}
+		>
 			<Flex h="100%">
 				<Box height="85%">
 					<MapView
@@ -100,7 +108,12 @@ export const Home = () => {
 				</Box>
 				<Box position="absolute" top={10} left={0} p={4}>
 					<TouchableOpacity onPress={handleFilterPress}>
-						<Center width={60} height={60} bg={colors.primary800} rounded="full">
+						<Center
+							width={60}
+							height={60}
+							bg={colors.primary800}
+							rounded="full"
+						>
 							<FontAwesome name="filter" size={40} color={colors.primary100} />
 						</Center>
 					</TouchableOpacity>
@@ -110,16 +123,33 @@ export const Home = () => {
 						<Modal.CloseButton />
 						<Modal.Header>Selecciona que ver en el mapa</Modal.Header>
 						<Modal.Body>
-							<Checkbox.Group colorScheme="green" defaultValue={selectedValues} accessibilityLabel="Selecciona los puntos que quieres ver"
-								onChange={(values) => setSelectedValues(values || [])}>
-								<Checkbox value="VERDE" my={2}>Puntos de reciclaje comunitario</Checkbox>
-								<Checkbox value="RECICLAJE" my={2}>Puntos de reciclaje particular</Checkbox>
-								<Checkbox value="RESIDUO" my={2}>Punto de retiro de residuos</Checkbox>
+							<Checkbox.Group
+								colorScheme="green"
+								defaultValue={selectedValues}
+								accessibilityLabel="Selecciona los puntos que quieres ver"
+								onChange={values => setSelectedValues(values || [])}
+							>
+								<Checkbox value="VERDE" my={2}>
+									Puntos de reciclaje comunitario
+								</Checkbox>
+								<Checkbox value="RECICLAJE" my={2}>
+									Puntos de reciclaje particular
+								</Checkbox>
+								<Checkbox value="RESIDUO" my={2}>
+									Punto de retiro de residuos
+								</Checkbox>
 							</Checkbox.Group>
 						</Modal.Body>
 						<Modal.Footer>
 							<Center flex={1}>
-								<Button onPress={handleFilter}>Filtrar</Button>
+								<Button
+									onPress={() => {
+										getPoints()
+										closePopover()
+									}}
+								>
+									Filtrar
+								</Button>
 							</Center>
 						</Modal.Footer>
 					</Modal.Content>
@@ -141,6 +171,6 @@ export const Home = () => {
 					</Row>
 				</Center>
 			</Flex>
-		</SafeAreaView >
+		</SafeAreaView>
 	)
 }
