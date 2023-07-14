@@ -1,6 +1,6 @@
 import React from 'react'
-import { NativeBaseProvider, useToast } from 'native-base'
-import { NavigationContainer } from '@react-navigation/native'
+import { NativeBaseProvider, extendTheme, useToast } from 'native-base'
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native'
 
 import { LoginFlow } from './ui/navigation/login.flow'
 import { MainTabsFlow } from './ui/navigation/main-tabs.flow'
@@ -8,6 +8,36 @@ import { AuthContext } from './context/auth.context'
 import { SplashScreen } from './ui/components/splash.component'
 import { User } from './services/types'
 import { UserService } from './services/user.service'
+
+import { colors } from './constants/styles'
+
+const navigationTheme = {
+	...DefaultTheme,
+	colors: {
+		...DefaultTheme.colors,
+		primary: colors.primaryText,
+		text: colors.primaryText,
+		card: colors.primary50,
+		border: 'lightgray',
+	},
+}
+
+const baseTheme = extendTheme({
+	colors: {
+		primary: {
+			50: colors.primary50,
+			100: colors.primary100,
+			200: colors.primary200,
+			300: colors.primary300,
+			400: colors.primary400,
+			500: colors.primary500,
+			600: colors.primary600,
+			700: colors.primary700,
+			800: colors.primary800,
+			900: colors.primary900,
+		},
+	},
+})
 
 export default function App() {
 	const [loading, setLoading] = React.useState(true)
@@ -26,9 +56,11 @@ export default function App() {
 	const toast = useToast()
 
 	React.useEffect(() => {
-		;(async () => {
+		(async () => {
 			if (await UserService.isLogged()) {
+				console.log('refreshing token')
 				const error = await UserService.refreshToken()
+
 				if (error !== null) {
 					toast.show({
 						description: 'Hubo un error al iniciar sesión automáticamente',
@@ -51,9 +83,9 @@ export default function App() {
 	}
 
 	return (
-		<NavigationContainer>
+		<NavigationContainer theme={navigationTheme}>
 			<AuthContext.Provider value={authContext}>
-				<NativeBaseProvider>
+				<NativeBaseProvider theme={baseTheme}>
 					{logged ? <MainTabsFlow /> : <LoginFlow />}
 				</NativeBaseProvider>
 			</AuthContext.Provider>

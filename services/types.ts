@@ -14,3 +14,13 @@ export type User = {
 	email: string
 	tipoUsuario: TipoUsuario
 }
+
+export type TipoPunto = 'RESIDUO' | 'RECICLAJE' | 'VERDE'
+
+export type Punto = {
+	id: number
+	latitud: number
+	longitud: number
+	tipo: TipoPunto
+	titulo: string
+}

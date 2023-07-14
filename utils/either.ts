@@ -29,7 +29,7 @@ const isRight = <A, B>(either: Either<A, B>): either is Right<B> => {
 export const match = <A, B>(
 	either: Either<A, B>,
 	onLeft: (l: A) => void,
-	onRight: (r: B) => void
+	onRight: (r: B) => void,
 ) => {
 	if (isLeft(either)) {
 		onLeft(either.left)
@@ -45,7 +45,7 @@ export const ifLeft = <A, B>(either: Either<A, B>, onLeft: (l: A) => void) => {
 
 export const ifRight = <A, B>(
 	either: Either<A, B>,
-	onRight: (r: B) => void
+	onRight: (r: B) => void,
 ) => {
 	if (isRight(either)) onRight(either.right)
 }
@@ -53,7 +53,7 @@ export const ifRight = <A, B>(
 export const map = <A, B, C, D>(
 	either: Either<A, B>,
 	mapLeft: (a: A) => C,
-	mapRight: (b: B) => D
+	mapRight: (b: B) => D,
 ): Either<C, D> => {
 	let newEither: Either<C, D>
 	match(
@@ -63,7 +63,7 @@ export const map = <A, B, C, D>(
 		},
 		r => {
 			newEither = right(mapRight(r))
-		}
+		},
 	)
 
 	return newEither

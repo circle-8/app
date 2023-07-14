@@ -13,7 +13,7 @@ export const Profile = () => {
 	return (
 		<Center w="100%">
 			<Box>Profile</Box>
-			<Button mt="2" colorScheme="indigo" onPress={onLogout}>
+			<Button mt="2" color='primary' onPress={onLogout}>
 				Cerrar Sesión
 			</Button>
 		</Center>

@@ -29,9 +29,6 @@ export const Login = ({ navigation }: Props) => {
 					size="lg"
 					fontWeight="600"
 					color="coolGray.800"
-					_dark={{
-						color: 'warmGray.50',
-					}}
 					alignSelf="center"
 				>
 					Circle 8
@@ -43,15 +40,12 @@ export const Login = ({ navigation }: Props) => {
 						<Text
 							fontSize="sm"
 							color="coolGray.600"
-							_dark={{
-								color: 'warmGray.200',
-							}}
 						>
 							Soy un nuevo usuario.{' '}
 						</Text>
 						<Link
 							_text={{
-								color: 'indigo.500',
+								color: 'primary.700',
 								fontWeight: 'medium',
 								fontSize: 'sm',
 							}}
@@ -118,7 +112,7 @@ const Form = () => {
 
 	return (
 		<>
-			<FormControl isRequired isInvalid={'username' in errors}>
+			<FormControl isInvalid={'username' in errors}>
 				<FormControl.Label>Usuario</FormControl.Label>
 				<Input
 					autoCapitalize="none"
@@ -128,7 +122,7 @@ const Form = () => {
 					{errors.username}
 				</FormControl.ErrorMessage>
 			</FormControl>
-			<FormControl isRequired isInvalid={'password' in errors}>
+			<FormControl isInvalid={'password' in errors}>
 				<FormControl.Label>Contraseña</FormControl.Label>
 				<Input
 					autoCapitalize="none"
@@ -142,7 +136,7 @@ const Form = () => {
 					_text={{
 						fontSize: 'xs',
 						fontWeight: '500',
-						color: 'indigo.500',
+						color: 'primary.700',
 					}}
 					alignSelf="flex-end"
 					mt="1"
@@ -152,7 +146,6 @@ const Form = () => {
 			</FormControl>
 			<Button
 				mt="2"
-				colorScheme="indigo"
 				onPress={onSubmit}
 				isLoading={loading}
 			>
