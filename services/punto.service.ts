@@ -17,7 +17,7 @@ const getPuntos = async (url: string, tipo: TipoPunto): Promise<Punto[]> => {
 	const puntosVerdes = await Http.get<ListResponse<PuntoResponse>>(url)
 
 	const points = []
-	ifLeft(puntosVerdes, l => points.push(...l.data.map(t => ({ ...t, tipo }))))
+	ifLeft(puntosVerdes, l => points.push(...l.data.map(t => ({ ...t, tipo, titulo: `${tipo} ${t.id}` }))))
 
 	return points
 }

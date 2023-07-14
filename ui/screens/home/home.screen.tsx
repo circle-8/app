@@ -72,7 +72,7 @@ export const Home = () => {
 								latitude: point.latitud,
 								longitude: point.longitud,
 							}}
-							title={'' + point.id}
+							title={point.titulo}
 							pinColor={colors.byType[point.tipo]}
 						/>
 					))}

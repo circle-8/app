@@ -22,4 +22,5 @@ export type Punto = {
 	latitud: number
 	longitud: number
 	tipo: TipoPunto
+	titulo: string
 }
