@@ -1,5 +1,5 @@
 import React from 'react'
-import { TouchableOpacity } from 'react-native'
+import { GestureResponderEvent, TouchableOpacity } from 'react-native'
 import MapView, { Marker } from 'react-native-maps'
 import {
 	Box,
@@ -32,11 +32,10 @@ export const Home = () => {
 	const [isLoading, setLoading] = React.useState(true)
 	const [userCoords, setUserCoords] = React.useState<Coord>()
 	const [points, setPoints] = React.useState<Punto[]>([])
-	const [isOpen, setIsOpen] = React.useState(false)
+	const [isFilterOpen, setFilterIsOpen] = React.useState(false)
 	const [selectedValues, setSelectedValues] = React.useState<TipoPunto[]>([
 		'VERDE',
-		'RECICLAJE',
-		'RESIDUO',
+		'RECICLAJE'
 	])
 
 	const getUserLocation = async () => {
@@ -59,13 +58,14 @@ export const Home = () => {
 	}
 
 	const handleFilterPress = () => {
-		setIsOpen(!isOpen)
+		setFilterIsOpen(!isFilterOpen)
 	}
 
 	const closePopover = () => {
-		setIsOpen(false)
+		setFilterIsOpen(false)
 	}
 
+	/* Initial data loading */
 	React.useEffect(() => {
 		getUserLocation()
 		getPoints()
@@ -107,18 +107,9 @@ export const Home = () => {
 					</MapView>
 				</Box>
 				<Box position="absolute" top={10} left={0} p={4}>
-					<TouchableOpacity onPress={handleFilterPress}>
-						<Center
-							width={60}
-							height={60}
-							bg={colors.primary800}
-							rounded="full"
-						>
-							<FontAwesome name="filter" size={40} color={colors.primary100} />
-						</Center>
-					</TouchableOpacity>
+					<Filter onPress={handleFilterPress}/>
 				</Box>
-				<Modal isOpen={isOpen} onClose={closePopover}>
+				<Modal isOpen={isFilterOpen} onClose={closePopover}>
 					<Modal.Content>
 						<Modal.CloseButton />
 						<Modal.Header>Selecciona que ver en el mapa</Modal.Header>
@@ -172,5 +163,24 @@ export const Home = () => {
 				</Center>
 			</Flex>
 		</SafeAreaView>
+	)
+}
+
+type FilterProps = {
+	onPress: (event: GestureResponderEvent) => void
+}
+
+const Filter = (props: FilterProps) => {
+	return (
+		<TouchableOpacity onPress={props.onPress}>
+			<Center
+				width={60}
+				height={60}
+				bg={colors.primary800}
+				rounded="full"
+			>
+				<FontAwesome name="filter" size={40} color={colors.primary100} />
+			</Center>
+		</TouchableOpacity>
 	)
 }

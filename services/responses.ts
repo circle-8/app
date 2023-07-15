@@ -36,28 +36,46 @@ export type ListResponse<T> = {
 	data: T[]
 }
 
-export type PuntoResponse = {
+export type DiaResponse = '0' | '1' | '2' | '3' | '4' | '5' | '6'
+
+export type CiudadanoResponse = {
+	id: number
+	username: string
+	nombre: string
+	email: string
+	tipoUsuario: TipoUsuario
+}
+
+
+type PuntoResponseBase = {
 	id: number
 	latitud: number
 	longitud: number
 }
 
-export type PuntoResiduoResponse = PuntoResponse
-
-export type DiaResponse = '0' | '1' | '2' | '3' | '4' | '5' | '6'
+export type PuntoResiduoResponse = PuntoResponseBase & {
+	ciudadanoId: number
+	ciudadanoUri: string
+	ciudadano?: CiudadanoResponse
+	residuos?: unknown
+}
 
 export type TipoResiduoResponse = {
 	id: number
 	nombre: string
 }
 
-export type PuntoVerdeResponse = PuntoResponse & {
+export type PuntoVerdeResponse = PuntoResponseBase & {
 	dias: DiaResponse[]
 	tipoResiduo: TipoResiduoResponse[]
+	titulo: string
 }
 
 export type PuntoReciclajeResponse = PuntoVerdeResponse & {
-	recicladorUri?: string
-	recicladorId?: number
+	recicladorUri: string
+	recicladorId: number
 	reciclador?: unknown
+	titulo: string
 }
+
+export type PuntoResponse = PuntoResiduoResponse | PuntoVerdeResponse | PuntoReciclajeResponse
