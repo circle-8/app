@@ -3,12 +3,25 @@ import { ifLeft } from '../utils/either'
 import { ListResponse, PuntoResponse } from './responses'
 import { Punto, TipoPunto } from './types'
 
-const getAll = async (): Promise<Punto[]> => {
+const getAll = async (tipos: TipoPunto[]): Promise<Punto[]> => {
 	const points: Punto[] = []
 
-	points.push(...(await getPuntos('/puntos_residuo', 'RESIDUO')))
-	points.push(...(await getPuntos('/puntos_reciclaje', 'RECICLAJE')))
-	points.push(...(await getPuntos('/puntos_verdes', 'VERDE')))
+	for (const tipo of tipos) {
+		switch (tipo) {
+			case 'RESIDUO':
+				points.push(...(await getPuntos('/puntos_residuo', 'RESIDUO')))
+				break;
+			case 'RECICLAJE':
+				points.push(...(await getPuntos('/puntos_reciclaje', 'RECICLAJE')))
+				break;
+			case 'VERDE':
+				points.push(...(await getPuntos('/puntos_verdes', 'VERDE')))
+				break;
+			default:
+				console.error("El tipo seleccionado no es correcto, verifique y reintente.")
+				break;
+		}
+	}
 
 	return points
 }
