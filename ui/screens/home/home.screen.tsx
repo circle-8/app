@@ -10,6 +10,9 @@ import {
 	Modal,
 	Checkbox,
 	Button,
+	View,
+	HStack,
+	CircleIcon,
 } from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { FontAwesome } from '@expo/vector-icons'
@@ -17,8 +20,9 @@ import { colors } from '../../../constants/styles'
 import * as Location from 'expo-location'
 import { LoadingScreen } from '../../components/loading.component'
 import { PuntoServicio } from '../../../services/punto.service'
-import { Punto, TipoPunto } from '../../../services/types'
+import { Punto, PuntoReciclaje, TipoPunto } from '../../../services/types'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { mapDays } from '../../../utils/days'
 
 type Coord = {
 	latitude: number
@@ -35,8 +39,9 @@ export const Home = () => {
 	const [isFilterOpen, setFilterIsOpen] = React.useState(false)
 	const [selectedValues, setSelectedValues] = React.useState<TipoPunto[]>([
 		'VERDE',
-		'RECICLAJE'
+		'RECICLAJE',
 	])
+	const [puntoReciclaje, setPuntoReciclaje] = React.useState<PuntoReciclaje>()
 
 	const getUserLocation = async () => {
 		const status = await Location.requestForegroundPermissionsAsync()
@@ -102,12 +107,17 @@ export const Home = () => {
 								}}
 								title={point.titulo}
 								pinColor={colors.byType[point.tipo]}
+								onCalloutPress={() => {
+									if (point.tipo === 'RECICLAJE') {
+										setPuntoReciclaje(point as PuntoReciclaje)
+									}
+								}}
 							/>
 						))}
 					</MapView>
 				</Box>
 				<Box position="absolute" top={10} left={0} p={4}>
-					<Filter onPress={handleFilterPress}/>
+					<Filter onPress={handleFilterPress} />
 				</Box>
 				<Modal isOpen={isFilterOpen} onClose={closePopover}>
 					<Modal.Content>
@@ -145,6 +155,11 @@ export const Home = () => {
 						</Modal.Footer>
 					</Modal.Content>
 				</Modal>
+				<PuntoReciclajeModal
+					show={!!puntoReciclaje}
+					onClose={() => setPuntoReciclaje(undefined)}
+					point={puntoReciclaje}
+				/>
 				<Center height="15%" bgColor="white">
 					<Row alignContent="center" mt="4">
 						<Center w="33%">
@@ -173,14 +188,57 @@ type FilterProps = {
 const Filter = (props: FilterProps) => {
 	return (
 		<TouchableOpacity onPress={props.onPress}>
-			<Center
-				width={60}
-				height={60}
-				bg={colors.primary800}
-				rounded="full"
-			>
+			<Center width={60} height={60} bg={colors.primary800} rounded="full">
 				<FontAwesome name="filter" size={40} color={colors.primary100} />
 			</Center>
 		</TouchableOpacity>
+	)
+}
+
+type PuntoReciclajeModalProps = {
+	show: boolean
+	onClose: () => void
+	point: PuntoReciclaje
+}
+
+const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
+	if (!props.show) return <></>
+
+	return (
+		<Modal isOpen={props.show} onClose={props.onClose} size="lg">
+			<Modal.Content>
+				<Modal.CloseButton />
+				<Modal.Header alignItems="center">
+					<Text bold fontSize="xl">
+						{props.point.titulo}
+					</Text>
+				</Modal.Header>
+				<Modal.Body>
+					<View>
+						<Text bold fontSize="md">
+							Días en que se puede depositar:
+						</Text>
+						<Text>{props.point.dias.map(mapDays).join(' - ')}</Text>
+					</View>
+
+					<View>
+						<Text bold fontSize="md">
+							Tipos de residuo que acepta:
+						</Text>
+						{props.point.tipoResiduo.map((tipo, index) => (
+							<HStack space={2} mt="0.5" key={index} alignItems="center">
+								<CircleIcon size="2" color="black" />
+								<Text fontSize="sm">{tipo.nombre}</Text>
+							</HStack>
+						))}
+					</View>
+				</Modal.Body>
+				<Modal.Footer>
+					<Center flex={1}>
+						<Button>Contactar</Button>
+					</Center>
+				</Modal.Footer>
+			</Modal.Content>
+		</Modal>
 	)
 }
