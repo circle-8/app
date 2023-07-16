@@ -26,7 +26,7 @@ import {
 	Punto,
 	PuntoReciclaje,
 	TipoPunto,
-	TipoResiduo,
+	PuntoVerde,
 } from '../../../services/types'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { mapDays } from '../../../utils/days'
@@ -130,7 +130,7 @@ export const Home = () => {
 								title={point.titulo}
 								pinColor={colors.byType[point.tipo]}
 								onCalloutPress={() => {
-									if (point.tipo === 'RECICLAJE') {
+									if (point.tipo === 'RECICLAJE' || point.tipo === 'VERDE') {
 										setPuntoReciclaje(point as PuntoReciclaje)
 									}
 								}}
