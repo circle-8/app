@@ -13,6 +13,8 @@ import {
 	View,
 	HStack,
 	CircleIcon,
+	ChevronDownIcon,
+	ChevronUpIcon,
 } from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { FontAwesome } from '@expo/vector-icons'
@@ -20,7 +22,12 @@ import { colors } from '../../../constants/styles'
 import * as Location from 'expo-location'
 import { LoadingScreen } from '../../components/loading.component'
 import { PuntoServicio } from '../../../services/punto.service'
-import { Punto, PuntoReciclaje, TipoPunto } from '../../../services/types'
+import {
+	Punto,
+	PuntoReciclaje,
+	TipoPunto,
+	TipoResiduo,
+} from '../../../services/types'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { mapDays } from '../../../utils/days'
 
@@ -37,11 +44,16 @@ export const Home = () => {
 	const [userCoords, setUserCoords] = React.useState<Coord>()
 	const [points, setPoints] = React.useState<Punto[]>([])
 	const [isFilterOpen, setFilterIsOpen] = React.useState(false)
-	const [selectedValues, setSelectedValues] = React.useState<TipoPunto[]>([
+	const [selectedPuntos, setSelectedPuntos] = React.useState<TipoPunto[]>([
 		'VERDE',
 		'RECICLAJE',
 	])
+	const [selectedTipos, setSelectedTipos] = React.useState<String[]>([])
+	const [selectedDias, setSelectedDias] = React.useState<String[]>([])
 	const [puntoReciclaje, setPuntoReciclaje] = React.useState<PuntoReciclaje>()
+	const [showCheckboxesPuntos, setShowCheckboxesPuntos] = React.useState(false)
+	const [showCheckboxesTipos, setShowCheckboxesTipos] = React.useState(false)
+	const [showCheckboxesDias, setShowCheckboxesDias] = React.useState(false)
 
 	const getUserLocation = async () => {
 		const status = await Location.requestForegroundPermissionsAsync()
@@ -58,7 +70,11 @@ export const Home = () => {
 	}
 
 	const getPoints = async () => {
-		const newPoints = await PuntoServicio.getAll(selectedValues)
+		const newPoints = await PuntoServicio.getAll(
+			selectedPuntos,
+			selectedTipos,
+			selectedDias,
+		)
 		setPoints(newPoints)
 	}
 
@@ -68,6 +84,12 @@ export const Home = () => {
 
 	const closePopover = () => {
 		setFilterIsOpen(false)
+	}
+
+	const handleFiltroPress = filter => {
+		if (filter == 'Puntos') setShowCheckboxesPuntos(!showCheckboxesPuntos)
+		if (filter == 'Tipos') setShowCheckboxesTipos(!showCheckboxesTipos)
+		if (filter == 'Dias') setShowCheckboxesDias(!showCheckboxesDias)
 	}
 
 	/* Initial data loading */
@@ -119,42 +141,21 @@ export const Home = () => {
 				<Box position="absolute" top={10} left={0} p={4}>
 					<Filter onPress={handleFilterPress} />
 				</Box>
-				<Modal isOpen={isFilterOpen} onClose={closePopover}>
-					<Modal.Content>
-						<Modal.CloseButton />
-						<Modal.Header>Selecciona que ver en el mapa</Modal.Header>
-						<Modal.Body>
-							<Checkbox.Group
-								colorScheme="green"
-								defaultValue={selectedValues}
-								accessibilityLabel="Selecciona los puntos que quieres ver"
-								onChange={values => setSelectedValues(values || [])}
-							>
-								<Checkbox value="VERDE" my={2}>
-									Puntos de reciclaje comunitario
-								</Checkbox>
-								<Checkbox value="RECICLAJE" my={2}>
-									Puntos de reciclaje particular
-								</Checkbox>
-								<Checkbox value="RESIDUO" my={2}>
-									Punto de retiro de residuos
-								</Checkbox>
-							</Checkbox.Group>
-						</Modal.Body>
-						<Modal.Footer>
-							<Center flex={1}>
-								<Button
-									onPress={() => {
-										getPoints()
-										closePopover()
-									}}
-								>
-									Filtrar
-								</Button>
-							</Center>
-						</Modal.Footer>
-					</Modal.Content>
-				</Modal>
+				<FiltrosModal
+					isOpen={isFilterOpen}
+					onClose={closePopover}
+					handleFiltroPress={handleFiltroPress}
+					showCheckboxesPuntos={showCheckboxesPuntos}
+					showCheckboxesTipos={showCheckboxesTipos}
+					showCheckboxesDias={showCheckboxesDias}
+					selectedPuntos={selectedPuntos}
+					setSelectedPuntos={setSelectedPuntos}
+					selectedTipos={selectedTipos}
+					setSelectedTipos={setSelectedTipos}
+					selectedDias={selectedDias}
+					setSelectedDias={setSelectedDias}
+					getPoints={getPoints}
+				/>
 				<PuntoReciclajeModal
 					show={!!puntoReciclaje}
 					onClose={() => setPuntoReciclaje(undefined)}
@@ -236,6 +237,168 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 				<Modal.Footer>
 					<Center flex={1}>
 						<Button>Contactar</Button>
+					</Center>
+				</Modal.Footer>
+			</Modal.Content>
+		</Modal>
+	)
+}
+
+const FiltrosModal = ({
+	isOpen,
+	onClose,
+	handleFiltroPress,
+	showCheckboxesPuntos,
+	showCheckboxesTipos,
+	showCheckboxesDias,
+	selectedPuntos,
+	setSelectedPuntos,
+	selectedTipos,
+	setSelectedTipos,
+	selectedDias,
+	setSelectedDias,
+	getPoints,
+}) => {
+	return (
+		<Modal isOpen={isOpen} onClose={onClose}>
+			<Modal.Content>
+				<Modal.CloseButton />
+				<Modal.Header>Filtrar por</Modal.Header>
+				<Modal.Body>
+					<TouchableOpacity onPress={() => handleFiltroPress('Puntos')}>
+						<HStack
+							space={2}
+							justifyContent="space-between"
+							alignItems="center"
+						>
+							<Text color="black" fontSize="md" bold>
+								Tipos de Puntos
+							</Text>
+							{showCheckboxesPuntos ? (
+								<ChevronUpIcon size="5" mt="0.5" color="emerald.500" />
+							) : (
+								<ChevronDownIcon size="5" mt="0.5" color="emerald.500" />
+							)}
+						</HStack>
+					</TouchableOpacity>
+					{showCheckboxesPuntos && (
+						<Checkbox.Group
+							colorScheme="green"
+							defaultValue={selectedPuntos}
+							accessibilityLabel="Selecciona los puntos que quieres ver"
+							onChange={values => setSelectedPuntos(values || [])}
+						>
+							<Checkbox value="VERDE" my={2}>
+								Puntos de reciclaje comunitario
+							</Checkbox>
+							<Checkbox value="RECICLAJE" my={2}>
+								Puntos de reciclaje particular
+							</Checkbox>
+							<Checkbox value="RESIDUO" my={2}>
+								Punto de retiro de residuos
+							</Checkbox>
+						</Checkbox.Group>
+					)}
+					<TouchableOpacity onPress={() => handleFiltroPress('Tipos')}>
+						<HStack
+							space={2}
+							justifyContent="space-between"
+							alignItems="center"
+						>
+							<Text color="black" fontSize="md" bold>
+								Tipos de Residuo
+							</Text>
+							{showCheckboxesTipos ? (
+								<ChevronUpIcon size="5" mt="0.5" color="emerald.500" />
+							) : (
+								<ChevronDownIcon size="5" mt="0.5" color="emerald.500" />
+							)}
+						</HStack>
+					</TouchableOpacity>
+					{showCheckboxesTipos && (
+						<Checkbox.Group
+							colorScheme="green"
+							defaultValue={selectedTipos}
+							accessibilityLabel="Selecciona los tipos de residuo que quieres ver"
+							onChange={values => setSelectedTipos(values || [])}
+						>
+							<Checkbox value="Plástico" my={2}>
+								Plastico
+							</Checkbox>
+							<Checkbox value="Papel" my={2}>
+								Papel
+							</Checkbox>
+							<Checkbox value="Pilas" my={2}>
+								Pilas
+							</Checkbox>
+							<Checkbox value="Carton" my={2}>
+								Carton
+							</Checkbox>
+							<Checkbox value="Organicos" my={2}>
+								Organicos
+							</Checkbox>
+							<Checkbox value="Compost" my={2}>
+								Compost
+							</Checkbox>
+						</Checkbox.Group>
+					)}
+					<TouchableOpacity onPress={() => handleFiltroPress('Dias')}>
+						<HStack
+							space={2}
+							justifyContent="space-between"
+							alignItems="center"
+						>
+							<Text color="black" fontSize="md" bold>
+								Dias
+							</Text>
+							{showCheckboxesDias ? (
+								<ChevronUpIcon size="5" mt="0.5" color="emerald.500" />
+							) : (
+								<ChevronDownIcon size="5" mt="0.5" color="emerald.500" />
+							)}
+						</HStack>
+					</TouchableOpacity>
+					{showCheckboxesDias && (
+						<Checkbox.Group
+							colorScheme="green"
+							defaultValue={selectedDias}
+							accessibilityLabel="Selecciona los dias que abren los puntos"
+							onChange={values => setSelectedDias(values || [])}
+						>
+							<Checkbox value="0" my={2}>
+								Lunes
+							</Checkbox>
+							<Checkbox value="1" my={2}>
+								Martes
+							</Checkbox>
+							<Checkbox value="2" my={2}>
+								Miercoles
+							</Checkbox>
+							<Checkbox value="3" my={2}>
+								Jueves
+							</Checkbox>
+							<Checkbox value="4" my={2}>
+								Viernes
+							</Checkbox>
+							<Checkbox value="5" my={2}>
+								Sabado
+							</Checkbox>
+							<Checkbox value="6" my={2}>
+								Domingo
+							</Checkbox>
+						</Checkbox.Group>
+					)}
+				</Modal.Body>
+				<Modal.Footer>
+					<Center flex={1}>
+						<Button
+							onPress={() => {
+								getPoints()
+								onClose()
+							}}
+						>
+							Filtrar
+						</Button>
 					</Center>
 				</Modal.Footer>
 			</Modal.Content>
