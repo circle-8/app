@@ -11,28 +11,40 @@ import { Punto, TipoPunto } from './types'
 
 const mapPoint = {
 	RESIDUO: {
-		url: '/puntos_residuo?expand=ciudadano',
+		url: '/puntos_residuo?expand=ciudadano&',
 	},
 	RECICLAJE: {
-		url: '/puntos_reciclaje',
+		url: '/puntos_reciclaje?',
 	},
 	VERDE: {
 		url: '/puntos_verdes',
 	},
 }
 
-const getAll = async (tipos: TipoPunto[]): Promise<Punto[]> => {
+const getAll = async (
+	tipos: TipoPunto[],
+	residuos: String[],
+	dias: String[],
+): Promise<Punto[]> => {
 	const points: Punto[] = []
 
-	for (const tipo of tipos) points.push(...(await getPuntos(tipo)))
+	for (const tipo of tipos)
+		points.push(...(await getPuntos(tipo, residuos, dias)))
 
 	return points
 }
 
-const getPuntos = async (tipo: TipoPunto): Promise<Punto[]> => {
-	const response = await Http.get<ListResponse<PuntoResponse>>(
-		mapPoint[tipo].url,
-	)
+const getPuntos = async (
+	tipo: TipoPunto,
+	residuos: String[],
+	dias: String[],
+): Promise<Punto[]> => {
+	var url = mapPoint[tipo].url
+	for (const residuo of residuos)
+		url = url.concat('tipos_residuo=' + residuo + '&')
+	for (const dia of dias) url = url.concat('dias=' + dia + '&')
+
+	const response = await Http.get<ListResponse<PuntoResponse>>(url)
 
 	const points = []
 	ifLeft(response, l =>
