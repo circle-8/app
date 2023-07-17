@@ -11,7 +11,7 @@ import { Punto, TipoPunto } from './types'
 
 const mapPoint = {
 	RESIDUO: {
-		url: '/puntos_residuo?expand=ciudadano',
+		url: '/puntos_residuo?expand=ciudadano&',
 	},
 	RECICLAJE: {
 		url: '/puntos_reciclaje?',
@@ -21,28 +21,30 @@ const mapPoint = {
 	},
 }
 
-const getAll = async (tipos: TipoPunto[], residuos: String[], dias: String[]): Promise<Punto[]> => {
+const getAll = async (
+	tipos: TipoPunto[],
+	residuos: String[],
+	dias: String[],
+): Promise<Punto[]> => {
 	const points: Punto[] = []
-	
-	for (const tipo of tipos) points.push(...(await getPuntos(tipo, residuos, dias)))
+
+	for (const tipo of tipos)
+		points.push(...(await getPuntos(tipo, residuos, dias)))
 
 	return points
 }
 
-const getPuntos = async (tipo: TipoPunto, residuos: String[], dias: String[]): Promise<Punto[]> => {
-	var url = mapPoint[tipo].url;
-	if(tipo == "RECICLAJE"){
-		for(const residuo of residuos)
-			url = url.concat("tipos_residuo=" + residuo + "&")
-		for(const dia of dias)
-			url = url.concat("dias=" + dia + "&")
-	}
-	
+const getPuntos = async (
+	tipo: TipoPunto,
+	residuos: String[],
+	dias: String[],
+): Promise<Punto[]> => {
+	var url = mapPoint[tipo].url
+	for (const residuo of residuos)
+		url = url.concat('tipos_residuo=' + residuo + '&')
+	for (const dia of dias) url = url.concat('dias=' + dia + '&')
 
-	
-	const response = await Http.get<ListResponse<PuntoResponse>>(
-		url,
-	)
+	const response = await Http.get<ListResponse<PuntoResponse>>(url)
 
 	const points = []
 	ifLeft(response, l =>
