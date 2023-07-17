@@ -22,12 +22,7 @@ import { colors } from '../../../constants/styles'
 import * as Location from 'expo-location'
 import { LoadingScreen } from '../../components/loading.component'
 import { PuntoServicio } from '../../../services/punto.service'
-import {
-	Punto,
-	PuntoReciclaje,
-	TipoPunto,
-	PuntoVerde,
-} from '../../../services/types'
+import { Punto, PuntoReciclaje, TipoPunto } from '../../../services/types'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { mapDays } from '../../../utils/days'
 
@@ -204,6 +199,34 @@ type PuntoReciclajeModalProps = {
 
 const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 	if (!props.show) return <></>
+	const [direction, setDirection] = React.useState('')
+
+	const getDirection = async (latitude, longitude) => {
+		try {
+			const location = await Location.reverseGeocodeAsync({
+				latitude,
+				longitude,
+			})
+			const address =
+				location.at(0).name +
+				', ' +
+				location.at(0).city +
+				', ' +
+				location.at(0).postalCode +
+				', ' +
+				location.at(0).region
+			setDirection(address)
+		} catch (error) {
+			// TODO: que hacer si no encuentra la direc
+			console.error('Error al realizar la geocodificación inversa:', error)
+		}
+	}
+
+	React.useEffect(() => {
+		if (props.point) {
+			getDirection(props.point.latitud, props.point.longitud)
+		}
+	}, [])
 
 	return (
 		<Modal isOpen={props.show} onClose={props.onClose} size="lg">
@@ -232,6 +255,13 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 								<Text fontSize="sm">{tipo.nombre}</Text>
 							</HStack>
 						))}
+					</View>
+
+					<View>
+						<Text bold fontSize="md">
+							Direccion:
+						</Text>
+						<Text>{direction}</Text>
 					</View>
 				</Modal.Body>
 				<Modal.Footer>
