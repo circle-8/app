@@ -165,7 +165,6 @@ const Form = ({
 			</FormControl>
 			<Button
 				mt="10"
-				colorScheme="indigo"
 				onPress={onSubmit}
 				isLoading={loading}
 			>

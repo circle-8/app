@@ -1,13 +1,13 @@
 import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import { HelloWorld } from '../screens/hw.screen'
+import { Home } from '../screens/home/home.screen'
 
 const HomeStack = createNativeStackNavigator()
 
-export const HelloWorldFlow = () => {
+export const HomeFlow = () => {
 	return (
 		<HomeStack.Navigator>
-			<HomeStack.Screen name="HelloWorld" component={HelloWorld} />
+			<HomeStack.Screen name="Home" component={Home} options={{header: () => <></>}}/>
 		</HomeStack.Navigator>
 	)
 }

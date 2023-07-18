@@ -1,7 +1,8 @@
 {
-  "useTabs": true,
+	"useTabs": true,
 	"singleQuote": true,
 	"semi": false,
 	"arrowParens": "avoid",
-	"editorconfig": true
+	"editorconfig": true,
+	"trailingComma": "all"
 }

@@ -1,6 +1,13 @@
 import { TipoUsuario } from './types'
 
-type ErrorCode = 'INTERNAL_ERROR' | 'BAD_REQUEST' | 'NOT_FOUND'
+type ErrorCode =
+	| 'INTERNAL_ERROR'
+	| 'BAD_REQUEST'
+	| 'NOT_FOUND'
+	| 'TOKEN_ERROR'
+	| 'TOKEN_NOT_FOUND'
+	| 'TOKEN_EXPIRED'
+
 export type ErrorResponse = {
 	code: ErrorCode
 	message: string
@@ -20,3 +27,55 @@ export type TokenResponse = {
 	refreshToken: string
 	user: UserResponse
 }
+
+export type ListResponse<T> = {
+	pageNumber: number
+	totalPages: number
+	pageSize: number
+	count: number
+	data: T[]
+}
+
+export type DiaResponse = '0' | '1' | '2' | '3' | '4' | '5' | '6'
+
+export type CiudadanoResponse = {
+	id: number
+	username: string
+	nombre: string
+	email: string
+	tipoUsuario: TipoUsuario
+}
+
+
+type PuntoResponseBase = {
+	id: number
+	latitud: number
+	longitud: number
+}
+
+export type PuntoResiduoResponse = PuntoResponseBase & {
+	ciudadanoId: number
+	ciudadanoUri: string
+	ciudadano?: CiudadanoResponse
+	residuos?: unknown
+}
+
+export type TipoResiduoResponse = {
+	id: number
+	nombre: string
+}
+
+export type PuntoVerdeResponse = PuntoResponseBase & {
+	dias: DiaResponse[]
+	tipoResiduo: TipoResiduoResponse[]
+	titulo: string
+}
+
+export type PuntoReciclajeResponse = PuntoVerdeResponse & {
+	recicladorUri: string
+	recicladorId: number
+	reciclador?: unknown
+	titulo: string
+}
+
+export type PuntoResponse = PuntoResiduoResponse | PuntoVerdeResponse | PuntoReciclajeResponse
