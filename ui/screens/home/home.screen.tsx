@@ -25,6 +25,8 @@ import { PuntoServicio } from '../../../services/punto.service'
 import { Punto, PuntoReciclaje, TipoPunto } from '../../../services/types'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { mapDays } from '../../../utils/days'
+import { NativeStackScreenProps } from '@react-navigation/native-stack'
+import { HomeRoutesParams, MainRoutesParams, ProfileRoutes } from '../../../constants/routes'
 
 type Coord = {
 	latitude: number
@@ -34,7 +36,9 @@ type Coord = {
 const latitudeDelta = 0.01
 const longitudeDelta = 0.01
 
-export const Home = () => {
+type Props = NativeStackScreenProps<MainRoutesParams, 'Home'>
+
+export const Home = ({ navigation }: Props) => {
 	const [isLoading, setLoading] = React.useState(true)
 	const [userCoords, setUserCoords] = React.useState<Coord>()
 	const [points, setPoints] = React.useState<Punto[]>([])
@@ -43,8 +47,8 @@ export const Home = () => {
 		'VERDE',
 		'RECICLAJE',
 	])
-	const [selectedTipos, setSelectedTipos] = React.useState<String[]>([])
-	const [selectedDias, setSelectedDias] = React.useState<String[]>([])
+	const [selectedTipos, setSelectedTipos] = React.useState<string[]>([])
+	const [selectedDias, setSelectedDias] = React.useState<string[]>([])
 	const [puntoReciclaje, setPuntoReciclaje] = React.useState<PuntoReciclaje>()
 	const [showCheckboxesPuntos, setShowCheckboxesPuntos] = React.useState(false)
 	const [showCheckboxesTipos, setShowCheckboxesTipos] = React.useState(false)
@@ -163,7 +167,7 @@ export const Home = () => {
 							<Text fontSize="xs">Retirar residuos</Text>
 						</Center>
 						<Center w="33%">
-							<Ionicons name="trash" size={40} color={colors.primary800} />
+							<Ionicons name="trash" size={40} color={colors.primary800} onPress={() => navigation.navigate('ProfileTab', {screen: 'ListPuntoReciclaje', initial: false})}/>
 							<Text fontSize="xs">Entregar residuos</Text>
 						</Center>
 						<Center w="33%">
