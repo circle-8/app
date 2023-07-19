@@ -15,7 +15,9 @@ export const LoginRoutes: {
 export type ProfileRoutesParams = {
 	Profile: undefined
 	ListPuntoReciclaje: undefined
-	EditPuntoReciclaje: undefined
+	EditPuntoReciclaje: {
+		puntoReciclajeId?: number,
+	}
 }
 type ProfileRouteName = keyof ProfileRoutesParams
 

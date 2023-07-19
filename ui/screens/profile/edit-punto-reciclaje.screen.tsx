@@ -5,6 +5,7 @@ import { ProfileRoutesParams } from '../../../constants/routes'
 
 type Props = NativeStackScreenProps<ProfileRoutesParams, 'EditPuntoReciclaje'>
 
-export const EditPuntoReciclaje = ({ navigation }: Props) => {
-	return <Text onPress={() => navigation.goBack()}>EditPuntoReciclaje</Text>
+export const EditPuntoReciclaje = ({ navigation, route }: Props) => {
+	const id = route.params?.puntoReciclajeId
+	return <Text onPress={() => navigation.goBack()}>EditPuntoReciclaje - {id}</Text>
 }

@@ -8,6 +8,7 @@ import { PuntoServicio } from '../../../services/punto.service'
 import { LoadingScreen } from '../../components/loading.component'
 import { UserService } from '../../../services/user.service'
 import { colors } from '../../../constants/styles'
+import { TouchableOpacity } from 'react-native'
 
 type Props = NativeStackScreenProps<ProfileRoutesParams, 'ListPuntoReciclaje'>
 
@@ -69,8 +70,14 @@ export const ListPuntoReciclaje = ({ navigation }: Props) => {
 				</VStack>
 				<Spacer/>
 				<HStack space={4} mr={2} alignSelf="center">
-					<FontAwesome name="pencil" size={30} color={colors.primary800}/>
-					<FontAwesome name="trash" size={30} color={colors.primary800}/>
+					<TouchableOpacity>
+						<FontAwesome name="pencil" size={30} color={colors.primary800}
+							onPress={() => navigation.navigate(ProfileRoutes.editPuntoReciclaje, {puntoReciclajeId: point.id})}
+						/>
+					</TouchableOpacity>
+					<TouchableOpacity>
+						<FontAwesome name="trash" size={30} color={colors.primary800}/>
+					</TouchableOpacity>
 				</HStack>
 			</HStack>
 		</Box>

@@ -163,22 +163,24 @@ export const Home = ({ navigation }: Props) => {
 				<Center height="15%" bgColor="white">
 					<Row alignContent="center" mt="4">
 						<Center w="33%">
-							<FontAwesome name="recycle" size={40} color={colors.primary800}
+							<TouchableOpacity
 								onPress={() =>
 									navigation.navigate('ProfileTab', {
 										screen: 'ListPuntoReciclaje',
 										initial: false,
 									})
 								}
-							/>
+							>
+								<FontAwesome
+									name="recycle"
+									size={40}
+									color={colors.primary800}
+								/>
+							</TouchableOpacity>
 							<Text fontSize="xs">Retirar residuos</Text>
 						</Center>
 						<Center w="33%">
-							<Ionicons
-								name="trash"
-								size={40}
-								color={colors.primary800}
-							/>
+							<Ionicons name="trash" size={40} color={colors.primary800} />
 							<Text fontSize="xs">Entregar residuos</Text>
 						</Center>
 						<Center w="33%">
