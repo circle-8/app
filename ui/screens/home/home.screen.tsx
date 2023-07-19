@@ -26,7 +26,7 @@ import { Punto, PuntoReciclaje, TipoPunto } from '../../../services/types'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { mapDays } from '../../../utils/days'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { HomeRoutesParams, MainRoutesParams, ProfileRoutes } from '../../../constants/routes'
+import { MainRoutesParams } from '../../../constants/routes'
 
 type Coord = {
 	latitude: number
@@ -69,11 +69,11 @@ export const Home = ({ navigation }: Props) => {
 	}
 
 	const getPoints = async () => {
-		const newPoints = await PuntoServicio.getAll(
-			selectedPuntos,
-			selectedTipos,
-			selectedDias,
-		)
+		const newPoints = await PuntoServicio.getAll({
+			tipos: selectedPuntos,
+			residuos: selectedTipos,
+			dias: selectedDias,
+		})
 		setPoints(newPoints)
 	}
 
@@ -163,11 +163,22 @@ export const Home = ({ navigation }: Props) => {
 				<Center height="15%" bgColor="white">
 					<Row alignContent="center" mt="4">
 						<Center w="33%">
-							<FontAwesome name="recycle" size={40} color={colors.primary800} />
+							<FontAwesome name="recycle" size={40} color={colors.primary800}
+								onPress={() =>
+									navigation.navigate('ProfileTab', {
+										screen: 'ListPuntoReciclaje',
+										initial: false,
+									})
+								}
+							/>
 							<Text fontSize="xs">Retirar residuos</Text>
 						</Center>
 						<Center w="33%">
-							<Ionicons name="trash" size={40} color={colors.primary800} onPress={() => navigation.navigate('ProfileTab', {screen: 'ListPuntoReciclaje', initial: false})}/>
+							<Ionicons
+								name="trash"
+								size={40}
+								color={colors.primary800}
+							/>
 							<Text fontSize="xs">Entregar residuos</Text>
 						</Center>
 						<Center w="33%">

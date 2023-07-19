@@ -20,6 +20,7 @@ export type UserResponse = {
 	nombre: string
 	email: string
 	tipoUsuario: TipoUsuario
+	ciudadanoId: number
 }
 
 export type TokenResponse = {

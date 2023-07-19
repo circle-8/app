@@ -21,28 +21,32 @@ const mapPoint = {
 	},
 }
 
-const getAll = async (
+type Filter = {
 	tipos: TipoPunto[],
-	residuos: String[],
-	dias: String[],
-): Promise<Punto[]> => {
+	tipo?: TipoPunto,
+	residuos?: string[],
+	dias?: string[],
+	recicladorId?: number,
+	ciudadanoId?: number
+}
+
+const getAll = async (f: Filter): Promise<Punto[]> => {
 	const points: Punto[] = []
 
-	for (const tipo of tipos)
-		points.push(...(await getPuntos(tipo, residuos, dias)))
+	for (const t of f.tipos)
+		points.push(...(await getPuntos({...f, tipo: t})))
 
 	return points
 }
 
-const getPuntos = async (
-	tipo: TipoPunto,
-	residuos: String[],
-	dias: String[],
-): Promise<Punto[]> => {
-	var url = mapPoint[tipo].url
-	for (const residuo of residuos)
-		url = url.concat('tipos_residuo=' + residuo + '&')
-	for (const dia of dias) url = url.concat('dias=' + dia + '&')
+const getPuntos = async ({ tipo, residuos, dias, recicladorId }: Filter): Promise<Punto[]> => {
+	let url = mapPoint[tipo].url
+	for (const residuo of residuos || [])
+		url += 'tipos_residuo=' + residuo + '&'
+	for (const dia of dias || [])
+		url += 'dias=' + dia + '&'
+	if (recicladorId)
+		url += 'reciclador_id=' + recicladorId
 
 	const response = await Http.get<ListResponse<PuntoResponse>>(url)
 
