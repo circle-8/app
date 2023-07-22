@@ -17,14 +17,15 @@ export type ProfileRoutesParams = {
 	ListPuntoReciclaje: undefined
 	EditPuntoReciclaje: {
 		puntoReciclajeId?: number,
+		recicladorId: number,
 	}
 }
 type ProfileRouteName = keyof ProfileRoutesParams
 
 export const ProfileRoutes: {
-	profile: ProfileRouteName
-	listPuntoReciclaje: ProfileRouteName
-	editPuntoReciclaje: ProfileRouteName
+	profile: 'Profile'
+	listPuntoReciclaje: 'ListPuntoReciclaje'
+	editPuntoReciclaje: 'EditPuntoReciclaje'
 } = {
 	profile: 'Profile',
 	listPuntoReciclaje: 'ListPuntoReciclaje',

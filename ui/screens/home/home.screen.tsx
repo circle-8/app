@@ -21,7 +21,7 @@ import { FontAwesome } from '@expo/vector-icons'
 import { colors } from '../../../constants/styles'
 import * as Location from 'expo-location'
 import { LoadingScreen } from '../../components/loading.component'
-import { PuntoServicio } from '../../../services/punto.service'
+import { PuntoService } from '../../../services/punto.service'
 import { Punto, PuntoReciclaje, TipoPunto } from '../../../services/types'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { mapDays } from '../../../utils/days'
@@ -69,7 +69,7 @@ export const Home = ({ navigation }: Props) => {
 	}
 
 	const getPoints = async () => {
-		const newPoints = await PuntoServicio.getAll({
+		const newPoints = await PuntoService.getAll({
 			tipos: selectedPuntos,
 			residuos: selectedTipos,
 			dias: selectedDias,

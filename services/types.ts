@@ -1,7 +1,9 @@
 import {
+	DiaResponse,
 	PuntoReciclajeResponse,
 	PuntoResiduoResponse,
 	PuntoVerdeResponse,
+	TipoResiduoResponse,
 	UserResponse,
 } from './responses'
 
@@ -16,10 +18,9 @@ export type ErrorMessage = string
 
 export type User = UserResponse
 
-export type TipoResiduo = {
-	id: number
-	nombre: string
-}
+export type Dia = DiaResponse
+
+export type TipoResiduo = TipoResiduoResponse
 
 export type TipoPunto = 'RESIDUO' | 'RECICLAJE' | 'VERDE'
 

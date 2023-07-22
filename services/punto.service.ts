@@ -1,5 +1,5 @@
 import { Http } from '../api/api'
-import { ifLeft } from '../utils/either'
+import { Either, ifLeft, map } from '../utils/either'
 import {
 	ListResponse,
 	PuntoReciclajeResponse,
@@ -7,7 +7,7 @@ import {
 	PuntoResponse,
 	PuntoVerdeResponse,
 } from './responses'
-import { Punto, TipoPunto } from './types'
+import { Dia, ErrorMessage, Punto, PuntoReciclaje, TipoPunto } from './types'
 
 const mapPoint = {
 	RESIDUO: {
@@ -22,56 +22,91 @@ const mapPoint = {
 }
 
 type Filter = {
-	tipos: TipoPunto[],
-	tipo?: TipoPunto,
-	residuos?: string[],
-	dias?: string[],
-	recicladorId?: number,
+	tipos: TipoPunto[]
+	tipo?: TipoPunto
+	residuos?: string[]
+	dias?: string[]
+	recicladorId?: number
 	ciudadanoId?: number
 }
 
 const getAll = async (f: Filter): Promise<Punto[]> => {
 	const points: Punto[] = []
 
-	for (const t of f.tipos)
-		points.push(...(await getPuntos({...f, tipo: t})))
+	for (const t of f.tipos) points.push(...(await getPuntos({ ...f, tipo: t })))
 
 	return points
 }
 
-const getPuntos = async ({ tipo, residuos, dias, recicladorId }: Filter): Promise<Punto[]> => {
+const mapResponse = (p: PuntoResponse, tipo: TipoPunto): Punto => {
+	let titulo: string
+	if (tipo === 'RESIDUO') {
+		const res = p as PuntoResiduoResponse
+		titulo = `Retirá los residuos de ${res.ciudadano?.username || ''}`
+	} else if (tipo == 'VERDE') {
+		titulo = (p as PuntoVerdeResponse).titulo || 'Punto Verde'
+	} else {
+		titulo = (p as PuntoReciclajeResponse).titulo
+	}
+
+	return { ...p, tipo, titulo }
+}
+
+const getPuntos = async ({
+	tipo,
+	residuos,
+	dias,
+	recicladorId,
+}: Filter): Promise<Punto[]> => {
 	let url = mapPoint[tipo].url
-	for (const residuo of residuos || [])
-		url += 'tipos_residuo=' + residuo + '&'
-	for (const dia of dias || [])
-		url += 'dias=' + dia + '&'
-	if (recicladorId)
-		url += 'reciclador_id=' + recicladorId
+	for (const residuo of residuos || []) url += 'tipos_residuo=' + residuo + '&'
+	for (const dia of dias || []) url += 'dias=' + dia + '&'
+	if (recicladorId) url += 'reciclador_id=' + recicladorId
 
 	const response = await Http.get<ListResponse<PuntoResponse>>(url)
 
 	const points = []
-	ifLeft(response, l =>
-		points.push(
-			...l.data.map(t => {
-				let titulo: string
-				if (tipo === 'RESIDUO') {
-					const res = t as PuntoResiduoResponse
-					titulo = `Retirá los residuos de ${res.ciudadano?.username || ''}`
-				} else if (tipo == 'VERDE') {
-					titulo = (t as PuntoVerdeResponse).titulo || 'Punto Verde'
-				} else {
-					titulo = (t as PuntoReciclajeResponse).titulo
-				}
-
-				return { ...t, tipo, titulo }
-			}),
-		),
-	)
+	ifLeft(response, l => points.push(...l.data.map(p => mapResponse(p, tipo))))
 
 	return points
 }
 
-export const PuntoServicio = {
+const getPuntoReciclaje = async (
+	id: number,
+	recicladorId: number,
+): Promise<Either<PuntoReciclaje, ErrorMessage>> => {
+	const url = `/reciclador/${recicladorId}/punto_reciclaje/${id}`
+	const res = await Http.get<PuntoReciclajeResponse>(url)
+	return map(
+		res,
+		p => mapResponse(p, 'RECICLAJE') as PuntoReciclaje,
+		err => err.message,
+	)
+}
+
+type PuntoReciclajeSave = {
+	id?: number
+	recicladorId: number
+	titulo?: string,
+	tipoResiduo?: number[],
+	dias?: Dia[],
+	latitud?: number,
+	longitud?: number,
+}
+
+const savePuntoReciclaje = async(p: PuntoReciclajeSave) => {
+	const url = `/reciclador/${p.recicladorId}/punto_reciclaje/${p.id}`
+	const method = p.id ? Http.put : Http.post
+	const res = await method<PuntoReciclajeResponse>(url, p)
+	return map(
+		res,
+		p => mapResponse(p, 'RECICLAJE') as PuntoReciclaje,
+		err => err.message,
+	)
+}
+
+export const PuntoService = {
 	getAll,
+	getPuntoReciclaje,
+	savePuntoReciclaje
 }
