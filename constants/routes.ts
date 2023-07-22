@@ -12,6 +12,48 @@ export const LoginRoutes: {
 	signup: 'SignUp',
 }
 
+export type ProfileRoutesParams = {
+	Profile: undefined
+	ListPuntoReciclaje: undefined
+	EditPuntoReciclaje: {
+		puntoReciclajeId?: number,
+		recicladorId: number,
+	}
+}
+type ProfileRouteName = keyof ProfileRoutesParams
+
+export const ProfileRoutes: {
+	profile: 'Profile'
+	listPuntoReciclaje: 'ListPuntoReciclaje'
+	editPuntoReciclaje: 'EditPuntoReciclaje'
+} = {
+	profile: 'Profile',
+	listPuntoReciclaje: 'ListPuntoReciclaje',
+	editPuntoReciclaje: 'EditPuntoReciclaje',
+}
+
+export type HomeRoutesParams = {
+	Home: undefined
+}
+type HomeRouteName = keyof HomeRoutesParams
+
+export const HomeRoutes: {
+	home: HomeRouteName
+} = {
+	home: 'Home'
+}
+
+type TabRoutesParams = {
+	HomeTab: undefined,
+	ActivityTab: undefined,
+	MessagesTab: undefined,
+	LearnTab: undefined,
+	ProfileTab: {
+		screen: ProfileRouteName,
+		initial: boolean
+	}
+}
+
 export const TabRoutes = {
 	home: 'HomeTab',
 	activity: 'ActivityTab',
@@ -19,3 +61,5 @@ export const TabRoutes = {
 	learn: 'LearnTab',
 	profile: 'ProfileTab',
 }
+
+export type MainRoutesParams = HomeRoutesParams & ProfileRoutesParams & TabRoutesParams

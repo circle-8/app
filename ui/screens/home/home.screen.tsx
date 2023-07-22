@@ -21,10 +21,12 @@ import { FontAwesome } from '@expo/vector-icons'
 import { colors } from '../../../constants/styles'
 import * as Location from 'expo-location'
 import { LoadingScreen } from '../../components/loading.component'
-import { PuntoServicio } from '../../../services/punto.service'
+import { PuntoService } from '../../../services/punto.service'
 import { Punto, PuntoReciclaje, TipoPunto } from '../../../services/types'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { mapDays } from '../../../utils/days'
+import { NativeStackScreenProps } from '@react-navigation/native-stack'
+import { MainRoutesParams } from '../../../constants/routes'
 
 type Coord = {
 	latitude: number
@@ -34,7 +36,9 @@ type Coord = {
 const latitudeDelta = 0.01
 const longitudeDelta = 0.01
 
-export const Home = () => {
+type Props = NativeStackScreenProps<MainRoutesParams, 'Home'>
+
+export const Home = ({ navigation }: Props) => {
 	const [isLoading, setLoading] = React.useState(true)
 	const [userCoords, setUserCoords] = React.useState<Coord>()
 	const [points, setPoints] = React.useState<Punto[]>([])
@@ -43,8 +47,8 @@ export const Home = () => {
 		'VERDE',
 		'RECICLAJE',
 	])
-	const [selectedTipos, setSelectedTipos] = React.useState<String[]>([])
-	const [selectedDias, setSelectedDias] = React.useState<String[]>([])
+	const [selectedTipos, setSelectedTipos] = React.useState<string[]>([])
+	const [selectedDias, setSelectedDias] = React.useState<string[]>([])
 	const [puntoReciclaje, setPuntoReciclaje] = React.useState<PuntoReciclaje>()
 	const [showCheckboxesPuntos, setShowCheckboxesPuntos] = React.useState(false)
 	const [showCheckboxesTipos, setShowCheckboxesTipos] = React.useState(false)
@@ -65,11 +69,11 @@ export const Home = () => {
 	}
 
 	const getPoints = async () => {
-		const newPoints = await PuntoServicio.getAll(
-			selectedPuntos,
-			selectedTipos,
-			selectedDias,
-		)
+		const newPoints = await PuntoService.getAll({
+			tipos: selectedPuntos,
+			residuos: selectedTipos,
+			dias: selectedDias,
+		})
 		setPoints(newPoints)
 	}
 
@@ -159,7 +163,20 @@ export const Home = () => {
 				<Center height="15%" bgColor="white">
 					<Row alignContent="center" mt="4">
 						<Center w="33%">
-							<FontAwesome name="recycle" size={40} color={colors.primary800} />
+							<TouchableOpacity
+								onPress={() =>
+									navigation.navigate('ProfileTab', {
+										screen: 'ListPuntoReciclaje',
+										initial: false,
+									})
+								}
+							>
+								<FontAwesome
+									name="recycle"
+									size={40}
+									color={colors.primary800}
+								/>
+							</TouchableOpacity>
 							<Text fontSize="xs">Retirar residuos</Text>
 						</Center>
 						<Center w="33%">
