@@ -106,17 +106,16 @@ export const EditPuntoReciclaje = ({ navigation, route }: Props) => {
 
 					<Form
 						id={id}
-						recicladorId={recicladorId}
 						punto={punto}
 						tipos={tipos}
 						initialPosition={initialMarkerCoord}
-						onSubmit={formData => {
+						onSubmit={(formData, tipos, dias) => {
 							PuntoService.savePuntoReciclaje({
 								id,
 								recicladorId,
 								titulo: formData.titulo,
-								tipoResiduo: formData.tipos,
-								dias: formData.dias,
+								tipoResiduo: tipos,
+								dias: dias,
 								latitud: formData.punto.latitude,
 								longitud: formData.punto.longitude,
 							})
@@ -154,7 +153,7 @@ type FormParams = {
 	punto?: PuntoReciclaje
 	initialPosition: Coord
 	tipos: TipoResiduo[]
-	onSubmit: (data: FormState) => void
+	onSubmit: (data: FormState, tipos: number[], dias: Dia[]) => void
 }
 
 const latitudeDelta = 0.002
@@ -171,7 +170,9 @@ const Form = ({ id, punto, initialPosition, tipos, onSubmit }: FormParams) => {
 
 	const [formData, setData] = React.useState<FormState>(initialData)
 	const [dias, setDias] = React.useState<Dia[]>(punto?.dias || [])
-	const [selectedTipos, setTipos] = React.useState<number[]>(punto?.tipoResiduo.map(t => t.id) || [])
+	const [selectedTipos, setTipos] = React.useState<number[]>(
+		punto?.tipoResiduo.map(t => t.id) || [],
+	)
 	const [errors, setErrors] = React.useState<Errors>({ has: false })
 	const [loading, setLoading] = React.useState(false)
 
@@ -203,7 +204,7 @@ const Form = ({ id, punto, initialPosition, tipos, onSubmit }: FormParams) => {
 	const doOnSubmit = async () => {
 		setLoading(true)
 
-		if (isValid()) onSubmit(formData)
+		if (isValid()) onSubmit(formData, selectedTipos, dias)
 
 		setLoading(false)
 	}
