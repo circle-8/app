@@ -194,15 +194,19 @@ export const Home = ({ navigation }: Props) => {
 									navigation.navigate(TabRoutes.profile, {
 										screen: ProfileRoutes.editPuntoResiduo,
 										initial: false,
-										ciudadanoId: user.ciudadanoId,
+										params: {
+											ciudadanoId: user.ciudadanoId,
+										}
 									})
 								} else {
 									// Si ya tiene, ir al menu de activity para crear un residuo
 									navigation.navigate(TabRoutes.activity, {
 										screen: ActivityRoutes.newResiduo,
 										initial: false,
-										ciudadanoId: user.ciudadanoId,
-										puntoResiduoId: points[0].id,
+										params: {
+											ciudadanoId: user.ciudadanoId,
+											puntoResiduoId: points[0].id,
+										}
 									})
 								}
 							}}>

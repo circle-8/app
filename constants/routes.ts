@@ -73,16 +73,20 @@ type TabRoutesParams = {
 	ActivityTab: {
 		screen: ActivityRouteName
 		initial: boolean
-		ciudadanoId?: number
-		puntoResiduoId?: number
+		params: {
+			ciudadanoId?: number
+			puntoResiduoId?: number
+		}
 	}
 	MessagesTab: undefined
 	LearnTab: undefined
 	ProfileTab: {
 		screen: ProfileRouteName
 		initial: boolean
-		ciudadanoId?: number
-		punto?: PuntoResiduo
+		params: {
+			ciudadanoId?: number
+			punto?: PuntoResiduo
+		}
 	}
 }
 

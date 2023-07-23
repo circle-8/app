@@ -7,6 +7,7 @@ import {
 	ScrollView,
 	Text,
 	VStack,
+	useToast,
 } from 'native-base'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { ProfileRoutesParams } from '../../../constants/routes'
@@ -15,6 +16,7 @@ import { PuntoService } from '../../../services/punto.service'
 import { LoadingScreen } from '../../components/loading.component'
 import MapView, { Marker } from 'react-native-maps'
 import { colors } from '../../../constants/styles'
+import { match } from '../../../utils/either'
 
 type Props = NativeStackScreenProps<ProfileRoutesParams, 'EditPuntoResiduo'>
 
@@ -27,6 +29,7 @@ type Coord = {
 export const EditPuntoResiduo = ({ navigation, route }: Props) => {
 	const [initialMarkerCoord, setInitialMarkerCoord] = React.useState<Coord>()
 	const [isLoading, setLoading] = React.useState(true)
+	const toast = useToast()
 
 	const puntoResiduo = route.params?.punto
 	const ciudadanoId = route.params?.ciudadanoId
@@ -82,14 +85,24 @@ export const EditPuntoResiduo = ({ navigation, route }: Props) => {
 					<Form
 						id={puntoResiduo?.id}
 						initialPosition={initialMarkerCoord}
-						onSubmit={formData => {
-							PuntoService.savePuntoResiduo({
+						onSubmit={async formData => {
+							const savedPunto = await PuntoService.savePuntoResiduo({
 								id: puntoResiduo?.id,
 								ciudadanoId: ciudadanoId,
 								latitud: formData.punto.latitude,
 								longitud: formData.punto.longitude,
 							})
-							navigation.goBack()
+							match(
+								savedPunto,
+								p => {
+									toast.show({description: 'Punto guardado exitosamente'})
+									navigation.goBack()
+								},
+								err => {
+									toast.show({description: err})
+									navigation.goBack()
+								}
+							)
 						}}
 					/>
 				</Box>
@@ -105,7 +118,7 @@ type FormState = {
 type FormParams = {
 	id?: number
 	initialPosition: Coord
-	onSubmit: (data: FormState) => void
+	onSubmit: (data: FormState) => Promise<void>
 }
 
 const latitudeDelta = 0.002
@@ -119,7 +132,7 @@ const Form = ({ id, initialPosition, onSubmit }: FormParams) => {
 
 	const doOnSubmit = async () => {
 		setLoading(true)
-		onSubmit(formData)
+		await onSubmit(formData)
 		setLoading(false)
 	}
 
