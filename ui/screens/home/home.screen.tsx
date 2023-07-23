@@ -15,6 +15,7 @@ import {
 	CircleIcon,
 	ChevronDownIcon,
 	ChevronUpIcon,
+	Spinner,
 } from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { FontAwesome } from '@expo/vector-icons'
@@ -22,7 +23,12 @@ import { colors } from '../../../constants/styles'
 import * as Location from 'expo-location'
 import { LoadingScreen } from '../../components/loading.component'
 import { PuntoService } from '../../../services/punto.service'
-import { Punto, PuntoReciclaje, TipoPunto } from '../../../services/types'
+import {
+	Punto,
+	PuntoReciclaje,
+	PuntoResiduo,
+	TipoPunto,
+} from '../../../services/types'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { mapDays } from '../../../utils/days'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
@@ -53,6 +59,10 @@ export const Home = ({ navigation }: Props) => {
 	const [showCheckboxesPuntos, setShowCheckboxesPuntos] = React.useState(false)
 	const [showCheckboxesTipos, setShowCheckboxesTipos] = React.useState(false)
 	const [showCheckboxesDias, setShowCheckboxesDias] = React.useState(false)
+	const [puntoResiduo, setPuntoResiduo] = React.useState<PuntoResiduo>()
+	const [direction, setDirection] = React.useState('')
+	const [isLoadingModal, setIsLoadingModal] = React.useState(true);
+
 
 	const getUserLocation = async () => {
 		const status = await Location.requestForegroundPermissionsAsync()
@@ -75,6 +85,30 @@ export const Home = ({ navigation }: Props) => {
 			dias: selectedDias,
 		})
 		setPoints(newPoints)
+	}
+
+	const getDirection = async (latitude, longitude) => {
+		try {
+			setIsLoadingModal(true); 
+			const location = await Location.reverseGeocodeAsync({
+				latitude,
+				longitude,
+			})
+			const address =
+				location.at(0).name +
+				', ' +
+				location.at(0).city +
+				', ' +
+				location.at(0).postalCode +
+				', ' +
+				location.at(0).region
+			setDirection(address)
+			setIsLoadingModal(false); 
+		} catch (error) {
+			// TODO: que hacer si no encuentra la direc
+			console.error('Error al realizar la geocodificación inversa:', error)
+			setIsLoadingModal(false); 
+		}
 	}
 
 	const handleFilterPress = () => {
@@ -131,6 +165,8 @@ export const Home = ({ navigation }: Props) => {
 								onCalloutPress={() => {
 									if (point.tipo === 'RECICLAJE' || point.tipo === 'VERDE') {
 										setPuntoReciclaje(point as PuntoReciclaje)
+									} else {
+										setPuntoResiduo(point as PuntoResiduo)
 									}
 								}}
 							/>
@@ -159,6 +195,17 @@ export const Home = ({ navigation }: Props) => {
 					show={!!puntoReciclaje}
 					onClose={() => setPuntoReciclaje(undefined)}
 					point={puntoReciclaje}
+					isLoadingModal={isLoadingModal}
+					direction={direction}
+					getDirection={getDirection}
+				/>
+				<PuntoResiduoModal
+					show={!!puntoResiduo}
+					onClose={() => setPuntoResiduo(undefined)}
+					point={puntoResiduo}
+					isLoadingModal={isLoadingModal}
+					direction={direction}
+					getDirection={getDirection}
 				/>
 				<Center height="15%" bgColor="white">
 					<Row alignContent="center" mt="4">
@@ -212,36 +259,17 @@ type PuntoReciclajeModalProps = {
 	show: boolean
 	onClose: () => void
 	point: PuntoReciclaje
+	isLoadingModal
+	direction
+	getDirection
 }
 
 const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 	if (!props.show) return <></>
-	const [direction, setDirection] = React.useState('')
-
-	const getDirection = async (latitude, longitude) => {
-		try {
-			const location = await Location.reverseGeocodeAsync({
-				latitude,
-				longitude,
-			})
-			const address =
-				location.at(0).name +
-				', ' +
-				location.at(0).city +
-				', ' +
-				location.at(0).postalCode +
-				', ' +
-				location.at(0).region
-			setDirection(address)
-		} catch (error) {
-			// TODO: que hacer si no encuentra la direc
-			console.error('Error al realizar la geocodificación inversa:', error)
-		}
-	}
 
 	React.useEffect(() => {
 		if (props.point) {
-			getDirection(props.point.latitud, props.point.longitud)
+			props.getDirection(props.point.latitud, props.point.longitud)
 		}
 	}, [])
 
@@ -255,31 +283,80 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 					</Text>
 				</Modal.Header>
 				<Modal.Body>
-					<View>
-						<Text bold fontSize="md">
-							Días en que se puede depositar:
-						</Text>
-						<Text>{props.point.dias.map(mapDays).join(' - ')}</Text>
-					</View>
+				{props.isLoadingModal ? (
+						<Spinner color="emerald.800" accessibilityLabel="Loading posts" />
+					) : (
+						<><View>
+								<Text bold fontSize="md">
+									Días en que se puede depositar:
+								</Text>
+								<Text>{props.point.dias.map(mapDays).join(' - ')}</Text>
+							</View><View>
+									<Text bold fontSize="md">
+										Tipos de residuo que acepta:
+									</Text>
+									{props.point.tipoResiduo.map((tipo, index) => (
+										<HStack space={2} mt="0.5" key={index} alignItems="center">
+											<CircleIcon size="2" color="black" />
+											<Text fontSize="sm">{tipo.nombre}</Text>
+										</HStack>
+									))}
+								</View><View>
+									<Text bold fontSize="md">
+										Direccion:
+									</Text>
+									<Text>{props.direction}</Text>
+								</View></>
+					)}
+				</Modal.Body>
+				<Modal.Footer>
+					<Center flex={1}>
+						<Button>Contactar</Button>
+					</Center>
+				</Modal.Footer>
+			</Modal.Content>
+		</Modal>
+	)
+}
 
-					<View>
-						<Text bold fontSize="md">
-							Tipos de residuo que acepta:
-						</Text>
-						{props.point.tipoResiduo.map((tipo, index) => (
-							<HStack space={2} mt="0.5" key={index} alignItems="center">
-								<CircleIcon size="2" color="black" />
-								<Text fontSize="sm">{tipo.nombre}</Text>
-							</HStack>
-						))}
-					</View>
+type PuntoResiduoModalProps = {
+	show: boolean
+	onClose: () => void
+	point: PuntoResiduo
+	isLoadingModal
+	direction
+	getDirection
+}
 
-					<View>
-						<Text bold fontSize="md">
-							Direccion:
-						</Text>
-						<Text>{direction}</Text>
-					</View>
+const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
+	if (!props.show) return <></>
+
+	React.useEffect(() => {
+		if (props.point) {
+			props.getDirection(props.point.latitud, props.point.longitud)
+		}
+	}, [])
+
+	return (
+		<Modal isOpen={props.show} onClose={props.onClose} size="lg">
+			<Modal.Content>
+				<Modal.CloseButton />
+				<Modal.Header alignItems="center">
+					<Text bold fontSize="xl">
+						{props.point.titulo}
+					</Text>
+				</Modal.Header>
+				<Modal.Body>
+					{props.isLoadingModal ? (
+						<Spinner color="emerald.800" accessibilityLabel="Loading posts" />
+					) : (
+						<View>
+							<Text bold fontSize="md">
+								Direccion:
+							</Text>
+							<Text>{props.direction}</Text>
+						</View>
+					)}
 				</Modal.Body>
 				<Modal.Footer>
 					<Center flex={1}>
