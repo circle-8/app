@@ -1,4 +1,4 @@
-import { PuntoResiduo } from "../services/types"
+import { PuntoResiduo } from '../services/types'
 
 export type LoginRoutesParams = {
 	Login: undefined
@@ -83,19 +83,19 @@ type TabRoutesParams = {
 	ProfileTab: {
 		screen: ProfileRouteName
 		initial: boolean
-		params: {
-			ciudadanoId?: number
+		params?: {
+			ciudadanoId: number
 			punto?: PuntoResiduo
 		}
 	}
 }
 
 export const TabRoutes: {
-	home: 'HomeTab',
-	activity: 'ActivityTab',
-	messages: 'MessagesTab',
-	learn: 'LearnTab',
-	profile: 'ProfileTab',
+	home: 'HomeTab'
+	activity: 'ActivityTab'
+	messages: 'MessagesTab'
+	learn: 'LearnTab'
+	profile: 'ProfileTab'
 } = {
 	home: 'HomeTab',
 	activity: 'ActivityTab',
