@@ -87,14 +87,14 @@ const getPuntoReciclaje = async (
 type PuntoReciclajeSave = {
 	id?: number
 	recicladorId: number
-	titulo?: string,
-	tipoResiduo?: number[],
-	dias?: Dia[],
-	latitud?: number,
-	longitud?: number,
+	titulo?: string
+	tipoResiduo?: number[]
+	dias?: Dia[]
+	latitud?: number
+	longitud?: number
 }
 
-const savePuntoReciclaje = async(p: PuntoReciclajeSave) => {
+const savePuntoReciclaje = async (p: PuntoReciclajeSave) => {
 	const url = `/reciclador/${p.recicladorId}/punto_reciclaje/${p.id}`
 	const method = p.id ? Http.put : Http.post
 	const res = await method<PuntoReciclajeResponse>(url, p)
@@ -105,8 +105,26 @@ const savePuntoReciclaje = async(p: PuntoReciclajeSave) => {
 	)
 }
 
+type PuntoResiduoSave = {
+	id?: number
+	ciudadanoId: number
+	latitud: number
+	longitud: number
+}
+const savePuntoResiduo = async (p: PuntoResiduoSave) => {
+	const url = `/reciclador/${p.ciudadanoId}/punto_reciclaje/${p.id}`
+	const method = p.id ? Http.put : Http.post
+	const res = await method<PuntoResiduoResponse>(url, p)
+	return map(
+		res,
+		p => mapResponse(p, 'RESIDUO') as PuntoReciclaje,
+		err => err.message,
+	)
+}
+
 export const PuntoService = {
 	getAll,
 	getPuntoReciclaje,
-	savePuntoReciclaje
+	savePuntoReciclaje,
+	savePuntoResiduo,
 }
