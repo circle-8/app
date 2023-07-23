@@ -109,8 +109,8 @@ export const EditPuntoReciclaje = ({ navigation, route }: Props) => {
 						punto={punto}
 						tipos={tipos}
 						initialPosition={initialMarkerCoord}
-						onSubmit={(formData, tipos, dias) => {
-							PuntoService.savePuntoReciclaje({
+						onSubmit={async (formData, tipos, dias) => {
+							const savedPunto = await PuntoService.savePuntoReciclaje({
 								id,
 								recicladorId,
 								titulo: formData.titulo,
@@ -119,7 +119,17 @@ export const EditPuntoReciclaje = ({ navigation, route }: Props) => {
 								latitud: formData.punto.latitude,
 								longitud: formData.punto.longitude,
 							})
-							navigation.goBack()
+							match(
+								savedPunto,
+								p => {
+									toast.show({description: 'Punto guardado exitosamente'})
+									navigation.goBack()
+								},
+								err => {
+									toast.show({description: err})
+									navigation.goBack()
+								}
+							)
 						}}
 					/>
 				</Box>
@@ -153,7 +163,7 @@ type FormParams = {
 	punto?: PuntoReciclaje
 	initialPosition: Coord
 	tipos: TipoResiduo[]
-	onSubmit: (data: FormState, tipos: number[], dias: Dia[]) => void
+	onSubmit: (data: FormState, tipos: number[], dias: Dia[]) => Promise<void>
 }
 
 const latitudeDelta = 0.002
@@ -204,7 +214,7 @@ const Form = ({ id, punto, initialPosition, tipos, onSubmit }: FormParams) => {
 	const doOnSubmit = async () => {
 		setLoading(true)
 
-		if (isValid()) onSubmit(formData, selectedTipos, dias)
+		if (isValid()) await onSubmit(formData, selectedTipos, dias)
 
 		setLoading(false)
 	}
