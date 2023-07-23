@@ -8,7 +8,7 @@ type ResiduoSave = {
 	ciudadanoId: number
 	puntoResiduoId: number
 	descripcion: string
-	fechaLimiteRetiro?: string
+	fechaLimite?: string
 }
 
 const save = async (r: ResiduoSave): Promise<Either<Residuo, ErrorMessage>> => {
