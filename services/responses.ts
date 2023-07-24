@@ -80,3 +80,12 @@ export type PuntoReciclajeResponse = PuntoVerdeResponse & {
 }
 
 export type PuntoResponse = PuntoResiduoResponse | PuntoVerdeResponse | PuntoReciclajeResponse
+
+export type ResiduoResponse = {
+	id: number
+	fechaCreacion: string
+	puntoResiduoUri: string
+	puntoResiduoId: number
+	puntoResiduo?: unknown
+	tipoResiduo: TipoResiduoResponse
+}

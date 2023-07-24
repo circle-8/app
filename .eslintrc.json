@@ -33,6 +33,7 @@
         "semi": [
             "warn",
             "never"
-        ]
+        ],
+		"no-unused-vars": "off"
     }
 }

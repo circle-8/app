@@ -32,7 +32,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { mapDays } from '../../../utils/days'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { MainRoutesParams } from '../../../constants/routes'
+import { ActivityRoutes, MainRoutesParams, ProfileRoutes, TabRoutes } from '../../../constants/routes'
+import { UserService } from '../../../services/user.service'
 
 type Coord = {
 	latitude: number
@@ -227,7 +228,37 @@ export const Home = ({ navigation }: Props) => {
 							<Text fontSize="xs">Retirar residuos</Text>
 						</Center>
 						<Center w="33%">
-							<Ionicons name="trash" size={40} color={colors.primary800} />
+							<TouchableOpacity onPress={async () => {
+								// Traer puntos de residuos del user
+								const user = await UserService.getCurrent()
+								const points = await PuntoService.getAll({
+									tipos: ['RESIDUO'],
+									ciudadanoId: user.ciudadanoId
+								})
+
+								if ( points.length === 0 ) {
+									// Si no tiene puntos de residuos, ir directo a crear uno
+									navigation.navigate(TabRoutes.profile, {
+										screen: ProfileRoutes.editPuntoResiduo,
+										initial: false,
+										params: {
+											ciudadanoId: user.ciudadanoId,
+										}
+									})
+								} else {
+									// Si ya tiene, ir al menu de activity para crear un residuo
+									navigation.navigate(TabRoutes.activity, {
+										screen: ActivityRoutes.newResiduo,
+										initial: false,
+										params: {
+											ciudadanoId: user.ciudadanoId,
+											puntoResiduoId: points[0].id,
+										}
+									})
+								}
+							}}>
+								<Ionicons name="trash" size={40} color={colors.primary800} />
+							</TouchableOpacity>
 							<Text fontSize="xs">Entregar residuos</Text>
 						</Center>
 						<Center w="33%">
