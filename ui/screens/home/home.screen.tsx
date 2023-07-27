@@ -16,6 +16,10 @@ import {
 	ChevronDownIcon,
 	ChevronUpIcon,
 	Spinner,
+	VStack,
+	InfoOutlineIcon,
+	WarningIcon,
+	WarningOutlineIcon,
 } from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { FontAwesome } from '@expo/vector-icons'
@@ -32,8 +36,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { mapDays } from '../../../utils/days'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { ActivityRoutes, MainRoutesParams, ProfileRoutes, TabRoutes } from '../../../constants/routes'
+import {
+	ActivityRoutes,
+	MainRoutesParams,
+	ProfileRoutes,
+	TabRoutes,
+} from '../../../constants/routes'
 import { UserService } from '../../../services/user.service'
+import { match } from '../../../utils/either'
 
 type Coord = {
 	latitude: number
@@ -62,8 +72,7 @@ export const Home = ({ navigation }: Props) => {
 	const [showCheckboxesDias, setShowCheckboxesDias] = React.useState(false)
 	const [puntoResiduo, setPuntoResiduo] = React.useState<PuntoResiduo>()
 	const [direction, setDirection] = React.useState('')
-	const [isLoadingModal, setIsLoadingModal] = React.useState(true);
-
+	const [isLoadingModal, setIsLoadingModal] = React.useState(true)
 
 	const getUserLocation = async () => {
 		const status = await Location.requestForegroundPermissionsAsync()
@@ -79,6 +88,23 @@ export const Home = ({ navigation }: Props) => {
 		// TODO: que hacer si no da permisos (no funcionar, por ejemplo)
 	}
 
+	const obtenerPuntoResiduoAsync = async (id, ciudadanoId) => {
+		try {
+			const p = await PuntoService.getPuntoResiduo(id, ciudadanoId)
+			match(
+				p,
+				punto => {
+					setPuntoResiduo(punto)
+				},
+				err => {
+					console.error('Error al obtener el punto de residuo:', err)
+				},
+			)
+		} catch (error) {
+			console.error('Error al obtener el punto de residuo:', error)
+		}
+	}
+
 	const getPoints = async () => {
 		const newPoints = await PuntoService.getAll({
 			tipos: selectedPuntos,
@@ -90,7 +116,7 @@ export const Home = ({ navigation }: Props) => {
 
 	const getDirection = async (latitude, longitude) => {
 		try {
-			setIsLoadingModal(true); 
+			setIsLoadingModal(true)
 			const location = await Location.reverseGeocodeAsync({
 				latitude,
 				longitude,
@@ -104,11 +130,10 @@ export const Home = ({ navigation }: Props) => {
 				', ' +
 				location.at(0).region
 			setDirection(address)
-			setIsLoadingModal(false); 
+			setIsLoadingModal(false)
 		} catch (error) {
-			// TODO: que hacer si no encuentra la direc
-			console.error('Error al realizar la geocodificación inversa:', error)
-			setIsLoadingModal(false); 
+			setDirection('No podemos brindar la direccion.')
+			setIsLoadingModal(false)
 		}
 	}
 
@@ -207,6 +232,7 @@ export const Home = ({ navigation }: Props) => {
 					isLoadingModal={isLoadingModal}
 					direction={direction}
 					getDirection={getDirection}
+					obtenerPuntoResiduoAsync={obtenerPuntoResiduoAsync}
 				/>
 				<Center height="15%" bgColor="white">
 					<Row alignContent="center" mt="4">
@@ -228,35 +254,37 @@ export const Home = ({ navigation }: Props) => {
 							<Text fontSize="xs">Retirar residuos</Text>
 						</Center>
 						<Center w="33%">
-							<TouchableOpacity onPress={async () => {
-								// Traer puntos de residuos del user
-								const user = await UserService.getCurrent()
-								const points = await PuntoService.getAll({
-									tipos: ['RESIDUO'],
-									ciudadanoId: user.ciudadanoId
-								})
+							<TouchableOpacity
+								onPress={async () => {
+									// Traer puntos de residuos del user
+									const user = await UserService.getCurrent()
+									const points = await PuntoService.getAll({
+										tipos: ['RESIDUO'],
+										ciudadanoId: user.ciudadanoId,
+									})
 
-								if ( points.length === 0 ) {
-									// Si no tiene puntos de residuos, ir directo a crear uno
-									navigation.navigate(TabRoutes.profile, {
-										screen: ProfileRoutes.editPuntoResiduo,
-										initial: false,
-										params: {
-											ciudadanoId: user.ciudadanoId,
-										}
-									})
-								} else {
-									// Si ya tiene, ir al menu de activity para crear un residuo
-									navigation.navigate(TabRoutes.activity, {
-										screen: ActivityRoutes.newResiduo,
-										initial: false,
-										params: {
-											ciudadanoId: user.ciudadanoId,
-											puntoResiduoId: points[0].id,
-										}
-									})
-								}
-							}}>
+									if (points.length === 0) {
+										// Si no tiene puntos de residuos, ir directo a crear uno
+										navigation.navigate(TabRoutes.profile, {
+											screen: ProfileRoutes.editPuntoResiduo,
+											initial: false,
+											params: {
+												ciudadanoId: user.ciudadanoId,
+											},
+										})
+									} else {
+										// Si ya tiene, ir al menu de activity para crear un residuo
+										navigation.navigate(TabRoutes.activity, {
+											screen: ActivityRoutes.newResiduo,
+											initial: false,
+											params: {
+												ciudadanoId: user.ciudadanoId,
+												puntoResiduoId: points[0].id,
+											},
+										})
+									}
+								}}
+							>
 								<Ionicons name="trash" size={40} color={colors.primary800} />
 							</TouchableOpacity>
 							<Text fontSize="xs">Entregar residuos</Text>
@@ -314,30 +342,34 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 					</Text>
 				</Modal.Header>
 				<Modal.Body>
-				{props.isLoadingModal ? (
+					{props.isLoadingModal ? (
 						<Spinner color="emerald.800" accessibilityLabel="Loading posts" />
 					) : (
-						<><View>
+						<>
+							<View>
 								<Text bold fontSize="md">
 									Días en que se puede depositar:
 								</Text>
 								<Text>{props.point.dias.map(mapDays).join(' - ')}</Text>
-							</View><View>
-									<Text bold fontSize="md">
-										Tipos de residuo que acepta:
-									</Text>
-									{props.point.tipoResiduo.map((tipo, index) => (
-										<HStack space={2} mt="0.5" key={index} alignItems="center">
-											<CircleIcon size="2" color="black" />
-											<Text fontSize="sm">{tipo.nombre}</Text>
-										</HStack>
-									))}
-								</View><View>
-									<Text bold fontSize="md">
-										Direccion:
-									</Text>
-									<Text>{props.direction}</Text>
-								</View></>
+							</View>
+							<View>
+								<Text bold fontSize="md">
+									Tipos de residuo que acepta:
+								</Text>
+								{props.point.tipoResiduo.map((tipo, index) => (
+									<HStack space={2} mt="0.5" key={index} alignItems="center">
+										<CircleIcon size="2" color="black" />
+										<Text fontSize="sm">{tipo.nombre}</Text>
+									</HStack>
+								))}
+							</View>
+							<View>
+								<Text bold fontSize="md">
+									Direccion:
+								</Text>
+								<Text>{props.direction}</Text>
+							</View>
+						</>
 					)}
 				</Modal.Body>
 				<Modal.Footer>
@@ -357,16 +389,70 @@ type PuntoResiduoModalProps = {
 	isLoadingModal
 	direction
 	getDirection
+	obtenerPuntoResiduoAsync
 }
 
 const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 	if (!props.show) return <></>
 
+	const [selectedBoxIndices, setSelectedBoxIndices] = React.useState<number[]>(
+		[],
+	)
+	const [retiroExitoso, setRetiroExitoso] = React.useState(false)
+
 	React.useEffect(() => {
 		if (props.point) {
 			props.getDirection(props.point.latitud, props.point.longitud)
+			props.obtenerPuntoResiduoAsync(props.point.id, props.point.ciudadanoId)
 		}
 	}, [])
+
+	const handleBoxPress = (index: number) => {
+		if (selectedBoxIndices.includes(index)) {
+			setSelectedBoxIndices(prevState => prevState.filter(i => i !== index))
+		} else {
+			setSelectedBoxIndices(prevState => [...prevState, index])
+		}
+	}
+
+	const handleRetirarClick = async () => {
+		const puntosSeleccionados = selectedBoxIndices.map(
+			index => props.point.residuos[index].id,
+		)
+
+		//await PuntoService.getPuntoResiduo(puntosSeleccionados)
+		for (const puntoId of puntosSeleccionados) {
+			const result = await PuntoService.postRetiroResiudo(puntoId, props.point.id);
+		
+			if (result) {
+			  console.log(`Se realizó la solicitud de retiro para el punto con ID ${puntoId}`);
+			  // Realizar otras acciones si es necesario
+			} else {
+			  console.error(`No se pudo realizar la solicitud de retiro para el punto con ID ${puntoId}`);
+			  // Realizar otras acciones si es necesario
+			}
+		  }
+		console.log(puntosSeleccionados)
+		setRetiroExitoso(true)
+	}
+
+	const handleResetClick = () => {
+		setRetiroExitoso(false)
+		setSelectedBoxIndices([])
+		props.onClose();
+	}
+
+	const formatFecha = fecha => {
+		try {
+			const dia = fecha.substring(8, 10)
+			const mes = fecha.substring(5, 7)
+			const anio = fecha.substring(0, 4)
+			return `Deben retirarse antes del ${dia}/${mes}/${anio}`
+		} catch (error) {
+			console.error('Error al formatear la fecha:', error)
+			return 'Sin fecha limite de retiro'
+		}
+	}
 
 	return (
 		<Modal isOpen={props.show} onClose={props.onClose} size="lg">
@@ -380,18 +466,92 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 				<Modal.Body>
 					{props.isLoadingModal ? (
 						<Spinner color="emerald.800" accessibilityLabel="Loading posts" />
+					) : retiroExitoso ? (
+						<>
+							<HStack space={2} mt="0.5" alignItems="center">
+								<Text fontSize="md">¡Orden de retiro creada con éxito!</Text>
+							</HStack>
+						</>
 					) : (
-						<View>
-							<Text bold fontSize="md">
-								Direccion:
-							</Text>
-							<Text>{props.direction}</Text>
-						</View>
+						<>
+							<View>
+								<Text bold fontSize="md">
+									Selecciona los residuos a retirar:
+								</Text>
+								{props.point.residuos && props.point.residuos.length > 0 ? (
+									props.point.residuos.map((tipo, index) => (
+										<TouchableOpacity
+											key={index}
+											onPress={() => handleBoxPress(index)}
+										>
+											<Box
+												key={index}
+												mb={2}
+												p={2}
+												borderWidth={1}
+												borderColor="gray.300"
+												borderRadius="md"
+												shadow={1}
+												bg={
+													selectedBoxIndices.includes(index)
+														? 'green.100'
+														: 'white'
+												}
+											>
+												<HStack
+													space={2}
+													mt="0.5"
+													key={index}
+													alignItems="center"
+												>
+													<Text fontSize="sm">{index + 1}</Text>
+													<Text fontSize="sm">{tipo.tipoResiduo.nombre}</Text>
+												</HStack>
+												<HStack
+													space={2}
+													mt="0.5"
+													key={index}
+													alignItems="center"
+												>
+													<InfoOutlineIcon size="3" color="emerald.600" />
+													<Text fontSize="sm">{tipo.descripcion}</Text>
+												</HStack>
+												<HStack
+													space={2}
+													mt="0.5"
+													key={index}
+													alignItems="center"
+												>
+													<WarningOutlineIcon size="3" color="emerald.600" />
+													<Text fontSize="sm">
+														{formatFecha(tipo.fechaLimiteRetiro)}
+													</Text>
+												</HStack>
+											</Box>
+										</TouchableOpacity>
+									))
+								) : (
+									<Text fontSize="sm">
+										No hay información de los tipos de residuo que para retirar.
+									</Text>
+								)}
+							</View>
+							<View>
+								<Text bold fontSize="md">
+									Direccion:
+								</Text>
+								<Text>{props.direction}</Text>
+							</View>
+						</>
 					)}
 				</Modal.Body>
 				<Modal.Footer>
 					<Center flex={1}>
-						<Button>Contactar</Button>
+						{retiroExitoso ? (
+							<Button onPress={handleResetClick}>Cerrar</Button>
+						) : (
+							<Button onPress={handleRetirarClick}>Retirar</Button>
+						)}
 					</Center>
 				</Modal.Footer>
 			</Modal.Content>
