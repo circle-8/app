@@ -141,7 +141,6 @@ const getPuntoResiduo = async (
 ): Promise<Either<PuntoResiduo, ErrorMessage>> => {
 	const url = `/residuo/${id}/notificacion/${id_punto_reciclaje}`;
 	const res = await Http.post<PuntoResiduoResponse>(url, {})
-	console.log(res)
 	return map(
 		res,
 		p => mapResponse(p, 'RESIDUO') as PuntoResiduo,

@@ -12,7 +12,6 @@ type ResiduoSave = {
 }
 
 const save = async (r: ResiduoSave): Promise<Either<Residuo, ErrorMessage>> => {
-	console.log(r)
 	const url = '/residuo'
 	const res = await Http.post<ResiduoResponse>(url, r)
 	return map(

@@ -16,10 +16,9 @@ import {
 	ChevronDownIcon,
 	ChevronUpIcon,
 	Spinner,
-	VStack,
 	InfoOutlineIcon,
-	WarningIcon,
 	WarningOutlineIcon,
+	CheckCircleIcon,
 } from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { FontAwesome } from '@expo/vector-icons'
@@ -32,6 +31,7 @@ import {
 	PuntoReciclaje,
 	PuntoResiduo,
 	TipoPunto,
+	TipoResiduo,
 } from '../../../services/types'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { mapDays } from '../../../utils/days'
@@ -43,7 +43,8 @@ import {
 	TabRoutes,
 } from '../../../constants/routes'
 import { UserService } from '../../../services/user.service'
-import { match } from '../../../utils/either'
+import { match, ifLeft, ifRight } from '../../../utils/either'
+import { TipoResiduoService } from '../../../services/tipos.service'
 
 type Coord = {
 	latitude: number
@@ -73,6 +74,7 @@ export const Home = ({ navigation }: Props) => {
 	const [puntoResiduo, setPuntoResiduo] = React.useState<PuntoResiduo>()
 	const [direction, setDirection] = React.useState('')
 	const [isLoadingModal, setIsLoadingModal] = React.useState(true)
+	const [tipos, setTipos] = React.useState<TipoResiduo[]>()
 
 	const getUserLocation = async () => {
 		const status = await Location.requestForegroundPermissionsAsync()
@@ -112,6 +114,17 @@ export const Home = ({ navigation }: Props) => {
 			dias: selectedDias,
 		})
 		setPoints(newPoints)
+	}
+
+	const getTipos = async () => {
+		const tipos = await TipoResiduoService.getAll()
+		match(
+			tipos,
+			t => setTipos(t),
+			err => {
+				// que hago si falla
+			},
+		)
 	}
 
 	const getDirection = async (latitude, longitude) => {
@@ -155,6 +168,7 @@ export const Home = ({ navigation }: Props) => {
 	React.useEffect(() => {
 		getUserLocation()
 		getPoints()
+		getTipos()
 	}, [])
 
 	if (isLoading) {
@@ -216,6 +230,7 @@ export const Home = ({ navigation }: Props) => {
 					selectedDias={selectedDias}
 					setSelectedDias={setSelectedDias}
 					getPoints={getPoints}
+					tipos={tipos}
 				/>
 				<PuntoReciclajeModal
 					show={!!puntoReciclaje}
@@ -233,6 +248,7 @@ export const Home = ({ navigation }: Props) => {
 					direction={direction}
 					getDirection={getDirection}
 					obtenerPuntoResiduoAsync={obtenerPuntoResiduoAsync}
+					navigation={navigation}
 				/>
 				<Center height="15%" bgColor="white">
 					<Row alignContent="center" mt="4">
@@ -390,15 +406,20 @@ type PuntoResiduoModalProps = {
 	direction
 	getDirection
 	obtenerPuntoResiduoAsync
+	navigation
 }
 
 const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 	if (!props.show) return <></>
 
-	const [selectedBoxIndices, setSelectedBoxIndices] = React.useState<number[]>(
-		[],
-	)
+	const [selectedResiduos, setSelectedResiduos] = React.useState<number[]>([],)
 	const [retiroExitoso, setRetiroExitoso] = React.useState(false)
+	const [errorRetiro, setErrorRetiro] = React.useState(false)
+	const [firstStep, setFirstStep] = React.useState(true)
+	const [userPoints, setUserPoints] = React.useState<Punto[]>([])
+	const [selectedUserPoint, setSelectedUserPoint] = React.useState<number | null>(null);
+	const [errorMsj, setErrorMsj] = React.useState<string | null>(null);
+	const [successMsj, setSuccessMsj] = React.useState<string | null>(null);
 
 	React.useEffect(() => {
 		if (props.point) {
@@ -408,46 +429,88 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 	}, [])
 
 	const handleBoxPress = (index: number) => {
-		if (selectedBoxIndices.includes(index)) {
-			setSelectedBoxIndices(prevState => prevState.filter(i => i !== index))
+		if (selectedResiduos.includes(index)) {
+			setSelectedResiduos(prevState => prevState.filter(i => i !== index))
 		} else {
-			setSelectedBoxIndices(prevState => [...prevState, index])
+			setSelectedResiduos(prevState => [...prevState, index])
 		}
 	}
 
 	const handleRetirarClick = async () => {
-		const puntosSeleccionados = selectedBoxIndices.map(
-			index => props.point.residuos[index].id,
+		const puntosSeleccionados = selectedResiduos.map(
+			index => props.point.residuos[index],
 		)
 
-		//await PuntoService.getPuntoResiduo(puntosSeleccionados)
-		for (const puntoId of puntosSeleccionados) {
-			const result = await PuntoService.postRetiroResiudo(puntoId, props.point.id);
-		
-			if (result) {
-			  console.log(`Se realizó la solicitud de retiro para el punto con ID ${puntoId}`);
-			  // Realizar otras acciones si es necesario
-			} else {
-			  console.error(`No se pudo realizar la solicitud de retiro para el punto con ID ${puntoId}`);
-			  // Realizar otras acciones si es necesario
-			}
+		const puntoReciclajeId = userPoints[selectedUserPoint]
+		const errorMap: string[] = [];
+		const successMap: string[] = [];
+		for (const p of puntosSeleccionados) {
+			const result = await PuntoService.postRetiroResiudo(
+				p.id,
+				puntoReciclajeId.id,
+			)
+			ifLeft(result, t => {
+				successMap.push(p.tipoResiduo.nombre)
+			})
+			ifRight(result, t => {
+				errorMap.push(p.tipoResiduo.nombre)
+			})
+		}
+		if (errorMap.length === 0) {
+			setRetiroExitoso(true);
+		  } else {
+			const successMessaje = `Solicitud generada con exito para estos residuos: ${successMap.join(', ')}`;
+			const errorMessaje = `Ocurrió un error al generar la solicitud de estos residuos: ${errorMap.join(', ')}`;
+			successMap.length === 0 ? setSuccessMsj(null) : setSuccessMsj(successMessaje)
+			setErrorMsj(errorMessaje)
+			setErrorRetiro(true);
 		  }
-		console.log(puntosSeleccionados)
-		setRetiroExitoso(true)
+
+	}
+
+	const handleUserPointSelection = async () => {
+		const puntosSeleccionados = selectedResiduos.map(
+			i => props.point.residuos[i].tipoResiduo.id,
+		)
+		const puntosSeleccionadosStrings: string[] = puntosSeleccionados.map((numero) => numero.toString())
+		const user = await UserService.getCurrent()
+		if (user) {
+			const getUserPoints = await PuntoService.getAll({
+				recicladorId: user.ciudadanoId,
+				tipos: ['RECICLAJE'],
+				residuos: puntosSeleccionadosStrings
+			})
+			setUserPoints(getUserPoints)
+			setFirstStep(false)
+		}
 	}
 
 	const handleResetClick = () => {
-		setRetiroExitoso(false)
-		setSelectedBoxIndices([])
 		props.onClose();
 	}
 
+	const handleVolverClick = () => {
+		setFirstStep(true)
+	}
+
+	const handleCreatePuntoReciclaje = () => {
+		props.onClose();
+		props.navigation.navigate('ProfileTab', {
+			screen: 'EditPuntoReciclaje',
+			initial: false,
+		})
+	}
+	
+
 	const formatFecha = fecha => {
 		try {
-			const dia = fecha.substring(8, 10)
-			const mes = fecha.substring(5, 7)
-			const anio = fecha.substring(0, 4)
-			return `Deben retirarse antes del ${dia}/${mes}/${anio}`
+			if(fecha != null) {
+				const dia = fecha.substring(8, 10)
+				const mes = fecha.substring(5, 7)
+				const anio = fecha.substring(0, 4)
+				return `Deben retirarse antes del ${dia}/${mes}/${anio}`
+			}
+			return 'Sin fecha limite de retiro'
 		} catch (error) {
 			console.error('Error al formatear la fecha:', error)
 			return 'Sin fecha limite de retiro'
@@ -468,11 +531,46 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 						<Spinner color="emerald.800" accessibilityLabel="Loading posts" />
 					) : retiroExitoso ? (
 						<>
-							<HStack space={2} mt="0.5" alignItems="center">
-								<Text fontSize="md">¡Orden de retiro creada con éxito!</Text>
-							</HStack>
+							<View
+								style={{
+									flex: 1,
+									justifyContent: 'center',
+									alignItems: 'center',
+								}}
+							>
+								<CheckCircleIcon size={5} color="emerald.600" />
+								<Text style={{ fontSize: 14, textAlign: 'center' }}>
+									¡Orden de retiro creada con éxito!
+								</Text>
+							</View>
 						</>
-					) : (
+					) : errorRetiro ? (
+						<>
+							{successMsj !== null ? (
+								<View
+									style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: 20,}}>
+									<CheckCircleIcon size={5} color="emerald.600" />
+									<Text style={{ fontSize: 14, textAlign: 'center' }}>
+										{successMsj}
+									</Text>
+								</View>
+							) : ''}
+							<View
+								style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: 20,}}>
+								<WarningOutlineIcon size={5} color="red.600" />
+								<Text style={{ fontSize: 14, textAlign: 'center' }}>
+									{errorMsj}
+								</Text>
+							</View>
+							<View
+								style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: 20,}}>
+								<InfoOutlineIcon size={5} color="emerald.600" />
+								<Text style={{ fontSize: 14, textAlign: 'center' }}>
+								Asegurate que el punto de reciclaje elegido admita el tipo de residuo que queres retirar y que no hayas solicitado este residuo anteriormente.
+								</Text>
+							</View>
+						</>
+					) : firstStep ? (
 						<>
 							<View>
 								<Text bold fontSize="md">
@@ -481,11 +579,11 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 								{props.point.residuos && props.point.residuos.length > 0 ? (
 									props.point.residuos.map((tipo, index) => (
 										<TouchableOpacity
-											key={index}
+											key={`resUser-${index}`}
 											onPress={() => handleBoxPress(index)}
 										>
 											<Box
-												key={index}
+												key={`resBox-${index}`}
 												mb={2}
 												p={2}
 												borderWidth={1}
@@ -493,7 +591,7 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 												borderRadius="md"
 												shadow={1}
 												bg={
-													selectedBoxIndices.includes(index)
+													selectedResiduos.includes(index)
 														? 'green.100'
 														: 'white'
 												}
@@ -501,7 +599,7 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 												<HStack
 													space={2}
 													mt="0.5"
-													key={index}
+													key={`name-${index}`}
 													alignItems="center"
 												>
 													<Text fontSize="sm">{index + 1}</Text>
@@ -510,7 +608,7 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 												<HStack
 													space={2}
 													mt="0.5"
-													key={index}
+													key={`desc-${index}`}
 													alignItems="center"
 												>
 													<InfoOutlineIcon size="3" color="emerald.600" />
@@ -519,7 +617,7 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 												<HStack
 													space={2}
 													mt="0.5"
-													key={index}
+													key={`date-${index}`}
 													alignItems="center"
 												>
 													<WarningOutlineIcon size="3" color="emerald.600" />
@@ -543,14 +641,96 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 								<Text>{props.direction}</Text>
 							</View>
 						</>
+					) : (
+						<>
+							<View>
+								<Text bold fontSize="md">
+									Selecciona el punto donde lo queres recibir:
+								</Text>
+								{userPoints && userPoints.length > 0 ? (
+									userPoints.map((punto, userIndex) => (
+										<TouchableOpacity
+											key={`user-${userIndex}`}
+											onPress={() => setSelectedUserPoint(userIndex)}
+										>
+											<Box
+												key={`box-${userIndex}`}
+												mb={2}
+												p={2}
+												borderWidth={1}
+												borderColor="gray.300"
+												borderRadius="md"
+												shadow={1}
+												bg={
+													selectedUserPoint === userIndex
+														? 'green.100'
+														: 'white'
+												}
+											>
+												<HStack
+													space={2}
+													mt="0.5"
+													key={`stack-${userIndex}`}
+													alignItems="center"
+												>
+													<Text fontSize="sm">{userIndex + 1}</Text>
+													<Text fontSize="sm">{punto.titulo}</Text>
+												</HStack>
+											</Box>
+										</TouchableOpacity>
+									))
+								) : (
+									<>
+										<View
+											style={{
+												flex: 1,
+												justifyContent: 'center',
+												alignItems: 'center',
+											}}
+										>
+											<WarningOutlineIcon size={5} color="red.600" />
+											<Text style={{ fontSize: 14, textAlign: 'center' }}>
+												No dispones de un punto de reciclaje, para generar un
+												orden de retiro primero asegura tener un punto de
+												reciclaje creado.
+											</Text>
+										</View>
+									</>
+								)}
+							</View>
+						</>
 					)}
 				</Modal.Body>
 				<Modal.Footer>
 					<Center flex={1}>
-						{retiroExitoso ? (
+						{retiroExitoso || errorRetiro ? (
 							<Button onPress={handleResetClick}>Cerrar</Button>
+						) : firstStep ? (
+							<Button onPress={handleUserPointSelection}>Siguiente</Button>
+						) : !firstStep && userPoints.length === 0 ? (
+							<View
+								style={{
+									flexDirection: 'row',
+									justifyContent: 'space-between',
+								}}
+							>
+								<Button onPress={handleResetClick}>Cerrar</Button>
+								<View style={{ marginHorizontal: 10 }} />
+								<Button onPress={handleCreatePuntoReciclaje}>
+									Crear punto
+								</Button>
+							</View>
 						) : (
-							<Button onPress={handleRetirarClick}>Retirar</Button>
+							<View
+								style={{
+									flexDirection: 'row',
+									justifyContent: 'space-between',
+								}}
+							>
+								<Button onPress={handleVolverClick}>Volver</Button>
+								<View style={{ marginHorizontal: 10 }} />
+								<Button onPress={handleRetirarClick}>Retirar</Button>
+							</View>
 						)}
 					</Center>
 				</Modal.Footer>
@@ -573,6 +753,7 @@ const FiltrosModal = ({
 	selectedDias,
 	setSelectedDias,
 	getPoints,
+	tipos
 }) => {
 	return (
 		<Modal isOpen={isOpen} onClose={onClose}>
@@ -637,24 +818,17 @@ const FiltrosModal = ({
 							accessibilityLabel="Selecciona los tipos de residuo que quieres ver"
 							onChange={values => setSelectedTipos(values || [])}
 						>
-							<Checkbox value="Plástico" my={2}>
-								Plastico
-							</Checkbox>
-							<Checkbox value="Papel" my={2}>
-								Papel
-							</Checkbox>
-							<Checkbox value="Pilas" my={2}>
-								Pilas
-							</Checkbox>
-							<Checkbox value="Carton" my={2}>
-								Carton
-							</Checkbox>
-							<Checkbox value="Organicos" my={2}>
-								Organicos
-							</Checkbox>
-							<Checkbox value="Compost" my={2}>
-								Compost
-							</Checkbox>
+							{tipos && tipos.length > 0 ? (
+								tipos.map((tipo) => (
+									<Checkbox value={tipo.id} my={2}>
+										{tipo.nombre}
+									</Checkbox>
+								))
+							) : (
+								<Text fontSize="sm">
+									No hay información de los tipos de residuo.
+								</Text>
+							)}
 						</Checkbox.Group>
 					)}
 					<TouchableOpacity onPress={() => handleFiltroPress('Dias')}>
