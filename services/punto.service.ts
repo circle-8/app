@@ -122,35 +122,6 @@ const savePuntoResiduo = async (p: PuntoResiduoSave) => {
 	)
 }
 
-<<<<<<< Updated upstream
-=======
-const getPuntoResiduo = async (
-	id: number,
-	ciudadanoId: number,
-): Promise<Either<PuntoResiduo, ErrorMessage>> => {
-	const url = `/ciudadano/${ciudadanoId}/punto_residuo/${id}?expand=ciudadano&expand=residuos`
-	const res = await Http.get<PuntoResiduoResponse>(url)
-	return map(
-		res,
-		p => mapResponse(p, 'RESIDUO') as PuntoResiduo,
-		err => err.message,
-	)
-}
-
-  const postRetiroResiudo = async (
-	id: number,
-	id_punto_reciclaje: number,
-): Promise<Either<PuntoResiduo, ErrorMessage>> => {
-	const url = `/residuo/${id}/notificacion/${id_punto_reciclaje}`;
-	const res = await Http.post<PuntoResiduoResponse>(url, {})
-	return map(
-		res,
-		p => mapResponse(p, 'RESIDUO') as PuntoResiduo,
-		err => err.message
-	)
-}
-
->>>>>>> Stashed changes
 export const PuntoService = {
 	getAll,
 	getPuntoReciclaje,
