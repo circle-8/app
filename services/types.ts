@@ -4,6 +4,7 @@ import {
 	PuntoResiduoResponse,
 	PuntoVerdeResponse,
 	ResiduoResponse,
+	SolicitudResponse,
 	TipoResiduoResponse,
 	UserResponse,
 } from './responses'
@@ -41,3 +42,4 @@ export type PuntoVerde = PuntoBase & PuntoVerdeResponse
 export type PuntoReciclaje = PuntoBase & PuntoReciclajeResponse
 export type PuntoResiduo = PuntoBase & PuntoResiduoResponse
 export type Punto = PuntoReciclaje | PuntoVerde | PuntoResiduo
+export type Solicitud = SolicitudResponse

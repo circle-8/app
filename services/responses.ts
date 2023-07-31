@@ -58,7 +58,7 @@ export type PuntoResiduoResponse = PuntoResponseBase & {
 	ciudadanoId: number
 	ciudadanoUri: string
 	ciudadano?: CiudadanoResponse
-	residuos?: unknown
+	residuos?: ResiduoResponse[]
 }
 
 export type TipoResiduoResponse = {
@@ -88,4 +88,16 @@ export type ResiduoResponse = {
 	puntoResiduoId: number
 	puntoResiduo?: unknown
 	tipoResiduo: TipoResiduoResponse
+	descripcion: string
+	fechaLimiteRetiro: string
+}
+
+export type SolicitudResponse = {
+	id: number
+	solicitanteId: number
+	solicitante: UserResponse
+	solicitadoId: number
+	solicitado: UserResponse
+	estado: string
+	residuo: ResiduoResponse
 }
