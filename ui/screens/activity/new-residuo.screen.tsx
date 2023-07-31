@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import React from 'react'
-import { AcitivityRouteParams } from '../../../constants/routes'
+import { ActivityRouteParams } from '../../../constants/routes'
 import {
 	Box,
 	Button,
@@ -22,7 +22,7 @@ import DateTimePicker from '@react-native-community/datetimepicker'
 import { ResiduoService } from '../../../services/residuo.service'
 import { Keyboard, TouchableWithoutFeedback } from 'react-native'
 
-type Props = NativeStackScreenProps<AcitivityRouteParams, 'NewResiduo'>
+type Props = NativeStackScreenProps<ActivityRouteParams, 'NewResiduo'>
 
 export const NewResiduo = ({ navigation, route }: Props) => {
 	const { ciudadanoId, puntoResiduoId } = route.params

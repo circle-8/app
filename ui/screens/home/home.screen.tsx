@@ -90,21 +90,17 @@ export const Home = ({ navigation }: Props) => {
 		// TODO: que hacer si no da permisos (no funcionar, por ejemplo)
 	}
 
-	const obtenerPuntoResiduoAsync = async (id, ciudadanoId) => {
-		try {
-			const p = await PuntoService.getPuntoResiduo(id, ciudadanoId)
-			match(
-				p,
-				punto => {
-					setPuntoResiduo(punto)
-				},
-				err => {
-					console.error('Error al obtener el punto de residuo:', err)
-				},
-			)
-		} catch (error) {
-			console.error('Error al obtener el punto de residuo:', error)
-		}
+	const getPuntoResiduo = async (id, ciudadanoId) => {
+		const p = await PuntoService.getPuntoResiduo(id, ciudadanoId)
+		match(
+			p,
+			punto => {
+				setPuntoResiduo(punto)
+			},
+			err => {
+				console.error('Error al obtener el punto de residuo:', err)
+			},
+		)
 	}
 
 	const getPoints = async () => {
@@ -247,7 +243,7 @@ export const Home = ({ navigation }: Props) => {
 					isLoadingModal={isLoadingModal}
 					direction={direction}
 					getDirection={getDirection}
-					obtenerPuntoResiduoAsync={obtenerPuntoResiduoAsync}
+					getPuntoResiduo={getPuntoResiduo}
 					navigation={navigation}
 				/>
 				<Center height="15%" bgColor="white">
@@ -405,26 +401,28 @@ type PuntoResiduoModalProps = {
 	isLoadingModal
 	direction
 	getDirection
-	obtenerPuntoResiduoAsync
+	getPuntoResiduo
 	navigation
 }
 
 const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 	if (!props.show) return <></>
 
-	const [selectedResiduos, setSelectedResiduos] = React.useState<number[]>([],)
+	const [selectedResiduos, setSelectedResiduos] = React.useState<number[]>([])
 	const [retiroExitoso, setRetiroExitoso] = React.useState(false)
 	const [errorRetiro, setErrorRetiro] = React.useState(false)
 	const [firstStep, setFirstStep] = React.useState(true)
 	const [userPoints, setUserPoints] = React.useState<Punto[]>([])
-	const [selectedUserPoint, setSelectedUserPoint] = React.useState<number | null>(null);
-	const [errorMsj, setErrorMsj] = React.useState<string | null>(null);
-	const [successMsj, setSuccessMsj] = React.useState<string | null>(null);
+	const [selectedUserPoint, setSelectedUserPoint] = React.useState<
+		number | null
+	>(null)
+	const [errorMsj, setErrorMsj] = React.useState<string | null>(null)
+	const [successMsj, setSuccessMsj] = React.useState<string | null>(null)
 
 	React.useEffect(() => {
 		if (props.point) {
 			props.getDirection(props.point.latitud, props.point.longitud)
-			props.obtenerPuntoResiduoAsync(props.point.id, props.point.ciudadanoId)
+			props.getPuntoResiduo(props.point.id, props.point.ciudadanoId)
 		}
 	}, [])
 
@@ -442,8 +440,8 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 		)
 
 		const puntoReciclajeId = userPoints[selectedUserPoint]
-		const errorMap: string[] = [];
-		const successMap: string[] = [];
+		const errorMap: string[] = []
+		const successMap: string[] = []
 		for (const p of puntosSeleccionados) {
 			const result = await PuntoService.postRetiroResiudo(
 				p.id,
@@ -457,28 +455,35 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 			})
 		}
 		if (errorMap.length === 0) {
-			setRetiroExitoso(true);
-		  } else {
-			const successMessaje = `Solicitud generada con exito para estos residuos: ${successMap.join(', ')}`;
-			const errorMessaje = `Ocurrió un error al generar la solicitud de estos residuos: ${errorMap.join(', ')}`;
-			successMap.length === 0 ? setSuccessMsj(null) : setSuccessMsj(successMessaje)
+			setRetiroExitoso(true)
+		} else {
+			const successMessaje = `Solicitud generada con exito para estos residuos: ${successMap.join(
+				', ',
+			)}`
+			const errorMessaje = `Ocurrió un error al generar la solicitud de estos residuos: ${errorMap.join(
+				', ',
+			)}`
+			successMap.length === 0
+				? setSuccessMsj(null)
+				: setSuccessMsj(successMessaje)
 			setErrorMsj(errorMessaje)
-			setErrorRetiro(true);
-		  }
-
+			setErrorRetiro(true)
+		}
 	}
 
 	const handleUserPointSelection = async () => {
 		const puntosSeleccionados = selectedResiduos.map(
 			i => props.point.residuos[i].tipoResiduo.id,
 		)
-		const puntosSeleccionadosStrings: string[] = puntosSeleccionados.map((numero) => numero.toString())
+		const puntosSeleccionadosStrings: string[] = puntosSeleccionados.map(
+			numero => numero.toString(),
+		)
 		const user = await UserService.getCurrent()
 		if (user) {
 			const getUserPoints = await PuntoService.getAll({
 				recicladorId: user.ciudadanoId,
 				tipos: ['RECICLAJE'],
-				residuos: puntosSeleccionadosStrings
+				residuos: puntosSeleccionadosStrings,
 			})
 			setUserPoints(getUserPoints)
 			setFirstStep(false)
@@ -486,7 +491,7 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 	}
 
 	const handleResetClick = () => {
-		props.onClose();
+		props.onClose()
 	}
 
 	const handleVolverClick = () => {
@@ -494,17 +499,28 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 	}
 
 	const handleCreatePuntoReciclaje = () => {
-		props.onClose();
+		props.onClose()
 		props.navigation.navigate('ProfileTab', {
 			screen: 'EditPuntoReciclaje',
 			initial: false,
 		})
 	}
-	
+
+	const handleMisSolicitudes = async () => {
+		const user = await UserService.getCurrent()
+		props.onClose()
+		props.navigation.navigate(TabRoutes.activity, {
+			screen: ActivityRoutes.listSolicitudes,
+			initial: false,
+			params: {
+				ciudadanoId: user.ciudadanoId
+			},
+		})
+	}
 
 	const formatFecha = fecha => {
 		try {
-			if(fecha != null) {
+			if (fecha != null) {
 				const dia = fecha.substring(8, 10)
 				const mes = fecha.substring(5, 7)
 				const anio = fecha.substring(0, 4)
@@ -548,25 +564,47 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 						<>
 							{successMsj !== null ? (
 								<View
-									style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: 20,}}>
+									style={{
+										flex: 1,
+										justifyContent: 'center',
+										alignItems: 'center',
+										marginBottom: 20,
+									}}
+								>
 									<CheckCircleIcon size={5} color="emerald.600" />
 									<Text style={{ fontSize: 14, textAlign: 'center' }}>
 										{successMsj}
 									</Text>
 								</View>
-							) : ''}
+							) : (
+								''
+							)}
 							<View
-								style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: 20,}}>
+								style={{
+									flex: 1,
+									justifyContent: 'center',
+									alignItems: 'center',
+									marginBottom: 20,
+								}}
+							>
 								<WarningOutlineIcon size={5} color="red.600" />
 								<Text style={{ fontSize: 14, textAlign: 'center' }}>
 									{errorMsj}
 								</Text>
 							</View>
 							<View
-								style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: 20,}}>
+								style={{
+									flex: 1,
+									justifyContent: 'center',
+									alignItems: 'center',
+									marginBottom: 20,
+								}}
+							>
 								<InfoOutlineIcon size={5} color="emerald.600" />
 								<Text style={{ fontSize: 14, textAlign: 'center' }}>
-								Asegurate que el punto de reciclaje elegido admita el tipo de residuo que queres retirar y que no hayas solicitado este residuo anteriormente.
+									Asegurate que el punto de reciclaje elegido admita el tipo de
+									residuo que queres retirar y que no hayas solicitado este
+									residuo anteriormente.
 								</Text>
 							</View>
 						</>
@@ -590,6 +628,7 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 												borderColor="gray.300"
 												borderRadius="md"
 												shadow={1}
+												maxWidth={350}
 												bg={
 													selectedResiduos.includes(index)
 														? 'green.100'
@@ -612,7 +651,9 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 													alignItems="center"
 												>
 													<InfoOutlineIcon size="3" color="emerald.600" />
-													<Text fontSize="sm">{tipo.descripcion}</Text>
+													<Text fontSize="sm" numberOfLines={4}>
+														{tipo.descripcion}
+													</Text>
 												</HStack>
 												<HStack
 													space={2}
@@ -661,6 +702,7 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 												borderColor="gray.300"
 												borderRadius="md"
 												shadow={1}
+												maxWidth={350}
 												bg={
 													selectedUserPoint === userIndex
 														? 'green.100'
@@ -674,7 +716,9 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 													alignItems="center"
 												>
 													<Text fontSize="sm">{userIndex + 1}</Text>
-													<Text fontSize="sm">{punto.titulo}</Text>
+													<Text fontSize="sm" numberOfLines={4}>
+														{punto.titulo}
+													</Text>
 												</HStack>
 											</Box>
 										</TouchableOpacity>
@@ -704,7 +748,18 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 				<Modal.Footer>
 					<Center flex={1}>
 						{retiroExitoso || errorRetiro ? (
-							<Button onPress={handleResetClick}>Cerrar</Button>
+							<View
+								style={{
+									flexDirection: 'row',
+									justifyContent: 'space-between',
+								}}
+							>
+								<Button onPress={handleResetClick}>Cerrar</Button>
+								<View style={{ marginHorizontal: 10 }} />
+								<Button onPress={handleMisSolicitudes}>
+									Ir a mis solicitudes
+								</Button>
+							</View>
 						) : firstStep ? (
 							<Button onPress={handleUserPointSelection}>Siguiente</Button>
 						) : !firstStep && userPoints.length === 0 ? (
@@ -753,7 +808,7 @@ const FiltrosModal = ({
 	selectedDias,
 	setSelectedDias,
 	getPoints,
-	tipos
+	tipos,
 }) => {
 	return (
 		<Modal isOpen={isOpen} onClose={onClose}>
@@ -819,7 +874,7 @@ const FiltrosModal = ({
 							onChange={values => setSelectedTipos(values || [])}
 						>
 							{tipos && tipos.length > 0 ? (
-								tipos.map((tipo) => (
+								tipos.map(tipo => (
 									<Checkbox value={tipo.id} my={2}>
 										{tipo.nombre}
 									</Checkbox>

@@ -91,3 +91,13 @@ export type ResiduoResponse = {
 	descripcion: string
 	fechaLimiteRetiro: string
 }
+
+export type SolicitudResponse = {
+	id: number
+	solicitanteId: number
+	solicitante: UserResponse
+	solicitadoId: number
+	solicitado: UserResponse
+	estado: string
+	residuo: ResiduoResponse
+}
