@@ -1,27 +1,39 @@
 import React from 'react'
-import { Button, Center } from 'native-base'
-import { AcitivityRouteParams, ActivityRoutes } from '../../../constants/routes'
+import { Box, Button, Center, VStack } from 'native-base'
+import { UserService } from '../../../services/user.service'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
+import { ActivityRoutes, ActivityRouteParams, TabRoutes } from '../../../constants/routes'
 
-type Props = NativeStackScreenProps<AcitivityRouteParams, 'Activity'>
+type Props = NativeStackScreenProps<ActivityRouteParams, 'Activity'>
 
-export const Activity = ({ navigation }: Props) => {
+export const Activity = ({navigation}: Props) => {
+
+	const onMisResiduos = async () => {
+		navigation.navigate(ActivityRoutes.listResiduos)
+	}
+
+	const onMisSolicitudes = async () => {
+		const user = await UserService.getCurrent()
+		navigation.navigate(ActivityRoutes.listSolicitudes, {
+			ciudadanoId: user.ciudadanoId
+		})
+	}
+
+	const onMisRetiros = async () => {
+		
+	}
+
 	return (
-		<Center w="100%" flex="1">
-			<Button
-				m="5"
-				size="lg"
-				width="60%"
-				color="primary"
-				onPress={() => navigation.navigate(ActivityRoutes.listResiduos)}
-			>
-				Mis Residuos
+		<Center w="100%">
+			<Box>Aqui podras consultar toda tu actividad</Box>
+			<Button mt="2" color="primary" onPress={onMisResiduos} width="70%">
+				Mis residuos
 			</Button>
-			<Button m="5" size="lg" width="60%" color="primary">
-				Mis Solicitudes
+			<Button mt="2" color="primary" onPress={onMisSolicitudes} width="70%">
+				Mis solicitudes
 			</Button>
-			<Button m="5" size="lg" width="60%" color="primary">
-				Mis Depositos
+			<Button mt="2" color="primary" onPress={onMisRetiros} width="70%">
+				Mis Retiros
 			</Button>
 		</Center>
 	)

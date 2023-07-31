@@ -51,24 +51,29 @@ export const HomeRoutes: {
 	home: 'Home',
 }
 
-export type AcitivityRouteParams = {
+export type ActivityRouteParams = {
 	Activity: undefined
 	NewResiduo: {
 		ciudadanoId: number
 		puntoResiduoId: number
 	},
 	ListResiduos: undefined
+	ListSolicitudes: {
+		ciudadanoId: number
+	},
 }
-type ActivityRouteName = keyof AcitivityRouteParams
+type ActivityRouteName = keyof ActivityRouteParams
 
 export const ActivityRoutes: {
 	activity: 'Activity'
-	newResiduo: 'NewResiduo',
-	listResiduos: 'ListResiduos',
+	newResiduo: 'NewResiduo'
+	listSolicitudes: 'ListSolicitudes'
+  listResiduos: 'ListResiduos'
 } = {
 	activity: 'Activity',
 	newResiduo: 'NewResiduo',
-	listResiduos: 'ListResiduos',
+	listSolicitudes: 'ListSolicitudes',
+  listResiduos: 'ListResiduos',
 }
 
 type TabRoutesParams = {
@@ -109,5 +114,5 @@ export const TabRoutes: {
 
 export type MainRoutesParams = HomeRoutesParams &
 	ProfileRoutesParams &
-	AcitivityRouteParams &
+	ActivityRouteParams &
 	TabRoutesParams
