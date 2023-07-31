@@ -20,7 +20,7 @@ import { TipoResiduo } from '../../../services/types'
 import { LoadingScreen } from '../../components/loading.component'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { ResiduoService } from '../../../services/residuo.service'
-import { Keyboard, TouchableWithoutFeedback } from 'react-native'
+import { Keyboard } from 'react-native'
 
 type Props = NativeStackScreenProps<AcitivityRouteParams, 'NewResiduo'>
 

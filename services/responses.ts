@@ -83,7 +83,9 @@ export type PuntoResponse = PuntoResiduoResponse | PuntoVerdeResponse | PuntoRec
 
 export type ResiduoResponse = {
 	id: number
+	descripcion: string
 	fechaCreacion: string
+	fechaLimiteRetiro: string
 	puntoResiduoUri: string
 	puntoResiduoId: number
 	puntoResiduo?: unknown

@@ -56,16 +56,19 @@ export type AcitivityRouteParams = {
 	NewResiduo: {
 		ciudadanoId: number
 		puntoResiduoId: number
-	}
+	},
+	ListResiduos: undefined
 }
 type ActivityRouteName = keyof AcitivityRouteParams
 
 export const ActivityRoutes: {
 	activity: 'Activity'
-	newResiduo: 'NewResiduo'
+	newResiduo: 'NewResiduo',
+	listResiduos: 'ListResiduos',
 } = {
 	activity: 'Activity',
 	newResiduo: 'NewResiduo',
+	listResiduos: 'ListResiduos',
 }
 
 type TabRoutesParams = {
