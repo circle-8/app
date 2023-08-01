@@ -88,7 +88,10 @@ export type ResiduoResponse = {
 	fechaLimiteRetiro: string
 	puntoResiduoUri: string
 	puntoResiduoId: number
-	puntoResiduo?: unknown
+	puntoResiduo?: {
+		id: number
+		ciudadanoId: number
+	}
 	tipoResiduo: TipoResiduoResponse
 }
 
@@ -98,6 +101,7 @@ export type SolicitudResponse = {
 	solicitante: UserResponse
 	solicitadoId: number
 	solicitado: UserResponse
+	canceladorId?: number
 	estado: string
 	residuo: ResiduoResponse
 }
