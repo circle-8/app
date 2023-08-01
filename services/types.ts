@@ -26,6 +26,7 @@ export type TipoResiduo = TipoResiduoResponse
 
 export type Residuo = ResiduoResponse & {
 	createdAt: Date
+	limitDate?: Date
 }
 
 export type TipoPunto = 'RESIDUO' | 'RECICLAJE' | 'VERDE'

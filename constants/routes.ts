@@ -56,10 +56,11 @@ export type ActivityRouteParams = {
 	NewResiduo: {
 		ciudadanoId: number
 		puntoResiduoId: number
-	}
+	},
+	ListResiduos: undefined
 	ListSolicitudes: {
 		ciudadanoId: number
-	}
+	},
 }
 type ActivityRouteName = keyof ActivityRouteParams
 
@@ -67,10 +68,12 @@ export const ActivityRoutes: {
 	activity: 'Activity'
 	newResiduo: 'NewResiduo'
 	listSolicitudes: 'ListSolicitudes'
+	listResiduos: 'ListResiduos'
 } = {
 	activity: 'Activity',
 	newResiduo: 'NewResiduo',
-	listSolicitudes: 'ListSolicitudes'
+	listSolicitudes: 'ListSolicitudes',
+	listResiduos: 'ListResiduos',
 }
 
 type TabRoutesParams = {
