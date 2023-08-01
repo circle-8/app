@@ -53,7 +53,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 			puntoResiduoId,
 			descripcion: form.descripcion,
 			tipoResiduoId: form.tipo,
-			fechaLimite: form.fechaLimite?.toISOString() || '',
+			fechaLimite: form.fechaLimite?.toISOString() || null,
 		})
 		match(
 			savedResiduo,

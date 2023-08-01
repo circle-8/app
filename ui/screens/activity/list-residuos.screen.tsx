@@ -1,5 +1,5 @@
 import React from 'react'
-import { AcitivityRouteParams } from '../../../constants/routes'
+import { ActivityRouteParams } from '../../../constants/routes'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { LoadingScreen } from '../../components/loading.component'
 import { Residuo } from '../../../services/types'
@@ -13,15 +13,14 @@ import {
 	Card,
 	Center,
 	Column,
-	Flex,
 	Row,
 	Text,
 	useToast,
 } from 'native-base'
-import { FontAwesome, EvilIcons, FontAwesome5 } from '@expo/vector-icons'
+import { FontAwesome, FontAwesome5 } from '@expo/vector-icons'
 import { TouchableOpacity } from 'react-native'
 
-type Props = NativeStackScreenProps<AcitivityRouteParams, 'ListResiduos'>
+type Props = NativeStackScreenProps<ActivityRouteParams, 'ListResiduos'>
 
 export const ListResiduos = ({ navigation }: Props) => {
 	const [ciudadanoId, setCiudadanoId] = React.useState<number>()
@@ -36,7 +35,7 @@ export const ListResiduos = ({ navigation }: Props) => {
 		setCiudadanoId(user.ciudadanoId)
 
 		const residuos = await ResiduoService.list({
-			ciudadano: [ciudadanoId],
+			ciudadano: [user.ciudadanoId],
 			retirado: false,
 			fechaLimiteRetiro: new Date(),
 		})
@@ -50,6 +49,11 @@ export const ListResiduos = ({ navigation }: Props) => {
 		)
 
 		setLoading(false)
+	}
+
+	const reload = () => {
+		setLoading(true)
+		loadData()
 	}
 
 	React.useEffect(() => {
@@ -125,6 +129,7 @@ export const ListResiduos = ({ navigation }: Props) => {
 						() => toast.show({ description: '¡Residuo eliminado!' }),
 					)
 					closeAlert()
+					reload()
 				}}
 			/>
 			<AlertBeforeAction
@@ -139,6 +144,7 @@ export const ListResiduos = ({ navigation }: Props) => {
 						() => toast.show({ description: '¡Residuo retirado!' }),
 					)
 					closeAlert()
+					reload()
 				}}
 			/>
 		</Box>

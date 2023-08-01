@@ -17,7 +17,7 @@ import {
 	Modal,
 } from 'native-base'
 import { match } from '../../../utils/either'
-import { Solicitud, TipoResiduo } from '../../../services/types'
+import { Solicitud } from '../../../services/types'
 import { LoadingScreen } from '../../components/loading.component'
 import { SolicitudService } from '../../../services/solicitud.service'
 
@@ -63,18 +63,18 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 
 	const getEstado = solicitud => {
 		switch (solicitud.estado) {
-			case 'PENDIENTE':
-				return `Esperando hasta que ${solicitud.solicitado.nombre} acepte la solicitud.`
-			case 'APROBADA':
-				return 'Solicitud aceptada'
-			case 'CANCELADA':
-				if (solicitud.solicitanteId == solicitud.canceladorId)
-					return `Cancelaste esta solicitud`
-				return `Solicitud Cancelada por ${solicitud.solicitado.nombre}`
-			case 'EXPIRADA':
-				return 'Solicitud Expirada'
-			default:
-				return 'No hay informacion del estado'
+		case 'PENDIENTE':
+			return `Esperando hasta que ${solicitud.solicitado.nombre} acepte la solicitud.`
+		case 'APROBADA':
+			return 'Solicitud aceptada'
+		case 'CANCELADA':
+			if (solicitud.solicitanteId == solicitud.canceladorId)
+				return `Cancelaste esta solicitud`
+			return `Solicitud Cancelada por ${solicitud.solicitado.nombre}`
+		case 'EXPIRADA':
+			return 'Solicitud Expirada'
+		default:
+			return 'No hay informacion del estado'
 		}
 	}
 
@@ -125,7 +125,8 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 									¿Estás seguro que deseas cancelar esta solicitud?
 								</Text>
 								<Text fontSize="md" mt={2}>
-									{solicitudCancelable.residuo.descripcion} de {solicitudCancelable.solicitado.nombre}
+									{solicitudCancelable.residuo.descripcion} de{' '}
+									{solicitudCancelable.solicitado.nombre}
 								</Text>
 								<HStack justifyContent="center" mt={4} space={2}>
 									<Button onPress={() => cerrarModal()}>volver</Button>
@@ -171,7 +172,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 									key={`name-${idx}`}
 									alignItems="center"
 								>
-									<Text fontSize="sm">{idx + 1}</Text>
+									<Text fontSize="sm">#{solicitud.id}</Text>
 									<Text fontSize="sm">
 										Residuos de {solicitud.solicitado.nombre}
 									</Text>
@@ -222,17 +223,17 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 								</HStack>
 								{solicitud.estado == 'CANCELADA' ||
 								solicitud.estado == 'EXPIRADA' ? (
-									''
-								) : (
-									<>
-										<Box mb={2} />
-										<Center justifyContent="space-between">
-											<Button onPress={() => modalCancelarSolicitud(solicitud)}>
+										''
+									) : (
+										<>
+											<Box mb={2} />
+											<Center justifyContent="space-between">
+												<Button onPress={() => modalCancelarSolicitud(solicitud)}>
 												Cancelar solicitud
-											</Button>
-										</Center>
-									</>
-								)}
+												</Button>
+											</Center>
+										</>
+									)}
 							</Box>
 						))
 					) : (

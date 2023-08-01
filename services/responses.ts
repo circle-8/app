@@ -90,8 +90,6 @@ export type ResiduoResponse = {
 	puntoResiduoId: number
 	puntoResiduo?: unknown
 	tipoResiduo: TipoResiduoResponse
-	descripcion: string
-	fechaLimiteRetiro: string
 }
 
 export type SolicitudResponse = {

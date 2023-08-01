@@ -68,12 +68,12 @@ export const ActivityRoutes: {
 	activity: 'Activity'
 	newResiduo: 'NewResiduo'
 	listSolicitudes: 'ListSolicitudes'
-  listResiduos: 'ListResiduos'
+	listResiduos: 'ListResiduos'
 } = {
 	activity: 'Activity',
 	newResiduo: 'NewResiduo',
 	listSolicitudes: 'ListSolicitudes',
-  listResiduos: 'ListResiduos',
+	listResiduos: 'ListResiduos',
 }
 
 type TabRoutesParams = {

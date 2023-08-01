@@ -37,9 +37,9 @@ type ResiduoFilter = {
 
 const makeParams = (url: string, f: ResiduoFilter): string => {
 	let finalUrl = url + '?'
-	for (const p in f.puntosResiduo) finalUrl += `punto_residuo=${p}&`
-	for (const c in f.ciudadano) finalUrl += `ciudadano=${c}&`
-	for (const t in f.tipo) finalUrl += `tipo=${t}&`
+	for (const p of f.puntosResiduo || []) finalUrl += `puntos_residuo=${p}&`
+	for (const c of f.ciudadano || []) finalUrl += `ciudadanos=${c}&`
+	for (const t of f.tipo || []) finalUrl += `tipos=${t}&`
 	if (f.transaccion) finalUrl += `transaccion=${f.transaccion}&`
 	if (f.recorrido) finalUrl += `recorrido=${f.recorrido}&`
 	if (f.retirado === true) finalUrl += 'retirado=true&'
