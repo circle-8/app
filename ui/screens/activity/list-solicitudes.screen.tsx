@@ -16,10 +16,13 @@ import {
 	QuestionOutlineIcon,
 	Modal,
 } from 'native-base'
-import { match } from '../../../utils/either'
-import { Solicitud } from '../../../services/types'
+import { ifLeft, ifRight, match } from '../../../utils/either'
+import { Solicitud, Transaccion } from '../../../services/types'
 import { LoadingScreen } from '../../components/loading.component'
 import { SolicitudService } from '../../../services/solicitud.service'
+import { TouchableOpacity } from 'react-native'
+import { UserService } from '../../../services/user.service'
+import { TransaccionService } from '../../../services/transaccion.service'
 
 type Props = NativeStackScreenProps<ActivityRouteParams, 'ListSolicitudes'>
 
@@ -38,6 +41,13 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 	const [modalAprobar, setModalAprobar] = React.useState(false)
 	const [solicitudAprobable, setSolicitudAprobable] =
 		React.useState<Solicitud>()
+	const [modalAgregar, setModalAgregar] = React.useState(false)
+	const [solicitudAgregar, setSolicitudAgregar] =
+	React.useState<Solicitud>()	
+	const [userTransactions, setUserTransactions] = React.useState<Transaccion[]>([])
+	const [selectedUserTransaction, setSelectedUserTransaction] = React.useState<number | null>(null)
+	const [modalErrorTransaccion, setModalErrorTransaccion] = React.useState(false)
+		
 
 	const toast = useToast()
 
@@ -67,13 +77,16 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 		setLoading(false)
 	}
 
-	const formatFecha = fecha => {
+	const formatFecha = (fecha, modalAgregar) => {
 		try {
 			if (fecha != null) {
 				const dia = fecha.substring(8, 10)
 				const mes = fecha.substring(5, 7)
 				const anio = fecha.substring(0, 4)
-				return `Deben retirarse antes del ${dia}/${mes}/${anio}`
+				const mensaje = modalAgregar
+					? `Creada el ${dia}/${mes}/${anio}`
+					: `Deben retirarse antes del ${dia}/${mes}/${anio}`
+				return mensaje;
 			}
 			return 'No tiene fecha limite de retiro'
 		} catch (error) {
@@ -121,6 +134,22 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 		setModalCancelar(true)
 	}
 
+	const modalAgregarTransaccion = async (solicitud) => {
+
+		const user = await UserService.getCurrent()
+		const getUserTransactions = await TransaccionService.getAll({
+			ciudadanoId: user.ciudadanoId.toString(),
+		})
+		ifLeft(getUserTransactions, t => {
+			setUserTransactions(t)
+		})
+		ifRight(getUserTransactions, t => {
+			setUserTransactions([])
+		})
+		setSolicitudAgregar(solicitud)
+		setModalAgregar(true)
+	}
+	
 	const modalAprobarSolicitud = solicitud => {
 		setSolicitudAprobable(solicitud)
 		setModalAprobar(true)
@@ -157,10 +186,42 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 		)
 	}
 
+	const handleAgregarSolicitud = async (id: number) => {
+		const solAgregada = await TransaccionService.putTransaccion(
+			id,
+			solicitudAgregar.residuo.id,
+		)
+		match(
+			solAgregada,
+			t => loadInitialData(),
+			err => {
+				toast.show({ description: err })
+				navigation.goBack()
+			},
+		)
+		cerrarModalAgregar();
+	}
+
+	const handleCrearNuevaTransaccion = async () => {
+		const postTransaccion = await TransaccionService.postTransaccion(solicitudAgregar.puntoReciclajeId)
+		ifLeft(postTransaccion, t => {
+			handleAgregarSolicitud(t.id)
+		})
+		ifRight(postTransaccion, t => {
+			setModalAgregar(false)
+			setModalErrorTransaccion(true)
+		})
+	}
+
 	const cerrarModalAprobar = () => {
 		setModalAprobar(false)
 	}
 
+	const cerrarModalAgregar = () => {
+		setSelectedUserTransaction(null);
+		setModalAgregar(false)
+		setModalErrorTransaccion(false)
+	}
 
 	React.useEffect(() => {
 		loadInitialData()
@@ -171,6 +232,48 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 	console.log(solicitadas, solicitadas[0].residuo, solicitadas[0].solicitado, solicitadas[0].solicitante)
 	return (
 		<ScrollView>
+			{modalErrorTransaccion ? (
+				<>
+					<Modal
+						isOpen={modalErrorTransaccion}
+						onClose={() => cerrarModalAgregar()}
+						size="lg"
+					>
+						<Modal.Content>
+							<Modal.CloseButton />
+							<Modal.Header alignItems="center">
+								<Text bold fontSize="xl">
+									Cancelar Solicitud
+								</Text>
+							</Modal.Header>
+							<Modal.Body>
+								<View
+									style={{
+										flex: 1,
+										justifyContent: 'center',
+										alignItems: 'center',
+									}}
+								>
+									<WarningOutlineIcon size={5} color="red.600" />
+									<Text style={{ fontSize: 14, textAlign: 'center' }}>
+										Ocurrio un error al crear la transaccion, reintenta mas
+										tarde.
+									</Text>
+								</View>
+							</Modal.Body>
+							<Modal.Footer>
+								<Center flex={1}>
+									<HStack justifyContent="center" mt={4} space={2}>
+										<Button onPress={() => cerrarModalAgregar()}>Volver</Button>
+									</HStack>
+								</Center>	
+							</Modal.Footer>
+						</Modal.Content>
+					</Modal>
+				</>
+			) : (
+				<></>
+			)}
 			{modalCancelar ? (
 				<Modal
 					isOpen={modalCancelar}
@@ -192,17 +295,21 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 								{solicitudCancelable.residuo.descripcion} de{' '}
 								{solicitudCancelable.solicitado.nombre}
 							</Text>
-							<HStack justifyContent="center" mt={4} space={2}>
-								<Button onPress={() => cerrarModalCancelar()}>Volver</Button>
-								<Button
-									onPress={() =>
-										handleCancelarSolicitud(solicitudCancelable.id)
-									}
-								>
-									Cancelar solicitud
-								</Button>
-							</HStack>
 						</Modal.Body>
+						<Modal.Footer>
+							<Center flex={1}>
+								<HStack justifyContent="center" mt={4} space={2}>
+									<Button onPress={() => cerrarModalCancelar()}>Volver</Button>
+									<Button
+										onPress={() =>
+											handleCancelarSolicitud(solicitudCancelable.id)
+										}
+									>
+										Cancelar solicitud
+									</Button>
+								</HStack>
+							</Center>	
+						</Modal.Footer>
 					</Modal.Content>
 				</Modal>
 			) : (
@@ -243,6 +350,138 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 			) : (
 				<></>
 			)}
+			{modalAgregar ? (
+				<Modal
+					isOpen={modalAgregar}
+					onClose={() => cerrarModalAgregar()}
+					size="lg"
+				>
+					<Modal.Content>
+						<Modal.CloseButton />
+						<Modal.Header alignItems="center">
+							<Text bold fontSize="xl">
+								Transacciones
+							</Text>
+						</Modal.Header>
+						<Modal.Body>
+							<Text fontSize="md" style={{ marginBottom: 10 }}>
+								¿A que transaccion queres agregar el residuo:{' '}
+								{solicitudAgregar.residuo.descripcion} de{' '}
+								{solicitudAgregar.solicitado.nombre} {'?'}
+							</Text>
+							<View>
+								<Text bold fontSize="md" style={{ marginBottom: 10 }}>
+									Transacciones existentes:
+								</Text>
+								<HStack justifyContent="center" mt={4} space={2}></HStack>
+								{userTransactions && userTransactions.length > 0 ? (
+									userTransactions.map((transaction, idx) => (
+										<>
+											<TouchableOpacity
+												key={`userT-${idx}`}
+												onPress={() => setSelectedUserTransaction(idx)}
+											>
+												<Box
+													key={`box-${idx}`}
+													mb={2}
+													p={2}
+													borderWidth={1}
+													borderColor="gray.300"
+													borderRadius="md"
+													shadow={1}
+													maxWidth={350}
+													bg={
+														selectedUserTransaction === idx
+															? 'green.100'
+															: 'white'
+													}
+												>
+													<HStack
+														space={2}
+														mt="0.5"
+														key={`stack-${idx}`}
+														alignItems="center"
+													>
+														<Text fontSize="sm">Transaccion #{idx + 1}</Text>
+													</HStack>
+													<HStack
+														space={2}
+														mt="0.5"
+														key={`name-${idx}`}
+														alignItems="center"
+													>
+														<Text fontSize="sm" numberOfLines={4}>
+															Punto de reciclaje {transaction.puntoReciclajeId}
+														</Text>
+													</HStack>
+													<HStack
+														space={2}
+														mt="0.5"
+														key={`date-${idx}`}
+														alignItems="center"
+													>
+														<Text fontSize="sm" numberOfLines={4}>
+															{formatFecha(transaction.fechaCreacion, true)}
+														</Text>
+													</HStack>
+												</Box>
+											</TouchableOpacity>
+										</>
+									))
+								) : (
+									<>
+										<View
+											style={{
+												flex: 1,
+												justifyContent: 'center',
+												alignItems: 'center',
+											}}
+										>
+											<WarningOutlineIcon size={5} color="red.600" />
+											<Text style={{ fontSize: 14, textAlign: 'center' }}>
+												No dispones de transacciones abiertas, crea una
+												presionando el boton de "Crear nueva Transaccion" y la
+												solicitud se asignara automaticamente.
+											</Text>
+										</View>
+									</>
+								)}
+								<HStack justifyContent="center" mt={4} space={2}>
+									<Button onPress={() => handleCrearNuevaTransaccion()}>
+										Crear nueva Transaccion
+									</Button>
+								</HStack>
+							</View>
+						</Modal.Body>
+						<Modal.Footer>
+							<Center flex={1}>
+								<HStack justifyContent="center" mt={4} space={2}>
+									{userTransactions && userTransactions.length > 0 ? (
+										<>
+											<Button onPress={() => cerrarModalAgregar()}>Volver</Button>
+											<Button
+												onPress={() =>
+													handleAgregarSolicitud(
+														userTransactions[selectedUserTransaction].id,
+													)
+												}
+											>
+												Agregar a la seleccionada
+											</Button>
+										</>
+									) : (
+										<>
+											<Button onPress={() => cerrarModalAgregar()}>Volver</Button>
+										</>
+									)}
+								</HStack>
+							</Center>
+						</Modal.Footer>
+					</Modal.Content>
+				</Modal>
+			) : (
+				<></>
+			)}
 			<Center w="100%">
 				<View>
 					<Box mb={2} />
@@ -261,7 +500,6 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 								borderRadius="md"
 								shadow={1}
 								maxWidth={350}
-								//bg={selectedUserPoint === userIndex ? 'green.100' : 'white'}
 							>
 								<HStack
 									space={2}
@@ -307,7 +545,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 								>
 									<WarningOutlineIcon size="3" color="emerald.600" />
 									<Text fontSize="sm">
-										{formatFecha(solicitud.residuo.fechaLimiteRetiro)}
+										{formatFecha(solicitud.residuo.fechaLimiteRetiro, false)}
 									</Text>
 								</HStack>
 								<HStack
@@ -323,17 +561,28 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 								</HStack>
 								{solicitud.estado == 'CANCELADA' ||
 								solicitud.estado == 'EXPIRADA' ? (
-										''
-									) : (
-										<>
-											<Box mb={2} />
-											<Center justifyContent="space-between">
-												<Button onPress={() => modalCancelarSolicitud(solicitud)}>
+									''
+								) : solicitud.estado == 'PENDIENTE' ? (
+									<>
+										<Box mb={2} />
+										<Center justifyContent="space-between">
+											<Button onPress={() => modalCancelarSolicitud(solicitud)}>
 												Cancelar solicitud
-												</Button>
-											</Center>
-										</>
-									)}
+											</Button>
+										</Center>
+									</>
+								) : (
+									<>
+										<Box mb={2} />
+										<Center justifyContent="space-between">
+											<Button
+												onPress={() => modalAgregarTransaccion(solicitud)}
+											>
+												Agregar a transaccion
+											</Button>
+										</Center>
+									</>
+								)}
 							</Box>
 						))
 					) : (
@@ -416,7 +665,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 								>
 									<WarningOutlineIcon size="3" color="emerald.600" />
 									<Text fontSize="sm">
-										{formatFecha(solicitud.residuo.fechaLimiteRetiro)}
+										{formatFecha(solicitud.residuo.fechaLimiteRetiro, false)}
 									</Text>
 								</HStack>
 								<HStack
@@ -444,17 +693,17 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 								)}
 								{solicitud.estado == 'CANCELADA' ||
 								solicitud.estado == 'EXPIRADA' ? (
-										<></>
-									) : (
-										<>
-											<Box mb={2} />
-											<Center justifyContent="space-between">
-												<Button onPress={() => modalCancelarSolicitud(solicitud)}>
+									<></>
+								) : (
+									<>
+										<Box mb={2} />
+										<Center justifyContent="space-between">
+											<Button onPress={() => modalCancelarSolicitud(solicitud)}>
 												Cancelar solicitud
-												</Button>
-											</Center>
-										</>
-									)}
+											</Button>
+										</Center>
+									</>
+								)}
 							</Box>
 						))
 					) : (

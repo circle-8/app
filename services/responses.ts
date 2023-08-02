@@ -102,8 +102,15 @@ export type SolicitudResponse = {
 	solicitante: UserResponse
 	solicitadoId: number
 	solicitado: UserResponse
-	canceladorId?: number
 	estado: string
 	residuo: ResiduoResponse
 	canceladorId: number
+	puntoReciclajeId: number
+}
+
+export type TransaccionResponse = {
+	id: number
+	fechaCreacion: number
+	puntoReciclajeUri: UserResponse
+	puntoReciclajeId: number
 }
