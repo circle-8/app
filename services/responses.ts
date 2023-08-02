@@ -30,6 +30,7 @@ export type TokenResponse = {
 }
 
 export type ListResponse<T> = {
+	fechaCreacion: string | number | Date
 	pageNumber: number
 	totalPages: number
 	pageSize: number
@@ -100,4 +101,5 @@ export type SolicitudResponse = {
 	solicitado: UserResponse
 	estado: string
 	residuo: ResiduoResponse
+	canceladorId: number
 }
