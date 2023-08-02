@@ -15,6 +15,8 @@ import {
 	InfoOutlineIcon,
 	QuestionOutlineIcon,
 	Modal,
+	ChevronUpIcon,
+	ChevronDownIcon,
 } from 'native-base'
 import { ifLeft, ifRight, match } from '../../../utils/either'
 import { Solicitud, Transaccion } from '../../../services/types'
@@ -42,12 +44,17 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 	const [solicitudAprobable, setSolicitudAprobable] =
 		React.useState<Solicitud>()
 	const [modalAgregar, setModalAgregar] = React.useState(false)
-	const [solicitudAgregar, setSolicitudAgregar] =
-	React.useState<Solicitud>()	
-	const [userTransactions, setUserTransactions] = React.useState<Transaccion[]>([])
-	const [selectedUserTransaction, setSelectedUserTransaction] = React.useState<number | null>(null)
-	const [modalErrorTransaccion, setModalErrorTransaccion] = React.useState(false)
-		
+	const [solicitudAgregar, setSolicitudAgregar] = React.useState<Solicitud>()
+	const [userTransactions, setUserTransactions] = React.useState<Transaccion[]>(
+		[],
+	)
+	const [selectedUserTransaction, setSelectedUserTransaction] = React.useState<
+		number | null
+	>(null)
+	const [modalErrorTransaccion, setModalErrorTransaccion] =
+		React.useState(false)
+	const [showSolicitante, setSolicitante] = React.useState(false)
+	const [showSolicitado, setSolicitado] = React.useState(false)
 
 	const toast = useToast()
 
@@ -86,7 +93,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 				const mensaje = modalAgregar
 					? `Creada el ${dia}/${mes}/${anio}`
 					: `Deben retirarse antes del ${dia}/${mes}/${anio}`
-				return mensaje;
+				return mensaje
 			}
 			return 'No tiene fecha limite de retiro'
 		} catch (error) {
@@ -98,33 +105,33 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 	const getEstado = (solicitud: Solicitud, solicitante: boolean) => {
 		if (solicitante) {
 			switch (solicitud.estado) {
-			case 'PENDIENTE':
-				return `Esperando hasta que ${solicitud.solicitado.nombre} acepte la solicitud.`
-			case 'APROBADA':
-				return 'Solicitud aceptada'
-			case 'CANCELADA':
-				if (solicitud.solicitanteId == solicitud.canceladorId)
-					return 'Cancelaste esta solicitud'
-				return `Solicitud Cancelada por ${solicitud.solicitado.nombre}`
-			case 'EXPIRADA':
-				return 'Solicitud Expirada'
-			default:
-				return 'No hay informacion del estado'
+				case 'PENDIENTE':
+					return `Esperando hasta que ${solicitud.solicitado.nombre} acepte la solicitud.`
+				case 'APROBADA':
+					return 'Solicitud aceptada'
+				case 'CANCELADA':
+					if (solicitud.solicitanteId == solicitud.canceladorId)
+						return 'Cancelaste esta solicitud'
+					return `Solicitud Cancelada por ${solicitud.solicitado.nombre}`
+				case 'EXPIRADA':
+					return 'Solicitud Expirada'
+				default:
+					return 'No hay informacion del estado'
 			}
 		} else {
 			switch (solicitud.estado) {
-			case 'PENDIENTE':
-				return 'Esperando hasta que aceptes la solicitud.'
-			case 'APROBADA':
-				return 'Solicitud aceptada'
-			case 'CANCELADA':
-				if (solicitud.solicitadoId == solicitud.canceladorId)
-					return 'Cancelaste esta solicitud'
-				return `Solicitud Cancelada por ${solicitud.solicitante.nombre}`
-			case 'EXPIRADA':
-				return 'Solicitud Expirada'
-			default:
-				return 'No hay informacion del estado'
+				case 'PENDIENTE':
+					return 'Esperando hasta que aceptes la solicitud.'
+				case 'APROBADA':
+					return 'Solicitud aceptada'
+				case 'CANCELADA':
+					if (solicitud.solicitadoId == solicitud.canceladorId)
+						return 'Cancelaste esta solicitud'
+					return `Solicitud Cancelada por ${solicitud.solicitante.nombre}`
+				case 'EXPIRADA':
+					return 'Solicitud Expirada'
+				default:
+					return 'No hay informacion del estado'
 			}
 		}
 	}
@@ -134,8 +141,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 		setModalCancelar(true)
 	}
 
-	const modalAgregarTransaccion = async (solicitud) => {
-
+	const modalAgregarTransaccion = async solicitud => {
 		const user = await UserService.getCurrent()
 		const getUserTransactions = await TransaccionService.getAll({
 			ciudadanoId: user.ciudadanoId.toString(),
@@ -149,7 +155,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 		setSolicitudAgregar(solicitud)
 		setModalAgregar(true)
 	}
-	
+
 	const modalAprobarSolicitud = solicitud => {
 		setSolicitudAprobable(solicitud)
 		setModalAprobar(true)
@@ -199,11 +205,13 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 				navigation.goBack()
 			},
 		)
-		cerrarModalAgregar();
+		cerrarModalAgregar()
 	}
 
 	const handleCrearNuevaTransaccion = async () => {
-		const postTransaccion = await TransaccionService.postTransaccion(solicitudAgregar.puntoReciclajeId)
+		const postTransaccion = await TransaccionService.postTransaccion(
+			solicitudAgregar.puntoReciclajeId,
+		)
 		ifLeft(postTransaccion, t => {
 			handleAgregarSolicitud(t.id)
 		})
@@ -218,9 +226,17 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 	}
 
 	const cerrarModalAgregar = () => {
-		setSelectedUserTransaction(null);
+		setSelectedUserTransaction(null)
 		setModalAgregar(false)
 		setModalErrorTransaccion(false)
+	}
+
+	const handleSolicitadoPress = () => {
+		setSolicitado(!showSolicitado)
+	}
+
+	const handleSolicitantePress = () => {
+		setSolicitante(!showSolicitante)
 	}
 
 	React.useEffect(() => {
@@ -229,7 +245,12 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 
 	if (isLoading) return <LoadingScreen />
 
-	console.log(solicitadas, solicitadas[0].residuo, solicitadas[0].solicitado, solicitadas[0].solicitante)
+	console.log(
+		solicitadas,
+		solicitadas[0].residuo,
+		solicitadas[0].solicitado,
+		solicitadas[0].solicitante,
+	)
 	return (
 		<ScrollView>
 			{modalErrorTransaccion ? (
@@ -266,7 +287,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 									<HStack justifyContent="center" mt={4} space={2}>
 										<Button onPress={() => cerrarModalAgregar()}>Volver</Button>
 									</HStack>
-								</Center>	
+								</Center>
 							</Modal.Footer>
 						</Modal.Content>
 					</Modal>
@@ -308,7 +329,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 										Cancelar solicitud
 									</Button>
 								</HStack>
-							</Center>	
+							</Center>
 						</Modal.Footer>
 					</Modal.Content>
 				</Modal>
@@ -458,7 +479,9 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 								<HStack justifyContent="center" mt={4} space={2}>
 									{userTransactions && userTransactions.length > 0 ? (
 										<>
-											<Button onPress={() => cerrarModalAgregar()}>Volver</Button>
+											<Button onPress={() => cerrarModalAgregar()}>
+												Volver
+											</Button>
 											<Button
 												onPress={() =>
 													handleAgregarSolicitud(
@@ -471,7 +494,9 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 										</>
 									) : (
 										<>
-											<Button onPress={() => cerrarModalAgregar()}>Volver</Button>
+											<Button onPress={() => cerrarModalAgregar()}>
+												Volver
+											</Button>
 										</>
 									)}
 								</HStack>
@@ -483,244 +508,310 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 				<></>
 			)}
 			<Center w="100%">
-				<View>
-					<Box mb={2} />
-					<Text bold fontSize="md">
-						Estas son todas tus solicitudes
-					</Text>
-					<Box mb={2} />
-					{solicitadas && solicitadas.length > 0 ? (
-						solicitadas.map((solicitud, idx) => (
-							<Box
-								key={`box-${idx}`}
-								mb={2}
-								p={2}
-								borderWidth={1}
-								borderColor="gray.300"
-								borderRadius="md"
-								shadow={1}
-								maxWidth={350}
+				<Box mb={8} />
+				<TouchableOpacity
+					onPress={() => handleSolicitantePress()}
+					style={{
+						borderRadius: 8,
+						paddingVertical: 10,
+						paddingHorizontal: 16,
+						backgroundColor: showSolicitante ? '#D9F3D5' : 'white',
+						width: 280,
+						height: 40,
+					}}
+				>
+					<HStack space={2} justifyContent="space-between" alignItems="center">
+						<Text color="black" fontSize="md" bold>
+							Solicitudes realizadas por mi
+						</Text>
+						{showSolicitante ? (
+							<ChevronUpIcon size="5" mt="0.5" color="emerald.500" />
+						) : (
+							<ChevronDownIcon size="5" mt="0.5" color="emerald.500" />
+						)}
+					</HStack>
+				</TouchableOpacity>
+				{showSolicitante ? (
+					<View>
+						<Box mb={2} />
+						<Text bold fontSize="md">
+							Estas son todas las solicitudes que realizaste
+						</Text>
+						<Box mb={2} />
+						{solicitadas && solicitadas.length > 0 ? (
+							solicitadas.map((solicitud, idx) => (
+								<Box
+									key={`box-${idx}`}
+									mb={2}
+									p={2}
+									borderWidth={1}
+									borderColor="gray.300"
+									borderRadius="md"
+									shadow={1}
+									maxWidth={350}
+								>
+									<HStack
+										space={2}
+										mt="0.5"
+										key={`name-${idx}`}
+										alignItems="center"
+									>
+										<Text fontSize="sm">#{idx + 1}</Text>
+										<Text fontSize="sm">
+											{solicitud.solicitadoId ==
+											solicitud.residuo.puntoResiduo?.ciudadanoId
+												? `Retirar residuos de ${solicitud.solicitado.nombre}`
+												: `Depositar tus residuos en el punto de ${solicitud.solicitado.nombre}`}
+										</Text>
+									</HStack>
+									<HStack
+										space={2}
+										mt="0.5"
+										key={`res-${idx}`}
+										alignItems="center"
+									>
+										<InfoOutlineIcon size="3" color="emerald.600" />
+										<Text fontSize="sm">
+											{solicitud.residuo.tipoResiduo.nombre}
+										</Text>
+									</HStack>
+									<HStack
+										space={2}
+										mt="0.5"
+										key={`desc-${idx}`}
+										alignItems="center"
+									>
+										<DeleteIcon size="3" color="emerald.600" />
+										<Text fontSize="sm" numberOfLines={4}>
+											{solicitud.residuo.descripcion}
+										</Text>
+									</HStack>
+									<HStack
+										space={2}
+										mt="0.5"
+										key={`date-${idx}`}
+										alignItems="center"
+									>
+										<WarningOutlineIcon size="3" color="emerald.600" />
+										<Text fontSize="sm">
+											{formatFecha(solicitud.residuo.fechaLimiteRetiro, false)}
+										</Text>
+									</HStack>
+									<HStack
+										space={2}
+										mt="0.5"
+										key={`state-${idx}`}
+										alignItems="center"
+									>
+										<QuestionOutlineIcon size="3" color="emerald.600" />
+										<Text fontSize="sm" numberOfLines={4}>
+											{getEstado(solicitud, true)}
+										</Text>
+									</HStack>
+									{solicitud.estado == 'CANCELADA' ||
+									solicitud.estado == 'EXPIRADA' ? (
+										''
+									) : solicitud.estado == 'PENDIENTE' ? (
+										<>
+											<Box mb={2} />
+											<Center justifyContent="space-between">
+												<Button
+													onPress={() => modalCancelarSolicitud(solicitud)}
+												>
+													Cancelar solicitud
+												</Button>
+											</Center>
+										</>
+									) : (
+										<>
+											<Box mb={2} />
+											<Center justifyContent="space-between">
+												<Button
+													onPress={() => modalAgregarTransaccion(solicitud)}
+												>
+													Agregar a transaccion
+												</Button>
+											</Center>
+										</>
+									)}
+								</Box>
+							))
+						) : (
+							<View
+								style={{
+									flex: 1,
+									justifyContent: 'center',
+									alignItems: 'center',
+								}}
 							>
-								<HStack
-									space={2}
-									mt="0.5"
-									key={`name-${idx}`}
-									alignItems="center"
-								>
-									<Text fontSize="sm">#{solicitud.id}</Text>
-									<Text fontSize="sm">
-										{solicitud.solicitadoId ==
-										solicitud.residuo.puntoResiduo?.ciudadanoId
-											? `Retirar residuos de ${solicitud.solicitado.nombre}`
-											: `Depositar tus residuos en el punto de ${solicitud.solicitado.nombre}`}
-									</Text>
-								</HStack>
-								<HStack
-									space={2}
-									mt="0.5"
-									key={`res-${idx}`}
-									alignItems="center"
-								>
-									<InfoOutlineIcon size="3" color="emerald.600" />
-									<Text fontSize="sm">
-										{solicitud.residuo.tipoResiduo.nombre}
-									</Text>
-								</HStack>
-								<HStack
-									space={2}
-									mt="0.5"
-									key={`desc-${idx}`}
-									alignItems="center"
-								>
-									<DeleteIcon size="3" color="emerald.600" />
-									<Text fontSize="sm" numberOfLines={4}>
-										{solicitud.residuo.descripcion}
-									</Text>
-								</HStack>
-								<HStack
-									space={2}
-									mt="0.5"
-									key={`date-${idx}`}
-									alignItems="center"
-								>
-									<WarningOutlineIcon size="3" color="emerald.600" />
-									<Text fontSize="sm">
-										{formatFecha(solicitud.residuo.fechaLimiteRetiro, false)}
-									</Text>
-								</HStack>
-								<HStack
-									space={2}
-									mt="0.5"
-									key={`state-${idx}`}
-									alignItems="center"
-								>
-									<QuestionOutlineIcon size="3" color="emerald.600" />
-									<Text fontSize="sm" numberOfLines={4}>
-										{getEstado(solicitud, true)}
-									</Text>
-								</HStack>
-								{solicitud.estado == 'CANCELADA' ||
-								solicitud.estado == 'EXPIRADA' ? (
-									''
-								) : solicitud.estado == 'PENDIENTE' ? (
-									<>
-										<Box mb={2} />
-										<Center justifyContent="space-between">
-											<Button onPress={() => modalCancelarSolicitud(solicitud)}>
-												Cancelar solicitud
-											</Button>
-										</Center>
-									</>
-								) : (
-									<>
-										<Box mb={2} />
-										<Center justifyContent="space-between">
-											<Button
-												onPress={() => modalAgregarTransaccion(solicitud)}
-											>
-												Agregar a transaccion
-											</Button>
-										</Center>
-									</>
-								)}
-							</Box>
-						))
-					) : (
-						<View
-							style={{
-								flex: 1,
-								justifyContent: 'center',
-								alignItems: 'center',
-							}}
-						>
-							<WarningOutlineIcon size={5} color="red.600" />
-							<Text style={{ fontSize: 14, textAlign: 'center' }}>
-								Aun no dispones de solicitudes de retiro, puedes generar alguna
-								desde el mapa en el inicio.
-							</Text>
-						</View>
-					)}
-				</View>
+								<WarningOutlineIcon size={5} color="red.600" />
+								<Text style={{ fontSize: 14, textAlign: 'center' }}>
+									Aun no dispones de solicitudes de retiro, puedes generar
+									alguna desde el mapa en el inicio.
+								</Text>
+							</View>
+						)}
+					</View>
+				) : (
+					''
+				)}
 			</Center>
 			<Center>
-				<View>
-					<Box mb={2} />
-					<Text bold fontSize="md">
-						Estas son todas las solicitudes que recibiste
-					</Text>
-					<Box mb={2} />
-					{solicitudesRecibidas && solicitudesRecibidas.length > 0 ? (
-						solicitudesRecibidas.map((solicitud, idx) => (
-							<Box
-								key={`box-${idx}`}
-								mb={2}
-								p={2}
-								borderWidth={1}
-								borderColor="gray.300"
-								borderRadius="md"
-								shadow={1}
-								maxWidth={350}
-							>
-								<HStack
-									space={2}
-									mt="0.5"
-									key={`name-${idx}`}
-									alignItems="center"
-								>
-									<Text fontSize="sm">#{solicitud.id}</Text>
-									<Text fontSize="sm">
-										{solicitud.solicitanteId ==
-										solicitud.residuo.puntoResiduo?.ciudadanoId
-											? `${solicitud.solicitante.nombre} quiere depositar un residuo`
-											: `${solicitud.solicitante.nombre} quiere retirar tus residuos`}
-									</Text>
-								</HStack>
-								<HStack
-									space={2}
-									mt="0.5"
-									key={`res-${idx}`}
-									alignItems="center"
-								>
-									<InfoOutlineIcon size="3" color="emerald.600" />
-									<Text fontSize="sm">
-										{solicitud.residuo.tipoResiduo.nombre}
-									</Text>
-								</HStack>
-								<HStack
-									space={2}
-									mt="0.5"
-									key={`desc-${idx}`}
-									alignItems="center"
-								>
-									<DeleteIcon size="3" color="emerald.600" />
-									<Text fontSize="sm" numberOfLines={4}>
-										{solicitud.residuo.descripcion}
-									</Text>
-								</HStack>
-								<HStack
-									space={2}
-									mt="0.5"
-									key={`date-${idx}`}
-									alignItems="center"
-								>
-									<WarningOutlineIcon size="3" color="emerald.600" />
-									<Text fontSize="sm">
-										{formatFecha(solicitud.residuo.fechaLimiteRetiro, false)}
-									</Text>
-								</HStack>
-								<HStack
-									space={2}
-									mt="0.5"
-									key={`state-${idx}`}
-									alignItems="center"
-								>
-									<QuestionOutlineIcon size="3" color="emerald.600" />
-									<Text fontSize="sm" numberOfLines={4}>
-										{getEstado(solicitud, false)}
-									</Text>
-								</HStack>
-								{solicitud.estado === 'PENDIENTE' ? (
-									<>
-										<Box mb={2} />
-										<Center justifyContent="space-between">
-											<Button onPress={() => modalAprobarSolicitud(solicitud)}>
-												Aprobar Solicitud
-											</Button>
-										</Center>
-									</>
-								) : (
-									<></>
-								)}
-								{solicitud.estado == 'CANCELADA' ||
-								solicitud.estado == 'EXPIRADA' ? (
-									<></>
-								) : (
-									<>
-										<Box mb={2} />
-										<Center justifyContent="space-between">
-											<Button onPress={() => modalCancelarSolicitud(solicitud)}>
-												Cancelar solicitud
-											</Button>
-										</Center>
-									</>
-								)}
-							</Box>
-						))
-					) : (
-						<View
-							style={{
-								justifyContent: 'center',
-								alignItems: 'center',
-							}}
-							mb="4"
-						>
-							<WarningOutlineIcon size={5} color="red.600" />
-							<Text style={{ fontSize: 14, textAlign: 'center' }}>
-								No recibiste ninguna solicitud
+				<Box mb={4} />
+				<TouchableOpacity
+					onPress={() => handleSolicitadoPress()}
+					style={{
+						borderRadius: 8,
+						paddingVertical: 10,
+						paddingHorizontal: 16,
+						backgroundColor: showSolicitado ? '#D9F3D5' : 'white',
+						width: 280,
+						height: 40,
+					}}
+				>
+					<HStack space={2} justifyContent="space-between" alignItems="center">
+						<Text color="black" fontSize="md" bold>
+							Solicitudes realizadas a mi
+						</Text>
+
+						{showSolicitado ? (
+							<ChevronUpIcon size="5" mt="0.5" color="emerald.500" />
+						) : (
+							<ChevronDownIcon size="5" mt="0.5" color="emerald.500" />
+						)}
+					</HStack>
+				</TouchableOpacity>
+				{showSolicitado ? (
+					<>
+						<View>
+							<Box mb={2} />
+							<Text bold fontSize="md">
+								Estas son todas las solicitudes que recibiste
 							</Text>
+							<Box mb={2} />
+							{solicitudesRecibidas && solicitudesRecibidas.length > 0 ? (
+								solicitudesRecibidas.map((solicitud, idx) => (
+									<Box
+										key={`box-${idx}`}
+										mb={2}
+										p={2}
+										borderWidth={1}
+										borderColor="gray.300"
+										borderRadius="md"
+										shadow={1}
+										maxWidth={350}
+									>
+										<HStack
+											space={2}
+											mt="0.5"
+											key={`name-${idx}`}
+											alignItems="center"
+										>
+											<Text fontSize="sm">#{solicitud.id}</Text>
+											<Text fontSize="sm">
+												{solicitud.solicitanteId ==
+												solicitud.residuo.puntoResiduo?.ciudadanoId
+													? `${solicitud.solicitante.nombre} quiere depositar un residuo`
+													: `${solicitud.solicitante.nombre} quiere retirar tus residuos`}
+											</Text>
+										</HStack>
+										<HStack
+											space={2}
+											mt="0.5"
+											key={`res-${idx}`}
+											alignItems="center"
+										>
+											<InfoOutlineIcon size="3" color="emerald.600" />
+											<Text fontSize="sm">
+												{solicitud.residuo.tipoResiduo.nombre}
+											</Text>
+										</HStack>
+										<HStack
+											space={2}
+											mt="0.5"
+											key={`desc-${idx}`}
+											alignItems="center"
+										>
+											<DeleteIcon size="3" color="emerald.600" />
+											<Text fontSize="sm" numberOfLines={4}>
+												{solicitud.residuo.descripcion}
+											</Text>
+										</HStack>
+										<HStack
+											space={2}
+											mt="0.5"
+											key={`date-${idx}`}
+											alignItems="center"
+										>
+											<WarningOutlineIcon size="3" color="emerald.600" />
+											<Text fontSize="sm">
+												{formatFecha(
+													solicitud.residuo.fechaLimiteRetiro,
+													false,
+												)}
+											</Text>
+										</HStack>
+										<HStack
+											space={2}
+											mt="0.5"
+											key={`state-${idx}`}
+											alignItems="center"
+										>
+											<QuestionOutlineIcon size="3" color="emerald.600" />
+											<Text fontSize="sm" numberOfLines={4}>
+												{getEstado(solicitud, false)}
+											</Text>
+										</HStack>
+										{solicitud.estado === 'PENDIENTE' ? (
+											<>
+												<Box mb={2} />
+												<Center justifyContent="space-between">
+													<Button
+														onPress={() => modalAprobarSolicitud(solicitud)}
+													>
+														Aprobar Solicitud
+													</Button>
+												</Center>
+											</>
+										) : (
+											<></>
+										)}
+										{solicitud.estado == 'CANCELADA' ||
+										solicitud.estado == 'EXPIRADA' ? (
+											<></>
+										) : (
+											<>
+												<Box mb={2} />
+												<Center justifyContent="space-between">
+													<Button
+														onPress={() => modalCancelarSolicitud(solicitud)}
+													>
+														Cancelar solicitud
+													</Button>
+												</Center>
+											</>
+										)}
+									</Box>
+								))
+							) : (
+								<View
+									style={{
+										justifyContent: 'center',
+										alignItems: 'center',
+									}}
+									mb="4"
+								>
+									<WarningOutlineIcon size={5} color="red.600" />
+									<Text style={{ fontSize: 14, textAlign: 'center' }}>
+										No recibiste ninguna solicitud
+									</Text>
+								</View>
+							)}
 						</View>
-					)}
-				</View>
+					</>
+				) : (
+					''
+				)}
 			</Center>
 		</ScrollView>
 	)
