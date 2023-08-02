@@ -549,6 +549,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 									borderRadius="md"
 									shadow={1}
 									maxWidth={350}
+									background={'white'}
 								>
 									<HStack
 										space={2}
@@ -700,6 +701,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 										borderRadius="md"
 										shadow={1}
 										maxWidth={350}
+										background={'white'}
 									>
 										<HStack
 											space={2}
