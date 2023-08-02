@@ -245,12 +245,6 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 
 	if (isLoading) return <LoadingScreen />
 
-	console.log(
-		solicitadas,
-		solicitadas[0].residuo,
-		solicitadas[0].solicitado,
-		solicitadas[0].solicitante,
-	)
 	return (
 		<ScrollView>
 			{modalErrorTransaccion ? (
@@ -557,7 +551,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 										key={`name-${idx}`}
 										alignItems="center"
 									>
-										<Text fontSize="sm">#{idx + 1}</Text>
+										<Text fontSize="sm">#{solicitud.id}</Text>
 										<Text fontSize="sm">
 											{solicitud.solicitadoId ==
 											solicitud.residuo.puntoResiduo?.ciudadanoId
@@ -626,13 +620,16 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 									) : (
 										<>
 											<Box mb={2} />
-											<Center justifyContent="space-between">
-												<Button
-													onPress={() => modalAgregarTransaccion(solicitud)}
-												>
-													Agregar a transaccion
-												</Button>
-											</Center>
+											{solicitud.solicitadoId ==
+												solicitud.residuo.puntoResiduo?.ciudadanoId && (
+												<Center justifyContent="space-between">
+													<Button
+														onPress={() => modalAgregarTransaccion(solicitud)}
+													>
+														Agregar a transaccion
+													</Button>
+												</Center>
+											)}
 										</>
 									)}
 								</Box>
@@ -780,8 +777,8 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 										)}
 										{solicitud.estado == 'CANCELADA' ||
 										solicitud.estado == 'EXPIRADA' ? (
-											<></>
-										) : (
+											''
+										) : solicitud.estado == 'PENDIENTE' ? (
 											<>
 												<Box mb={2} />
 												<Center justifyContent="space-between">
@@ -791,6 +788,20 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 														Cancelar solicitud
 													</Button>
 												</Center>
+											</>
+										) : (
+											<>
+												<Box mb={2} />
+												{solicitud.solicitanteId ==
+													solicitud.residuo.puntoResiduo?.ciudadanoId && (
+													<Center justifyContent="space-between">
+														<Button
+															onPress={() => modalAgregarTransaccion(solicitud)}
+														>
+															Agregar a transaccion
+														</Button>
+													</Center>
+												)}
 											</>
 										)}
 									</Box>
