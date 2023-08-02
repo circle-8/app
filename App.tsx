@@ -3,13 +3,15 @@ import { NativeBaseProvider, extendTheme, useToast } from 'native-base'
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native'
 
 import { LoginFlow } from './ui/navigation/login.flow'
-import { MainTabsFlow } from './ui/navigation/main-tabs.flow'
+import { MainTabsFlow } from './ui/navigation/ciudadano/main-tabs.flow'
 import { AuthContext } from './context/auth.context'
 import { SplashScreen } from './ui/components/splash.component'
-import { User } from './services/types'
+import { TipoUsuario, User } from './services/types'
 import { UserService } from './services/user.service'
 
 import { colors } from './constants/styles'
+import { Login } from './ui/screens/login/login.screen'
+import { MainRecicladorTabsFlow } from './ui/navigation/reciclador/main-reciclador.flow'
 
 const navigationTheme = {
 	...DefaultTheme,
@@ -42,12 +44,15 @@ const baseTheme = extendTheme({
 export default function App() {
 	const [loading, setLoading] = React.useState(true)
 	const [logged, setLogged] = React.useState(false)
+	const [tipo, setTipo] = React.useState<TipoUsuario>()
 	const authContext = React.useMemo(
 		() => ({
 			login: async (usr?: User) => {
+				setTipo(usr?.tipoUsuario || 'CIUDADANO')
 				setLogged(true)
 			},
 			logout: () => {
+				setTipo(undefined)
 				setLogged(false)
 			},
 		}),
@@ -86,7 +91,7 @@ export default function App() {
 		<NavigationContainer theme={navigationTheme}>
 			<AuthContext.Provider value={authContext}>
 				<NativeBaseProvider theme={baseTheme}>
-					{logged ? <MainTabsFlow /> : <LoginFlow />}
+					{!logged ? <LoginFlow /> : tipo == 'RECICLADOR_URBANO' ? <MainRecicladorTabsFlow/> : <MainTabsFlow />}
 				</NativeBaseProvider>
 			</AuthContext.Provider>
 		</NavigationContainer>

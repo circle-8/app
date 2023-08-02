@@ -3,10 +3,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
 import { HomeFlow } from './home.flow'
-import { TabRoutes } from '../../constants/routes'
-import { ProfileFlow } from './profile.flow'
+import { TabRoutes } from '../../../constants/routes'
+import { ProfileFlow } from '../profile.flow'
 import { ActivityFlow } from './activity.flow'
-import { MessagesFlow } from './messages.flow'
+import { MessagesFlow } from '../messages.flow'
 import { LearnFlow } from './learn.flow'
 
 interface Icons {
