@@ -1,7 +1,7 @@
 import { Http } from '../api/api'
+import { ListResponse, ResiduoResponse, SolicitudResponse } from './responses'
+import { ErrorMessage, Residuo, Solicitud } from './types'
 import { Either, Maybe, ifRight, map, mapRight, maybeRight } from '../utils/either'
-import { ListResponse, ResiduoResponse } from './responses'
-import { ErrorMessage, Residuo } from './types'
 
 type ResiduoSave = {
 	tipoResiduoId: number
@@ -10,6 +10,46 @@ type ResiduoSave = {
 	descripcion: string
 	fechaLimite?: string
 }
+
+type Filter = {
+	puntosResiduo?: string[]
+	ciudadanos?: string[]
+	tipos?: string[]
+	transaccion?: string
+	recorrido?: string
+	retirado?: boolean
+	fechaLimiteRetiro?: string
+}
+
+const getAll = async (f: Filter): Promise<Either<ResiduoResponse[], ErrorMessage>> => {
+	let url = '/residuos?'
+	for (const residuo of f.puntosResiduo || []) url += 'puntos_residuo=' + residuo + '&'
+	for (const ciudadano of f.ciudadanos || []) url += 'ciudadanos=' + ciudadano + '&'
+	for (const tipo of f.tipos || []) url += 'tipos=' + tipo + '&'
+	if (f.transaccion) url += 'transaccion=' + f.transaccion
+	if (f.recorrido) url += 'recorrido=' + f.recorrido
+	if (f.retirado) url += 'retirado=' + f.retirado
+	if (f.fechaLimiteRetiro) url += 'fecha_limite_retiro=' + f.fechaLimiteRetiro
+
+	const res = await Http.get<ListResponse<ResiduoResponse>>(url)
+	return map(
+		res,
+		p => p.data,
+		err => err.message,
+	)
+}
+
+const postSolicitarDeposito = async (
+	id: number,
+	idPuntoReciclaje: number,
+): Promise<Either<Solicitud, ErrorMessage>> => {
+	const url = `/residuo/${id}/notificacion/deposito/${idPuntoReciclaje}`;
+	const res = await Http.post<SolicitudResponse>(url, {})
+	return map(
+		res,
+		p => p as Solicitud,
+		err => err.message
+	)
 
 const mapResponse = (r: ResiduoResponse): Residuo => {
 	return {
@@ -77,6 +117,8 @@ const del = async (id: number): Promise<Maybe<ErrorMessage>> => {
 }
 
 export const ResiduoService = {
+	getAll,
+	postSolicitarDeposito,
 	save,
 	list,
 	fulfill,

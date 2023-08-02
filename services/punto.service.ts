@@ -135,7 +135,7 @@ const getPuntoResiduo = async (
 	)
 }
   
-  const postRetiroResiudo = async (
+const postRetiroResiduo = async (
 	id: number,
 	idPuntoReciclaje: number,
 ): Promise<Either<PuntoResiduo, ErrorMessage>> => {
@@ -154,5 +154,5 @@ export const PuntoService = {
 	savePuntoReciclaje,
 	savePuntoResiduo,
 	getPuntoResiduo,
-	postRetiroResiudo,
+	postRetiroResiudo: postRetiroResiduo,
 }
