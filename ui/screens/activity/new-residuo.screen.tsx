@@ -20,7 +20,7 @@ import { TipoResiduo } from '../../../services/types'
 import { LoadingScreen } from '../../components/loading.component'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { ResiduoService } from '../../../services/residuo.service'
-import { Keyboard, TouchableWithoutFeedback } from 'react-native'
+import { Keyboard } from 'react-native'
 
 type Props = NativeStackScreenProps<ActivityRouteParams, 'NewResiduo'>
 
@@ -53,7 +53,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 			puntoResiduoId,
 			descripcion: form.descripcion,
 			tipoResiduoId: form.tipo,
-			fechaLimite: form.fechaLimite?.toISOString() || '',
+			fechaLimite: form.fechaLimite?.toISOString() || null,
 		})
 		match(
 			savedResiduo,

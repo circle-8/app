@@ -9,7 +9,7 @@ type Props = NativeStackScreenProps<ActivityRouteParams, 'Activity'>
 export const Activity = ({navigation}: Props) => {
 
 	const onMisResiduos = async () => {
-		
+		navigation.navigate(ActivityRoutes.listResiduos)
 	}
 
 	const onMisSolicitudes = async () => {

@@ -68,3 +68,60 @@ export const map = <A, B, C, D>(
 
 	return newEither
 }
+
+export const mapLeft = <A, B, C>(
+	either: Either<A, B>,
+	doMap: (b: A) => C,
+): Either<C, B> => {
+	let newEither: Either<C, B>
+	match(
+		either,
+		l => {
+			newEither = left(doMap(l))
+		},
+		r => {
+			newEither = right(r)
+		},
+	)
+
+	return newEither
+}
+
+export const mapRight = <A, B, C>(
+	either: Either<A, B>,
+	doMap: (b: B) => C,
+): Either<A, C> => {
+	let newEither: Either<A, C>
+	match(
+		either,
+		l => {
+			newEither = left(l)
+		},
+		r => {
+			newEither = right(doMap(r))
+		},
+	)
+
+	return newEither
+}
+
+export type Maybe<A> = Either<A, null>
+export const maybe = <A>(a: A): Maybe<A> => left(a)
+export const emptyMaybe = <A>(): Maybe<A> => right(null)
+export const ifExists = <A>(m: Maybe<A>, onExists: (a: A) => void) =>
+	ifLeft(m, onExists)
+export const caseMaybe = <A>(
+	m: Maybe<A>,
+	onExists: (a: A) => void,
+	onNotExists: () => void,
+) => match(m, onExists, onNotExists)
+
+export const maybeLeft = <A, B>(either: Either<A, B>): Maybe<A> => {
+	if (isRight(either)) return emptyMaybe()
+	else if (isLeft(either)) return maybe(either.left)
+}
+
+export const maybeRight = <A, B>(either: Either<A, B>): Maybe<B> => {
+	if (isLeft(either)) return emptyMaybe()
+	else if (isRight(either)) return maybe(either.right)
+}
