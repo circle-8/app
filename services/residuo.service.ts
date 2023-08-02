@@ -50,6 +50,7 @@ const postSolicitarDeposito = async (
 		p => p as Solicitud,
 		err => err.message
 	)
+}
 
 const mapResponse = (r: ResiduoResponse): Residuo => {
 	return {
