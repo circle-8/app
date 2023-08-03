@@ -23,8 +23,8 @@ import { Solicitud, Transaccion } from '../../../services/types'
 import { LoadingScreen } from '../../components/loading.component'
 import { SolicitudService } from '../../../services/solicitud.service'
 import { TouchableOpacity } from 'react-native'
-import { UserService } from '../../../services/user.service'
 import { TransaccionService } from '../../../services/transaccion.service'
+import { formatFecha } from '../../../utils/days'
 
 type Props = NativeStackScreenProps<ActivityRouteParams, 'ListSolicitudes'>
 
@@ -84,23 +84,6 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 		setLoading(false)
 	}
 
-	const formatFecha = (fecha, modalAgregar) => {
-		try {
-			if (fecha != null) {
-				const dia = fecha.substring(8, 10)
-				const mes = fecha.substring(5, 7)
-				const anio = fecha.substring(0, 4)
-				const mensaje = modalAgregar
-					? `Creada el ${dia}/${mes}/${anio}`
-					: `Deben retirarse antes del ${dia}/${mes}/${anio}`
-				return mensaje
-			}
-			return 'No tiene fecha limite de retiro'
-		} catch (error) {
-			console.error('Error al formatear la fecha:', error)
-			return 'No tiene fecha limite de retiro'
-		}
-	}
 
 	const getEstado = (solicitud: Solicitud, solicitante: boolean) => {
 		if (solicitante) {
@@ -142,16 +125,14 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 	}
 
 	const modalAgregarTransaccion = async solicitud => {
-		const user = await UserService.getCurrent()
-		const getUserTransactions = await TransaccionService.getAll({
-			ciudadanoId: user.ciudadanoId.toString(),
+		const userTransactions = await TransaccionService.getAll({
+			ciudadanoId: ciudadanoId,
 		})
-		ifLeft(getUserTransactions, t => {
-			setUserTransactions(t)
-		})
-		ifRight(getUserTransactions, t => {
-			setUserTransactions([])
-		})
+		match(
+			userTransactions,
+			t => setUserTransactions(t),
+			e => setUserTransactions([])
+		)
 		setSolicitudAgregar(solicitud)
 		setModalAgregar(true)
 	}
@@ -193,7 +174,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 	}
 
 	const handleAgregarSolicitud = async (id: number) => {
-		const solAgregada = await TransaccionService.putTransaccion(
+		const solAgregada = await TransaccionService.addResiduo(
 			id,
 			solicitudAgregar.residuo.id,
 		)
@@ -209,7 +190,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 	}
 
 	const handleCrearNuevaTransaccion = async () => {
-		const postTransaccion = await TransaccionService.postTransaccion(
+		const postTransaccion = await TransaccionService.createTransaccion(
 			solicitudAgregar.puntoReciclajeId,
 		)
 		ifLeft(postTransaccion, t => {
@@ -417,7 +398,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 														key={`stack-${idx}`}
 														alignItems="center"
 													>
-														<Text fontSize="sm">Transaccion #{idx + 1}</Text>
+														<Text fontSize="sm">Transaccion #{transaction.id}</Text>
 													</HStack>
 													<HStack
 														space={2}

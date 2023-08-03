@@ -86,6 +86,7 @@ export type ResiduoResponse = {
 	id: number
 	descripcion: string
 	fechaCreacion: string
+	fechaRetiro?: string
 	fechaLimiteRetiro: string
 	puntoResiduoUri: string
 	puntoResiduoId: number
@@ -110,7 +111,10 @@ export type SolicitudResponse = {
 
 export type TransaccionResponse = {
 	id: number
-	fechaCreacion: number
+	fechaCreacion: string
+	fechaRetiro: string
 	puntoReciclajeUri: UserResponse
 	puntoReciclajeId: number
+	puntoReciclaje?: PuntoReciclajeResponse
+	residuos?: ResiduoResponse[]
 }

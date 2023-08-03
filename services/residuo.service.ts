@@ -1,7 +1,14 @@
 import { Http } from '../api/api'
 import { ListResponse, ResiduoResponse, SolicitudResponse } from './responses'
 import { ErrorMessage, Residuo, Solicitud } from './types'
-import { Either, Maybe, ifRight, map, mapRight, maybeRight } from '../utils/either'
+import {
+	Either,
+	Maybe,
+	ifRight,
+	map,
+	mapRight,
+	maybeRight,
+} from '../utils/either'
 
 type ResiduoSave = {
 	tipoResiduoId: number
@@ -21,10 +28,14 @@ type Filter = {
 	fechaLimiteRetiro?: string
 }
 
-const getAll = async (f: Filter): Promise<Either<ResiduoResponse[], ErrorMessage>> => {
+const getAll = async (
+	f: Filter,
+): Promise<Either<ResiduoResponse[], ErrorMessage>> => {
 	let url = '/residuos?'
-	for (const residuo of f.puntosResiduo || []) url += 'puntos_residuo=' + residuo + '&'
-	for (const ciudadano of f.ciudadanos || []) url += 'ciudadanos=' + ciudadano + '&'
+	for (const residuo of f.puntosResiduo || [])
+		url += 'puntos_residuo=' + residuo + '&'
+	for (const ciudadano of f.ciudadanos || [])
+		url += 'ciudadanos=' + ciudadano + '&'
 	for (const tipo of f.tipos || []) url += 'tipos=' + tipo + '&'
 	if (f.transaccion) url += 'transaccion=' + f.transaccion
 	if (f.recorrido) url += 'recorrido=' + f.recorrido
@@ -43,12 +54,12 @@ const postSolicitarDeposito = async (
 	id: number,
 	idPuntoReciclaje: number,
 ): Promise<Either<Solicitud, ErrorMessage>> => {
-	const url = `/residuo/${id}/notificacion/deposito/${idPuntoReciclaje}`;
+	const url = `/residuo/${id}/notificacion/deposito/${idPuntoReciclaje}`
 	const res = await Http.post<SolicitudResponse>(url, {})
 	return map(
 		res,
 		p => p as Solicitud,
-		err => err.message
+		err => err.message,
 	)
 }
 
@@ -124,4 +135,5 @@ export const ResiduoService = {
 	list,
 	fulfill,
 	delete: del,
+	mapResponse,
 }

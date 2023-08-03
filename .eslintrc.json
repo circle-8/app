@@ -18,10 +18,7 @@
         "react"
     ],
     "rules": {
-        "indent": [
-            "error",
-            "tab"
-        ],
+        "indent": "off",
         "linebreak-style": [
             "error",
             "unix"
@@ -34,6 +31,6 @@
             "warn",
             "never"
         ],
-		"no-unused-vars": "off"
+		"no-unused-vars": "off",
     }
 }

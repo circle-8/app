@@ -61,6 +61,13 @@ export type ActivityRouteParams = {
 	ListSolicitudes: {
 		ciudadanoId: number
 	},
+	ListTransacciones: {
+		ciudadanoId: number
+	},
+	ViewTransaccion: {
+		ciudadanoId: number
+		transaccionId: number
+	}
 }
 type ActivityRouteName = keyof ActivityRouteParams
 
@@ -68,11 +75,15 @@ export const ActivityRoutes: {
 	activity: 'Activity'
 	newResiduo: 'NewResiduo'
 	listSolicitudes: 'ListSolicitudes'
+	listTransacciones: 'ListTransacciones'
+	viewTransaccion: 'ViewTransaccion'
 	listResiduos: 'ListResiduos'
 } = {
 	activity: 'Activity',
 	newResiduo: 'NewResiduo',
 	listSolicitudes: 'ListSolicitudes',
+	listTransacciones: 'ListTransacciones',
+	viewTransaccion: 'ViewTransaccion',
 	listResiduos: 'ListResiduos',
 }
 

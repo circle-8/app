@@ -1,14 +1,16 @@
 import { Http } from '../api/api'
-import { Either, map } from '../utils/either'
+import { Either, Maybe, map, mapRight, maybeRight } from '../utils/either'
 import { ListResponse, TransaccionResponse } from './responses'
 import { ErrorMessage, Transaccion } from './types'
 
 type Filter = {
-	ciudadanoId?: string
-    //TODO creo el filtro por si queremos filtrar por mas cosas en un futuro
+	ciudadanoId?: number
+	//TODO creo el filtro por si queremos filtrar por mas cosas en un futuro
 }
 
-const getAll = async (f: Filter): Promise<Either<Transaccion[], ErrorMessage>> => {
+const getAll = async (
+	f: Filter,
+): Promise<Either<Transaccion[], ErrorMessage>> => {
 	let url = '/transacciones?'
 	if (f.ciudadanoId) url += 'ciudadano_id=' + f.ciudadanoId
 
@@ -20,8 +22,10 @@ const getAll = async (f: Filter): Promise<Either<Transaccion[], ErrorMessage>> =
 	)
 }
 
-const putTransaccion = async (id: number, id_residuo: number)=> {
-	const res = await Http.put<TransaccionResponse>(`/transaccion/${id}/residuo/${id_residuo}`)
+const get = async (id: number): Promise<Either<Transaccion, ErrorMessage>> => {
+	const res = await Http.get<TransaccionResponse>(
+		`/transaccion/${id}?expand=residuos&expand=punto_reciclaje`,
+	)
 	return map(
 		res,
 		p => p,
@@ -29,20 +33,54 @@ const putTransaccion = async (id: number, id_residuo: number)=> {
 	)
 }
 
-const postTransaccion = async (ptoReciclajeId: number)=> {
-    const body = {
-        punto_reciclaje: ptoReciclajeId,
-      };
-    const res = await Http.post<TransaccionResponse>(`/transaccion`, body)
+const addResiduo = async (id: number, id_residuo: number) => {
+	const res = await Http.put<TransaccionResponse>(
+		`/transaccion/${id}/residuo/${id_residuo}`,
+	)
 	return map(
 		res,
 		p => p,
 		err => err.message,
+	)
+}
+
+const deleteResiduo = async (
+	id: number,
+	idResiduo: number,
+): Promise<Maybe<ErrorMessage>> => {
+	const res = await Http.delete<null>(`/transaccion/${id}/residuo/${idResiduo}`)
+	return maybeRight(mapRight(res, err => err.message))
+}
+
+const createTransaccion = async (ptoReciclajeId: number) => {
+	const body = {
+		puntoReciclaje: ptoReciclajeId,
+	}
+	const res = await Http.post<TransaccionResponse>('/transaccion', body)
+	return map(
+		res,
+		p => p,
+		err => err.message,
+	)
+}
+
+const fulfill = async(id: number): Promise<Either<Transaccion, ErrorMessage>> => {
+	const body = {
+		fechaRetiro: new Date().toISOString()
+	}
+	const res = await Http.put<TransaccionResponse>(`/transaccion/${id}`, body)
+	return map(
+		res,
+		p => p,
+		err => err.message
 	)
 }
 
 export const TransaccionService = {
 	getAll,
-	putTransaccion,
-    postTransaccion,
+	get,
+	addResiduo,
+	deleteResiduo,
+	createTransaccion,
+	fulfill
 }
