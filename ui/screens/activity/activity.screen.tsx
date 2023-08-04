@@ -20,7 +20,10 @@ export const Activity = ({navigation}: Props) => {
 	}
 
 	const onMisRetiros = async () => {
-		
+		const user = await UserService.getCurrent()
+		navigation.navigate(ActivityRoutes.listTransacciones, {
+			ciudadanoId: user.ciudadanoId
+		})
 	}
 
 	return (
