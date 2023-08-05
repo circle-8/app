@@ -1,6 +1,6 @@
 import React from 'react'
 import { GestureResponderEvent, TouchableOpacity } from 'react-native'
-import MapView, { Marker } from 'react-native-maps'
+import MapView, { Marker, Polygon } from 'react-native-maps'
 import {
 	Box,
 	Center,
@@ -32,6 +32,7 @@ import {
 	PuntoResiduo,
 	TipoPunto,
 	TipoResiduo,
+	Zonas,
 } from '../../../services/types'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { mapDays } from '../../../utils/days'
@@ -47,6 +48,7 @@ import { match, ifLeft, ifRight } from '../../../utils/either'
 import { TipoResiduoService } from '../../../services/tipos.service'
 import { ResiduoResponse } from '../../../services/responses'
 import { ResiduoService } from '../../../services/residuo.service'
+import { ZonasService } from '../../../services/zonas.service'
 
 type Coord = {
 	latitude: number
@@ -77,6 +79,11 @@ export const Home = ({ navigation }: Props) => {
 	const [direction, setDirection] = React.useState('')
 	const [isLoadingModal, setIsLoadingModal] = React.useState(true)
 	const [tipos, setTipos] = React.useState<TipoResiduo[]>()
+	const [zonas, setZonas] = React.useState<Zonas[]>()
+	const [isViewZonas, setIsViewZonas] = React.useState(false)
+	const [modalErrorZonas, setModalErrorZonas] = React.useState(false)
+	const [zonaSelected, setZonaSelected] = React.useState<Zonas>()
+	const [modalZonaSelected, setModalZonaSelected] = React.useState(false)
 
 	const getUserLocation = async () => {
 		const status = await Location.requestForegroundPermissionsAsync()
@@ -191,6 +198,27 @@ export const Home = ({ navigation }: Props) => {
 		}
 	}
 
+	const handleGetZonas = async () => {
+		const zonas = await ZonasService.getAll()
+		match(
+			zonas,
+			t => setZonas(t),
+			err => {
+				setZonas(null),
+				setModalErrorZonas(true)
+			},
+		)
+		setIsViewZonas(!isViewZonas)
+	}
+
+	const handleZonaPress = zona => {
+		setZonaSelected(zona)
+		setModalZonaSelected(true)
+	}
+
+	const handleJoinCircuito = zona => {
+	}
+
 	/* Initial data loading */
 	React.useEffect(() => {
 		getUserLocation()
@@ -220,6 +248,120 @@ export const Home = ({ navigation }: Props) => {
 							longitudeDelta,
 						}}
 					>
+						{isViewZonas ? (
+							zonas && zonas.length > 0 ? (
+								zonas.map((zona, idx) => (
+									<Polygon
+										key={`polygon-${idx}`}
+										coordinates={zona.polyline.map(coord => ({
+											latitude: coord.latitud,
+											longitude: coord.longitud,
+										}))}
+										strokeColor="#8CB085"
+										fillColor="rgba(132, 209, 121, 0.2)"
+										strokeWidth={2}
+										onPress={() => handleZonaPress(zona)}
+									/>
+								))
+							) : (
+								<Modal
+									isOpen={modalErrorZonas}
+									onClose={() => setModalErrorZonas(false)}
+									size="lg"
+								>
+									<Modal.Content>
+										<Modal.CloseButton />
+										<Modal.Header alignItems="center">
+											<Text bold fontSize="xl">
+												Error
+											</Text>
+										</Modal.Header>
+										<Modal.Body>
+											<Text fontSize="md">
+												Ocurrió un error al obtener los circuitos de reciclaje,
+												reintenta más tarde.
+											</Text>
+										</Modal.Body>
+									</Modal.Content>
+								</Modal>
+							)
+						) : (
+							''
+						)}
+						{isViewZonas && modalZonaSelected ? (
+							<Modal
+								isOpen={modalZonaSelected}
+								onClose={() => setModalZonaSelected(false)}
+								size="lg"
+							>
+								<Modal.Content>
+									<Modal.CloseButton />
+									<Modal.Header alignItems="center">
+										<Text bold fontSize="xl">
+											Circuito de reciclaje
+										</Text>
+									</Modal.Header>
+									<Modal.Body>
+										<View
+											style={{ flexDirection: 'row', alignItems: 'center' }}
+										>
+											<View>
+												<Text bold fontSize="md">Nombre del circuito: </Text>
+											</View>
+											<View>
+												<Text>{zonaSelected.nombre}</Text>
+											</View>
+										</View>
+										<View style={{ marginVertical: 5 }} />
+										<View>
+											<Text bold fontSize="md">
+												Tipos de residuo que acepta:
+											</Text>
+											{zonaSelected.tipoResiduo &&
+											zonaSelected.tipoResiduo.length > 0 ? (
+												zonaSelected.tipoResiduo.map((tipo, index) => (
+													<HStack
+														space={2}
+														mt="0.5"
+														key={index}
+														alignItems="center"
+													>
+														<CircleIcon size="2" color="black" />
+														<Text fontSize="sm">{tipo.nombre}</Text>
+													</HStack>
+												))
+											) : (
+												<HStack space={2} mt="0.5" alignItems="center">
+													<CircleIcon size="2" color="black" />
+													<Text fontSize="sm">
+														La zona actualmente no acepta ningun residuo.
+													</Text>
+												</HStack>
+											)}
+										</View>
+									</Modal.Body>
+									<Modal.Footer>
+										<View
+											style={{
+												width: '100%',
+												flexDirection: 'row',
+												justifyContent: 'center',
+											}}
+										>
+											<Button onPress={() => setModalZonaSelected(false)}>
+												Cerrar
+											</Button>
+											<View style={{ marginHorizontal: 10 }} />
+											<Button onPress={() => handleJoinCircuito(zonaSelected)}>
+												Solicitar Unirme
+											</Button>
+										</View>
+									</Modal.Footer>
+								</Modal.Content>
+							</Modal>
+						) : (
+							''
+						)}
 						{points.map(point => (
 							<Marker
 								key={`${point.tipo}-${point.id}`}
@@ -300,14 +442,22 @@ export const Home = ({ navigation }: Props) => {
 						</Center>
 						<Center w="33%">
 							<TouchableOpacity
-								onPress={() => {handleEntregarResiduos()}}
+								onPress={() => {
+									handleEntregarResiduos()
+								}}
 							>
 								<Ionicons name="trash" size={40} color={colors.primary800} />
 							</TouchableOpacity>
 							<Text fontSize="xs">Entregar residuos</Text>
 						</Center>
 						<Center w="33%">
-							<Ionicons name="leaf" size={40} color={colors.primary800} />
+							<TouchableOpacity
+								onPress={() => {
+									handleGetZonas()
+								}}
+							>
+								<Ionicons name="leaf" size={40} color={colors.primary800} />
+							</TouchableOpacity>
 							<Text fontSize="xs">Circuitos de Reciclaje</Text>
 						</Center>
 					</Row>

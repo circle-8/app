@@ -118,3 +118,16 @@ export type TransaccionResponse = {
 	puntoReciclaje?: PuntoReciclajeResponse
 	residuos?: ResiduoResponse[]
 }
+
+export type PolylineResponse = {
+	latitud: number
+	longitud: number
+}
+
+export type ZonasResponse = {
+	id: number
+	nombre: string
+	polyline: PolylineResponse[]
+	organizacionId: number
+	tipoResiduo: TipoResiduoResponse[]
+}
