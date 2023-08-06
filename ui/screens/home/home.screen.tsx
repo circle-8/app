@@ -32,7 +32,7 @@ import {
 	PuntoResiduo,
 	TipoPunto,
 	TipoResiduo,
-	Zonas,
+	Zona,
 } from '../../../services/types'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { mapDays } from '../../../utils/days'
@@ -46,7 +46,7 @@ import {
 import { UserService } from '../../../services/user.service'
 import { match, ifLeft, ifRight } from '../../../utils/either'
 import { TipoResiduoService } from '../../../services/tipos.service'
-import { ResiduoResponse } from '../../../services/responses'
+import { PolylineResponse, ResiduoResponse } from '../../../services/responses'
 import { ResiduoService } from '../../../services/residuo.service'
 import { ZonasService } from '../../../services/zonas.service'
 
@@ -79,11 +79,9 @@ export const Home = ({ navigation }: Props) => {
 	const [direction, setDirection] = React.useState('')
 	const [isLoadingModal, setIsLoadingModal] = React.useState(true)
 	const [tipos, setTipos] = React.useState<TipoResiduo[]>()
-	const [zonas, setZonas] = React.useState<Zonas[]>()
+	const [zonas, setZonas] = React.useState<Zona[]>()
 	const [isViewZonas, setIsViewZonas] = React.useState(false)
 	const [modalErrorZonas, setModalErrorZonas] = React.useState(false)
-	const [zonaSelected, setZonaSelected] = React.useState<Zonas>()
-	const [modalZonaSelected, setModalZonaSelected] = React.useState(false)
 
 	const getUserLocation = async () => {
 		const status = await Location.requestForegroundPermissionsAsync()
@@ -199,24 +197,72 @@ export const Home = ({ navigation }: Props) => {
 	}
 
 	const handleGetZonas = async () => {
-		const zonas = await ZonasService.getAll()
+		const getZonas = await ZonasService.getAll()
 		match(
-			zonas,
-			t => setZonas(t),
+			getZonas,
+			t => setPuedeUnirseZona(t),
 			err => {
-				setZonas(null),
-				setModalErrorZonas(true)
+				setZonas(null), setModalErrorZonas(true)
 			},
 		)
 		setIsViewZonas(!isViewZonas)
 	}
 
-	const handleZonaPress = zona => {
-		setZonaSelected(zona)
-		setModalZonaSelected(true)
+	const setPuedeUnirseZona = async (zonas: Zona[]) => {
+		const user = await UserService.getCurrent()
+		const puntosResiduoUser = await PuntoService.getAll({
+			tipos: ['RESIDUO'],
+			ciudadanoId: user.ciudadanoId,
+		})
+
+		if (zonas != null && puntosResiduoUser != null) {
+			const zonasActualizadas: Zona[] = []
+			zonas.forEach(zona => {
+				const zonaActualizada: Zona = {
+					...zona,
+					puedeUnirse: false,
+					puntosDentroZona: [],
+				}
+				const puntosSet = new Set()
+
+				puntosResiduoUser.forEach(point => {
+					const intersecta = isPointInsideZone(point, zona)
+
+					if (intersecta && !puntosSet.has(point.id)) {
+						puntosSet.add(point.id)
+						zonaActualizada.puedeUnirse = true
+						zonaActualizada.puntosDentroZona.push(point)
+					}
+				})
+
+				zonasActualizadas.push(zonaActualizada)
+			})
+
+			setZonas(zonasActualizadas)
+		}
 	}
 
-	const handleJoinCircuito = zona => {
+	const isPointInsideZone = (point, zone) => {
+		let inside = false
+		const x = point.latitud
+		const y = point.longitud
+
+		const n = zone.polyline.length
+		for (let i = 0, j = n - 1; i < n; j = i++) {
+			const xi = zone.polyline[i].latitud
+			const yi = zone.polyline[i].longitud
+			const xj = zone.polyline[j].latitud
+			const yj = zone.polyline[j].longitud
+
+			const intersecta =
+				yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi
+
+			if (intersecta) {
+				inside = !inside
+			}
+		}
+
+		return inside
 	}
 
 	/* Initial data loading */
@@ -248,120 +294,12 @@ export const Home = ({ navigation }: Props) => {
 							longitudeDelta,
 						}}
 					>
-						{isViewZonas ? (
-							zonas && zonas.length > 0 ? (
-								zonas.map((zona, idx) => (
-									<Polygon
-										key={`polygon-${idx}`}
-										coordinates={zona.polyline.map(coord => ({
-											latitude: coord.latitud,
-											longitude: coord.longitud,
-										}))}
-										strokeColor="#8CB085"
-										fillColor="rgba(132, 209, 121, 0.2)"
-										strokeWidth={2}
-										onPress={() => handleZonaPress(zona)}
-									/>
-								))
-							) : (
-								<Modal
-									isOpen={modalErrorZonas}
-									onClose={() => setModalErrorZonas(false)}
-									size="lg"
-								>
-									<Modal.Content>
-										<Modal.CloseButton />
-										<Modal.Header alignItems="center">
-											<Text bold fontSize="xl">
-												Error
-											</Text>
-										</Modal.Header>
-										<Modal.Body>
-											<Text fontSize="md">
-												Ocurrió un error al obtener los circuitos de reciclaje,
-												reintenta más tarde.
-											</Text>
-										</Modal.Body>
-									</Modal.Content>
-								</Modal>
-							)
-						) : (
-							''
-						)}
-						{isViewZonas && modalZonaSelected ? (
-							<Modal
-								isOpen={modalZonaSelected}
-								onClose={() => setModalZonaSelected(false)}
-								size="lg"
-							>
-								<Modal.Content>
-									<Modal.CloseButton />
-									<Modal.Header alignItems="center">
-										<Text bold fontSize="xl">
-											Circuito de reciclaje
-										</Text>
-									</Modal.Header>
-									<Modal.Body>
-										<View
-											style={{ flexDirection: 'row', alignItems: 'center' }}
-										>
-											<View>
-												<Text bold fontSize="md">Nombre del circuito: </Text>
-											</View>
-											<View>
-												<Text>{zonaSelected.nombre}</Text>
-											</View>
-										</View>
-										<View style={{ marginVertical: 5 }} />
-										<View>
-											<Text bold fontSize="md">
-												Tipos de residuo que acepta:
-											</Text>
-											{zonaSelected.tipoResiduo &&
-											zonaSelected.tipoResiduo.length > 0 ? (
-												zonaSelected.tipoResiduo.map((tipo, index) => (
-													<HStack
-														space={2}
-														mt="0.5"
-														key={index}
-														alignItems="center"
-													>
-														<CircleIcon size="2" color="black" />
-														<Text fontSize="sm">{tipo.nombre}</Text>
-													</HStack>
-												))
-											) : (
-												<HStack space={2} mt="0.5" alignItems="center">
-													<CircleIcon size="2" color="black" />
-													<Text fontSize="sm">
-														La zona actualmente no acepta ningun residuo.
-													</Text>
-												</HStack>
-											)}
-										</View>
-									</Modal.Body>
-									<Modal.Footer>
-										<View
-											style={{
-												width: '100%',
-												flexDirection: 'row',
-												justifyContent: 'center',
-											}}
-										>
-											<Button onPress={() => setModalZonaSelected(false)}>
-												Cerrar
-											</Button>
-											<View style={{ marginHorizontal: 10 }} />
-											<Button onPress={() => handleJoinCircuito(zonaSelected)}>
-												Solicitar Unirme
-											</Button>
-										</View>
-									</Modal.Footer>
-								</Modal.Content>
-							</Modal>
-						) : (
-							''
-						)}
+						<CircuitosReciclaje
+							isViewZonas={isViewZonas}
+							zonas={zonas}
+							modalErrorZonas={modalErrorZonas}
+							setModalErrorZonas={setModalErrorZonas}
+						/>
 						{points.map(point => (
 							<Marker
 								key={`${point.tipo}-${point.id}`}
@@ -480,6 +418,537 @@ const Filter = (props: FilterProps) => {
 		</TouchableOpacity>
 	)
 }
+
+type CircuitosReciclajeProps = {
+	isViewZonas: boolean;
+	zonas: Zona[];
+	modalErrorZonas
+	setModalErrorZonas
+  }
+  
+const CircuitosReciclaje = (props: CircuitosReciclajeProps) => {
+	const [zonasSelected, setZonasSelected] = React.useState<Zona[] | null>(null)
+	const [modalZonaSelected, setModalZonaSelected] = React.useState(false)
+	const [modalJoin, setModalJoin] = React.useState(false)
+	const [modalFirstStep, setModalFirstStep] = React.useState(false)
+	const [zonaToJoin, setZonaToJoin] = React.useState<Zona | null>(null)
+	const [selectedUserPoint, setSelectedUserPoint] = React.useState<number | null>(null)
+	const [puntosConDireccion, setPuntosConDireccion] = React.useState<PuntoConDireccion[] | null>(null)
+	const [isLoadingModal, setIsLoadingModal] = React.useState(false)
+	const [modalExito, setModalExito] = React.useState(false)
+	const [modalError, setModalError] = React.useState(false)
+
+	const handleZonaPress = (zonaSeleccionada: Zona) => {
+		const zonasSelected = encontrarPoligonosSuperpuestos(zonaSeleccionada)
+		setZonasSelected(zonasSelected)
+		setModalZonaSelected(true)
+		setModalFirstStep(true)
+	}
+
+	const encontrarPoligonosSuperpuestos = (zonaSeleccionada: Zona): Zona[] => {
+		const superpuestos = props.zonas.filter(zona =>
+			poligonosSeSuperponen(zonaSeleccionada.polyline, zona.polyline),
+		)
+
+		return superpuestos
+	}
+
+	const poligonosSeSuperponen = (
+		poligono1: PolylineResponse[],
+		poligono2: PolylineResponse[],
+	): boolean => {
+		// Función para determinar si dos circuitos se intersectan
+		const intersectan = (
+			p1: PolylineResponse,
+			p2: PolylineResponse,
+			p3: PolylineResponse,
+			p4: PolylineResponse,
+		): boolean => {
+			const d1 = direccion(p3, p4, p1)
+			const d2 = direccion(p3, p4, p2)
+			const d3 = direccion(p1, p2, p3)
+			const d4 = direccion(p1, p2, p4)
+
+			if (d1 !== d2 && d3 !== d4) {
+				return true
+			}
+
+			if (d1 === 0 && enSegmento(p3, p4, p1)) {
+				return true
+			}
+
+			if (d2 === 0 && enSegmento(p3, p4, p2)) {
+				return true
+			}
+
+			if (d3 === 0 && enSegmento(p1, p2, p3)) {
+				return true
+			}
+
+			if (d4 === 0 && enSegmento(p1, p2, p4)) {
+				return true
+			}
+
+			return false
+		}
+
+		// Función para determinar la dirección del giro entre tres puntos
+		const direccion = (
+			p1: PolylineResponse,
+			p2: PolylineResponse,
+			p3: PolylineResponse,
+		): number => {
+			const value =
+				(p2.latitud - p1.latitud) * (p3.longitud - p2.longitud) -
+				(p2.longitud - p1.longitud) * (p3.latitud - p2.latitud)
+
+			if (value === 0) {
+				return 0 // Colineales
+			} else if (value < 0) {
+				return 1 // Giro a la derecha
+			} else {
+				return 2 // Giro a la izquierda
+			}
+		}
+
+		// Función para determinar si un punto está en el segmento de línea
+		const enSegmento = (
+			p1: PolylineResponse,
+			p2: PolylineResponse,
+			p3: PolylineResponse,
+		): boolean => {
+			return (
+				Math.min(p1.latitud, p2.latitud) <= p3.latitud &&
+				p3.latitud <= Math.max(p1.latitud, p2.latitud) &&
+				Math.min(p1.longitud, p2.longitud) <= p3.longitud &&
+				p3.longitud <= Math.max(p1.longitud, p2.longitud)
+			)
+		}
+
+		// Verificar si algún segmento de polígono1 intersecta con algún segmento de polígono2
+		for (let i = 0; i < poligono1.length; i++) {
+			const p1 = poligono1[i]
+			const p2 = poligono1[(i + 1) % poligono1.length]
+
+			for (let j = 0; j < poligono2.length; j++) {
+				const p3 = poligono2[j]
+				const p4 = poligono2[(j + 1) % poligono2.length]
+
+				if (intersectan(p1, p2, p3, p4)) {
+					return true // Los polígonos se superponen
+				}
+			}
+		}
+
+		return false // Los polígonos no se superponen
+	}
+
+	const handleJoinCircuito = (zona: Zona) => {
+		setDirectionPoint(zona)
+		setZonaToJoin(zona)
+		setModalJoin(true)
+		setModalFirstStep(false)
+	}
+
+	const handleCloseModal  = () => {
+		setSelectedUserPoint(null)
+		setZonaToJoin(null)
+		setModalZonaSelected(false)
+		setModalJoin(false)
+		setModalFirstStep(false)
+		setModalError(false)
+		setModalExito(false)
+	}
+
+	const handleVolver  = () => {
+		setModalJoin(false)
+		setModalFirstStep(true)
+		setSelectedUserPoint(null)
+	}
+
+	const handleJoin  = async (id: number, puntoReciclajeId: number) => {
+		console.log(id)
+		console.log(puntoReciclajeId)
+		const solAgregada = await ZonasService.postJoinCircuito(
+			id,
+			puntoReciclajeId,
+		)
+		match(
+			solAgregada,
+			t => {
+				setModalJoin(false)
+				setModalExito(true)
+			},
+			err => {
+				setModalJoin(false)
+				setModalError(true)
+			},
+		)
+	}
+
+	interface PuntoConDireccion {
+		punto: Punto;
+		address: string;
+	  }
+
+	  const setDirectionPoint = async (zona: Zona) => {
+		setIsLoadingModal(true)
+		const puntosConDireccion: PuntoConDireccion[] = [];
+	  
+		for (const punto of zona.puntosDentroZona) {
+		  try {
+			const locationPromise = await Location.reverseGeocodeAsync({
+			  latitude: punto.latitud,
+			  longitude: punto.longitud,
+			});
+			const location = await Promise.all(locationPromise);
+			const address =
+			  location.at(0).name +
+			  ', ' +
+			  location.at(0).city +
+			  ', ' +
+			  location.at(0).postalCode +
+			  ', ' +
+			  location.at(0).region;
+	  
+			const puntoConDireccion: PuntoConDireccion = {
+			  punto: punto, 
+			  address: address,
+			};
+			puntosConDireccion.push(puntoConDireccion);
+		  } catch (error) {
+			const address = 'No podemos brindar la dirección.';
+			const puntoConDireccion: PuntoConDireccion = {
+			  punto: punto, 
+			  address: address,
+			};
+			puntosConDireccion.push(puntoConDireccion);
+		  }
+		}
+		setPuntosConDireccion(puntosConDireccion); 
+		setIsLoadingModal(false)
+	  };
+	  
+	React.useEffect(() => {
+		setModalJoin(false)
+		setModalFirstStep(true)
+		setSelectedUserPoint(null)
+	}, [])
+
+	return (
+		<>
+			{props.isViewZonas ? (
+				props.zonas && props.zonas.length > 0 ? (
+					props.zonas.map((zona, idx) => (
+						<Polygon
+							key={`polygon-${idx}`}
+							coordinates={zona.polyline.map(coord => ({
+								latitude: coord.latitud,
+								longitude: coord.longitud,
+							}))}
+							strokeColor="#8CB085"
+							fillColor="rgba(132, 209, 121, 0.2)"
+							strokeWidth={2}
+							onPress={() => handleZonaPress(zona)}
+						/>
+					))
+				) : (
+					<Modal
+						isOpen={props.modalErrorZonas}
+						onClose={() => handleCloseModal()}
+						size="lg"
+					>
+						<Modal.Content>
+							<Modal.CloseButton />
+							<Modal.Header alignItems="center">
+								<Text bold fontSize="xl">
+									Error
+								</Text>
+							</Modal.Header>
+							<Modal.Body>
+								<Text fontSize="md">
+									Ocurrió un error con los circuitos de reciclaje, reintenta más
+									tarde.
+								</Text>
+							</Modal.Body>
+						</Modal.Content>
+					</Modal>
+				)
+			) : (
+				''
+			)}
+			{props.isViewZonas && modalZonaSelected ? (
+				<Modal
+					isOpen={modalZonaSelected}
+					onClose={() => handleCloseModal()}
+					size="lg"
+				>
+					<Modal.Content>
+						<Modal.CloseButton />
+						<Modal.Header alignItems="center">
+							<Text bold fontSize="xl">
+								Circuitos de reciclaje
+							</Text>
+						</Modal.Header>
+						<Modal.Body>
+							{modalJoin && zonaToJoin ? (
+								<>
+									<View>
+										<Text bold fontSize="md">
+											Confirma el punto que incluis al recorrido:
+										</Text>
+										{isLoadingModal ? (
+											<Spinner
+												color="emerald.800"
+												accessibilityLabel="Loading posts"
+											/>
+										) : puntosConDireccion && puntosConDireccion.length > 0 ? (
+											puntosConDireccion.map((punto, userIndex) => (
+												<TouchableOpacity
+													key={`user-${userIndex}`}
+													onPress={() => setSelectedUserPoint(userIndex)}
+												>
+													<Box
+														key={`box-${userIndex}`}
+														mb={2}
+														p={2}
+														borderWidth={1}
+														borderColor="gray.300"
+														borderRadius="md"
+														shadow={1}
+														maxWidth={350}
+														bg={
+															selectedUserPoint === userIndex
+																? 'green.100'
+																: 'white'
+														}
+													>
+														<HStack
+															space={2}
+															mt="0.5"
+															key={`stack-${userIndex}`}
+															alignItems="center"
+														>
+															<Text fontSize="sm">{userIndex + 1}</Text>
+															<Text fontSize="sm" numberOfLines={4}>
+																{punto.punto.titulo}
+															</Text>
+														</HStack>
+														<HStack
+															space={2}
+															mt="0.5"
+															key={`direc-${userIndex}`}
+															alignItems="center"
+														>
+															<CircleIcon size="2" color="black" />
+															<Text fontSize="sm">{punto.address}</Text>
+														</HStack>
+													</Box>
+												</TouchableOpacity>
+											))
+										) : (
+											<>
+												<View
+													style={{
+														flex: 1,
+														justifyContent: 'center',
+														alignItems: 'center',
+													}}
+												>
+													<WarningOutlineIcon size={5} color="red.600" />
+													<Text style={{ fontSize: 14, textAlign: 'center' }}>
+														No dispones de un punto de residuos, para solicitar
+														unirte a un circuito de reciclaje primero asegura
+														tener un punto de residuos creado.
+													</Text>
+												</View>
+											</>
+										)}
+									</View>
+								</>
+							) : null}
+
+							{modalExito ? (
+								<>
+									<View
+										style={{
+											flex: 1,
+											justifyContent: 'center',
+											alignItems: 'center',
+										}}
+									>
+										<CheckCircleIcon size={5} color="emerald.600" />
+										<Text style={{ fontSize: 14, textAlign: 'center' }}>
+											Solicitud enviada con exito, aguarda la respuesta de la
+											organizacion.
+										</Text>
+									</View>
+								</>
+							) : modalError ? (
+								<>
+									<View
+										style={{
+											flex: 1,
+											justifyContent: 'center',
+											alignItems: 'center',
+										}}
+									>
+										<WarningOutlineIcon size={5} color="red.600" />
+										<Text style={{ fontSize: 14, textAlign: 'center' }}>
+											Ocurrio un error al generar la solicitud, reintenta mas
+											tarde.
+										</Text>
+									</View>
+								</>
+							) : null}
+
+							{modalFirstStep && (
+								<>
+									{zonasSelected.length > 1 ? (
+										<View>
+											<Text bold fontSize="md">
+												Parece que el circuito seleccionado se superpone con
+												otros, aquí tienes todas las zonas superpuestas con la
+												que elegiste.
+											</Text>
+										</View>
+									) : null}
+
+									{zonasSelected.length > 0 ? (
+										zonasSelected.map((zona, idx) => (
+											<Box
+												key={`box-${idx}`}
+												mb={2}
+												p={2}
+												borderWidth={1}
+												borderColor="gray.300"
+												borderRadius="md"
+												shadow={1}
+												maxWidth={350}
+												background={'white'}
+											>
+												<View
+													style={{ flexDirection: 'row', alignItems: 'center' }}
+												>
+													<View>
+														<Text bold fontSize="md">
+															Nombre del circuito:{' '}
+														</Text>
+													</View>
+													<View>
+														<Text>{zona.nombre}</Text>
+													</View>
+												</View>
+												<View>
+													<Text bold fontSize="md">
+														Tipos de residuo que acepta:
+													</Text>
+													{zona.tipoResiduo && zona.tipoResiduo.length > 0 ? (
+														zona.tipoResiduo.map((tipo, index) => (
+															<HStack
+																space={2}
+																mt="0.5"
+																key={index}
+																alignItems="center"
+															>
+																<CircleIcon size="2" color="black" />
+																<Text fontSize="sm">{tipo.nombre}</Text>
+															</HStack>
+														))
+													) : (
+														<HStack space={2} mt="0.5" alignItems="center">
+															<CircleIcon size="2" color="black" />
+															<Text fontSize="sm">
+																La zona actualmente no acepta ningún residuo.
+															</Text>
+														</HStack>
+													)}
+												</View>
+												{zona.puedeUnirse ? (
+													<>
+														<Box mb={2} />
+														<Center justifyContent="space-between">
+															<Button onPress={() => handleJoinCircuito(zona)}>
+																Solicitar Unirme
+															</Button>
+														</Center>
+													</>
+												) : null}
+											</Box>
+										))
+									) : (
+										<HStack space={2} mt="0.5" alignItems="center">
+											<CircleIcon size="2" color="black" />
+											<Text fontSize="sm">
+												Ocurrió un error al seleccionar la zona, reintenta más
+												tarde.
+											</Text>
+										</HStack>
+									)}
+									<View
+										style={{
+											width: '90%',
+											flexDirection: 'row',
+											justifyContent: 'center',
+										}}
+									>
+										<HStack space={2} mt="0.5" alignItems="center">
+											<InfoOutlineIcon size="3" color="red.600" />
+											<Text fontSize="sm" numberOfLines={4}>
+												Ten en cuenta que solo puedes unirte a los circuitos que
+												abarquen alguno de tus punto de residuo.
+											</Text>
+										</HStack>
+									</View>
+								</>
+							)}
+						</Modal.Body>
+						<Modal.Footer>
+							{modalJoin ? (
+								<View
+									style={{
+										width: '100%',
+										flexDirection: 'row',
+										justifyContent: 'center',
+									}}
+								>
+									<Center>
+										<Button onPress={() => handleVolver()}>Volver</Button>
+									</Center>
+									<View style={{ marginHorizontal: 10 }} />
+									<Center>
+										<Button
+											onPress={() =>
+												handleJoin(
+													zonaToJoin.id,
+													puntosConDireccion[selectedUserPoint].punto.id,
+												)
+											}
+										>
+											Unirme al circuito
+										</Button>
+									</Center>
+								</View>
+							) : (
+								<View
+									style={{
+										width: '100%',
+										flexDirection: 'row',
+										justifyContent: 'center',
+									}}
+								>
+									<Button onPress={() => handleCloseModal()}>Cerrar</Button>
+								</View>
+							)}
+						</Modal.Footer>
+					</Modal.Content>
+				</Modal>
+			) : (
+				''
+			)}
+		</>
+	)	
+}  
 
 type PuntoReciclajeModalProps = {
 	show: boolean

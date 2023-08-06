@@ -124,7 +124,7 @@ export type PolylineResponse = {
 	longitud: number
 }
 
-export type ZonasResponse = {
+export type ZonaResponse = {
 	id: number
 	nombre: string
 	polyline: PolylineResponse[]
