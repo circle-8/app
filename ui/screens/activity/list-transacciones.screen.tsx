@@ -7,7 +7,8 @@ import {
 	View,
 	Text,
 	WarningOutlineIcon,
-	Card,
+	Box,
+	Center,
 } from 'native-base'
 import { match } from '../../../utils/either'
 import { TransaccionService } from '../../../services/transaccion.service'
@@ -43,77 +44,90 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 
 	return (
 		<ScrollView alignContent="center">
-			{transactions && transactions.length > 0 ? (
-				transactions.map((transaction, idx) => (
+			<Center w="100%">
+				<Box mb={5} />
+				{transactions && transactions.length > 0 ? (
+					transactions.map((transaction, idx) => (
+						<>
+							<TouchableOpacity
+								key={`userT-${idx}`}
+								onPress={() =>
+									navigation.navigate(ActivityRoutes.viewTransaccion, {
+										ciudadanoId,
+										transaccionId: transaction.id,
+									})
+								}
+							>
+								<Box
+									key={`box-${idx}`}
+									mb={2}
+									p={2}
+									borderWidth={1}
+									borderColor="gray.300"
+									borderRadius="md"
+									shadow={1}
+									width={350}
+									background={'white'}
+								>
+									<HStack
+										space={2}
+										mt="0.5"
+										key={`stack-${idx}`}
+										alignItems="center"
+									>
+										<Text fontSize="sm">Transaccion #{transaction.id}</Text>
+									</HStack>
+									<HStack
+										space={2}
+										mt="0.5"
+										key={`name-${idx}`}
+										alignItems="center"
+									>
+										<Text fontSize="sm" numberOfLines={4}>
+											Punto de reciclaje {transaction.puntoReciclajeId}
+										</Text>
+									</HStack>
+									<HStack
+										space={2}
+										mt="0.5"
+										key={`date-${idx}`}
+										alignItems="center"
+									>
+										<Text fontSize="sm" numberOfLines={4}>
+											{formatFecha(transaction.fechaCreacion, true)}
+										</Text>
+									</HStack>
+									<HStack
+										space={2}
+										mt="0.5"
+										key={`date-retiro-${idx}`}
+										alignItems="center"
+									>
+										<Text fontSize="sm" numberOfLines={4}>
+											{transaction.fechaRetiro && 'Ya completada'}
+										</Text>
+									</HStack>
+								</Box>
+							</TouchableOpacity>
+						</>
+					))
+				) : (
 					<>
-						<TouchableOpacity
-							key={`userT-${idx}`}
-							onPress={() =>
-								navigation.navigate(ActivityRoutes.viewTransaccion, {
-									ciudadanoId,
-									transaccionId: transaction.id,
-								})
-							}
+						<View
+							style={{
+								flex: 1,
+								justifyContent: 'center',
+								alignItems: 'center',
+							}}
 						>
-							<Card key={`box-${idx}`} mb={2} p={2}>
-								<HStack
-									space={2}
-									mt="0.5"
-									key={`stack-${idx}`}
-									alignItems="center"
-								>
-									<Text fontSize="sm">Transaccion #{transaction.id}</Text>
-								</HStack>
-								<HStack
-									space={2}
-									mt="0.5"
-									key={`name-${idx}`}
-									alignItems="center"
-								>
-									<Text fontSize="sm" numberOfLines={4}>
-										Punto de reciclaje {transaction.puntoReciclajeId}
-									</Text>
-								</HStack>
-								<HStack
-									space={2}
-									mt="0.5"
-									key={`date-${idx}`}
-									alignItems="center"
-								>
-									<Text fontSize="sm" numberOfLines={4}>
-										{formatFecha(transaction.fechaCreacion, true)}
-									</Text>
-								</HStack>
-								<HStack
-									space={2}
-									mt="0.5"
-									key={`date-retiro-${idx}`}
-									alignItems="center"
-								>
-									<Text fontSize="sm" numberOfLines={4}>
-										{transaction.fechaRetiro && 'Ya completada'}
-									</Text>
-								</HStack>
-							</Card>
-						</TouchableOpacity>
+							<WarningOutlineIcon size={5} color="red.600" />
+							<Text style={{ fontSize: 14, textAlign: 'center' }}>
+								No dispones de transacciones abiertas
+							</Text>
+						</View>
 					</>
-				))
-			) : (
-				<>
-					<View
-						style={{
-							flex: 1,
-							justifyContent: 'center',
-							alignItems: 'center',
-						}}
-					>
-						<WarningOutlineIcon size={5} color="red.600" />
-						<Text style={{ fontSize: 14, textAlign: 'center' }}>
-							No dispones de transacciones abiertas
-						</Text>
-					</View>
-				</>
-			)}
+				)}
+			</Center>
 		</ScrollView>
 	)
 }

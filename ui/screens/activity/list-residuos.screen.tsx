@@ -14,7 +14,9 @@ import {
 	Center,
 	Column,
 	Row,
+	ScrollView,
 	Text,
+	View,
 	useToast,
 } from 'native-base'
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons'
@@ -68,86 +70,105 @@ export const ListResiduos = ({ navigation }: Props) => {
 	}
 
 	return (
-		<Box p="3">
-			{residuos.map(r => (
-				<Card
-					key={r.id}
-					shadow="0"
-					borderWidth="0"
-					borderRadius="0"
-					my="1"
-					p="5"
-				>
-					<Row>
-						<Column width="80%">
-							<Text>Residuo #{r.id}</Text>
-							<Text>{r.tipoResiduo.nombre}</Text>
-							<Text>
-								{r.limitDate?.toDateString() || 'Sin fecha limite de retiro'}
-							</Text>
-							<Text>{r.descripcion}</Text>
-						</Column>
-						<Center flex="1">
-							<Column space="3">
-								<TouchableOpacity
-									onPress={() => {
-										setSelectedResiduo(r.id)
-										setSelectedAction('FULFILL')
-									}}
-								>
-									<FontAwesome5 name="box-open" size={28} alignSelf="center" />
-								</TouchableOpacity>
-								<TouchableOpacity
-									onPress={() => {
-										toast.show({ description: 'NO IMPLEMENTADO' })
-									}}
-								>
-									<FontAwesome name="pencil" size={28} alignSelf="center" />
-								</TouchableOpacity>
-								<TouchableOpacity
-									onPress={() => {
-										setSelectedResiduo(r.id)
-										setSelectedAction('DELETE')
-									}}
-								>
-									<FontAwesome name="trash" size={28} alignSelf="center" />
-								</TouchableOpacity>
-							</Column>
+		<ScrollView alignContent="center">
+			<Center w="100%">
+				<Box mb={5} />
+				{residuos.map(r => (
+					<Box
+						mb={2}
+						p={2}
+						borderWidth={1}
+						borderColor="gray.300"
+						borderRadius="md"
+						shadow={1}
+						width={350}
+						background={'white'}
+					>
+						<Text>Residuo #{r.id}</Text>
+						<Text>{r.tipoResiduo.nombre}</Text>
+						<Text>
+							{r.limitDate?.toLocaleDateString() ||
+								'Sin fecha limite de retiro'}
+						</Text>
+						<Text>{r.descripcion}</Text>
+						<Center>
+						<Box mb={2} />
+							<View
+								style={{
+									flexDirection: 'row',
+									justifyContent: 'space-between',
+									alignItems: 'center',
+								}}
+							>
+								<View style={{ marginHorizontal: 20 }}>
+									<TouchableOpacity
+										onPress={() => {
+											setSelectedResiduo(r.id)
+											setSelectedAction('FULFILL')
+										}}
+									>
+										<FontAwesome5
+											name="box-open"
+											size={28}
+											alignSelf="center"
+										/>
+									</TouchableOpacity>
+								</View>
+								<View style={{ marginHorizontal: 20 }}>
+									<TouchableOpacity
+										onPress={() => {
+											toast.show({ description: 'NO IMPLEMENTADO' })
+										}}
+									>
+										<FontAwesome name="pencil" size={28} alignSelf="center" />
+									</TouchableOpacity>
+								</View>
+								<View style={{ marginHorizontal: 20 }}>
+									<TouchableOpacity
+										onPress={() => {
+											setSelectedResiduo(r.id)
+											setSelectedAction('DELETE')
+										}}
+									>
+										<FontAwesome name="trash" size={28} alignSelf="center" />
+									</TouchableOpacity>
+								</View>
+							</View>
 						</Center>
-					</Row>
-				</Card>
-			))}
-			<AlertBeforeAction
-				isOpen={selectedResiduo && selectedAction === 'DELETE'}
-				action={'DELETE'}
-				onCancel={closeAlert}
-				onOk={async () => {
-					const error = await ResiduoService.delete(selectedResiduo)
-					caseMaybe(
-						error,
-						err => toast.show({ description: err }),
-						() => toast.show({ description: '¡Residuo eliminado!' }),
-					)
-					closeAlert()
-					reload()
-				}}
-			/>
-			<AlertBeforeAction
-				isOpen={selectedResiduo && selectedAction === 'FULFILL'}
-				action={'FULFILL'}
-				onCancel={closeAlert}
-				onOk={async () => {
-					const error = await ResiduoService.fulfill(selectedResiduo)
-					caseMaybe(
-						error,
-						err => toast.show({ description: err }),
-						() => toast.show({ description: '¡Residuo retirado!' }),
-					)
-					closeAlert()
-					reload()
-				}}
-			/>
-		</Box>
+					</Box>
+				))}
+				<AlertBeforeAction
+					isOpen={selectedResiduo && selectedAction === 'DELETE'}
+					action={'DELETE'}
+					onCancel={closeAlert}
+					onOk={async () => {
+						const error = await ResiduoService.delete(selectedResiduo)
+						caseMaybe(
+							error,
+							err => toast.show({ description: err }),
+							() => toast.show({ description: '¡Residuo eliminado!' }),
+						)
+						closeAlert()
+						reload()
+					}}
+				/>
+				<AlertBeforeAction
+					isOpen={selectedResiduo && selectedAction === 'FULFILL'}
+					action={'FULFILL'}
+					onCancel={closeAlert}
+					onOk={async () => {
+						const error = await ResiduoService.fulfill(selectedResiduo)
+						caseMaybe(
+							error,
+							err => toast.show({ description: err }),
+							() => toast.show({ description: '¡Residuo retirado!' }),
+						)
+						closeAlert()
+						reload()
+					}}
+				/>
+			</Center>
+		</ScrollView>
 	)
 }
 
