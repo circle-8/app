@@ -567,8 +567,6 @@ const CircuitosReciclaje = (props: CircuitosReciclajeProps) => {
 	}
 
 	const handleJoin  = async (id: number, puntoReciclajeId: number) => {
-		console.log(id)
-		console.log(puntoReciclajeId)
 		const solAgregada = await ZonasService.postJoinCircuito(
 			id,
 			puntoReciclajeId,
@@ -631,7 +629,8 @@ const CircuitosReciclaje = (props: CircuitosReciclajeProps) => {
 	  
 	React.useEffect(() => {
 		setModalJoin(false)
-		setModalFirstStep(true)
+		setModalFirstStep(false)
+		setModalZonaSelected(false)
 		setSelectedUserPoint(null)
 	}, [])
 
@@ -649,7 +648,8 @@ const CircuitosReciclaje = (props: CircuitosReciclajeProps) => {
 							strokeColor="#8CB085"
 							fillColor="rgba(132, 209, 121, 0.2)"
 							strokeWidth={2}
-							onPress={() => handleZonaPress(zona)}
+							tappable={true}
+    						onPress={() => handleZonaPress(zona)}
 						/>
 					))
 				) : (
@@ -677,7 +677,6 @@ const CircuitosReciclaje = (props: CircuitosReciclajeProps) => {
 			) : (
 				''
 			)}
-			{props.isViewZonas && modalZonaSelected ? (
 				<Modal
 					isOpen={modalZonaSelected}
 					onClose={() => handleCloseModal()}
@@ -943,9 +942,6 @@ const CircuitosReciclaje = (props: CircuitosReciclajeProps) => {
 						</Modal.Footer>
 					</Modal.Content>
 				</Modal>
-			) : (
-				''
-			)}
 		</>
 	)	
 }  
