@@ -3,6 +3,7 @@ import {
 	PuntoReciclajeResponse,
 	PuntoResiduoResponse,
 	PuntoVerdeResponse,
+	RecorridoResponse,
 	ResiduoResponse,
 	SolicitudResponse,
 	TipoResiduoResponse,
@@ -46,3 +47,9 @@ export type PuntoResiduo = PuntoBase & PuntoResiduoResponse
 export type Punto = PuntoReciclaje | PuntoVerde | PuntoResiduo
 export type Solicitud = SolicitudResponse
 export type Transaccion = TransaccionResponse
+
+export type Recorrido = RecorridoResponse & {
+	date: Date
+	initDate?: Date
+	endDate?: Date
+}
