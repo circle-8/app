@@ -70,8 +70,9 @@ export const ListResiduos = ({ navigation }: Props) => {
 		<ScrollView alignContent="center">
 			<Center w="100%">
 				<Box mb={5} />
-				{residuos.map(r => (
+				{residuos.map((r, idx) => (
 					<Box
+						key={`box-${idx}`}
 						mb={2}
 						p={2}
 						borderWidth={1}
@@ -211,7 +212,7 @@ const AlertBeforeAction = ({ isOpen, action, onCancel, onOk }: AlertProps) => {
 		action === 'DELETE'
 			? 'Esto va a eliminar el residuo, y no podrá ser retirado' :
 		action === 'DELIVERY' 
-			? 'se añadiria el residuo a un recorrido' 
+			? 'Se añadira el residuo a un recorrido' 
 			: 'Esto marcará el residuo como retirado y no podrá volver a ser retirado'
 	return (
 		<AlertDialog

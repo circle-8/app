@@ -24,9 +24,7 @@ const getAll = async (
 	if (f.ciudadanoId) url += '&ciudadano_id=' + f.ciudadanoId
 	if (f.puntoResiduoId) url += '&punto_residuo_id=' + f.puntoResiduoId
 	if (f.expandRecorrido) url += '&expand=recorridos'
-	console.log(url)
 	const res = await Http.get<ListResponse<ZonaResponse>>(url)
-	console.log(res)
 	return map(
 		res,
 		p => p.data.map(convertZonaResponseToZona),
