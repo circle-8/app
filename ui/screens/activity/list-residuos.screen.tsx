@@ -2,7 +2,7 @@ import React from 'react'
 import { ActivityRouteParams } from '../../../constants/routes'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { LoadingScreen } from '../../components/loading.component'
-import { Residuo } from '../../../services/types'
+import { Residuo, Zona } from '../../../services/types'
 import { UserService } from '../../../services/user.service'
 import { ResiduoService } from '../../../services/residuo.service'
 import { caseMaybe, match } from '../../../utils/either'
@@ -10,16 +10,13 @@ import {
 	AlertDialog,
 	Box,
 	Button,
-	Card,
 	Center,
-	Column,
-	Row,
 	ScrollView,
 	Text,
 	View,
 	useToast,
 } from 'native-base'
-import { FontAwesome, FontAwesome5 } from '@expo/vector-icons'
+import { FontAwesome, FontAwesome5, MaterialCommunityIcons  } from '@expo/vector-icons'
 import { TouchableOpacity } from 'react-native'
 
 type Props = NativeStackScreenProps<ActivityRouteParams, 'ListResiduos'>
@@ -133,6 +130,16 @@ export const ListResiduos = ({ navigation }: Props) => {
 										<FontAwesome name="trash" size={28} alignSelf="center" />
 									</TouchableOpacity>
 								</View>
+								<View style={{ marginHorizontal: 20 }}>
+									<TouchableOpacity
+										onPress={() => {
+											setSelectedResiduo(r.id)
+											setSelectedAction('DELIVERY')
+										}}
+									>
+										<MaterialCommunityIcons name="truck-delivery" size={28} alignSelf="center" color="black" />
+									</TouchableOpacity>
+								</View>
 							</View>
 						</Center>
 					</Box>
@@ -167,12 +174,27 @@ export const ListResiduos = ({ navigation }: Props) => {
 						reload()
 					}}
 				/>
+				<AlertBeforeAction
+					isOpen={selectedResiduo && selectedAction === 'DELIVERY'}
+					action={'DELIVERY'}
+					onCancel={closeAlert}
+					onOk={async () => {
+						const error = await ResiduoService.addRecorrido(selectedResiduo)
+						caseMaybe(
+							error,
+							err => toast.show({ description: err }),
+							() => toast.show({ description: '¡Residuo agregado correctamente!' }),
+						)
+						closeAlert()
+						reload()
+					}}
+				/>
 			</Center>
 		</ScrollView>
 	)
 }
 
-type ActionType = 'DELETE' | 'FULFILL'
+type ActionType = 'DELETE' | 'FULFILL' | 'DELIVERY'
 type AlertProps = {
 	isOpen: boolean
 	action: ActionType
@@ -182,10 +204,14 @@ type AlertProps = {
 const AlertBeforeAction = ({ isOpen, action, onCancel, onOk }: AlertProps) => {
 	const cancelRef = React.useRef(null)
 	const title =
-		action === 'DELETE' ? 'Eliminar residuo' : 'Marcar residuo como retirado'
+		action === 'DELETE' ? 'Eliminar residuo' : 
+		action === 'DELIVERY' ? 'Agregar residuo a un circuito de reciclaje'
+			: 'Marcar residuo como retirado'
 	const body =
 		action === 'DELETE'
-			? 'Esto va a eliminar el residuo, y no podrá ser retirado'
+			? 'Esto va a eliminar el residuo, y no podrá ser retirado' :
+		action === 'DELIVERY' 
+			? 'se añadiria el residuo a un recorrido' 
 			: 'Esto marcará el residuo como retirado y no podrá volver a ser retirado'
 	return (
 		<AlertDialog
@@ -198,17 +224,23 @@ const AlertBeforeAction = ({ isOpen, action, onCancel, onOk }: AlertProps) => {
 				<AlertDialog.Header>{title}</AlertDialog.Header>
 				<AlertDialog.Body>{body}</AlertDialog.Body>
 				<AlertDialog.Footer>
-					<Button.Group space={2}>
-						<Button onPress={onCancel} ref={cancelRef}>
-							Cancelar
-						</Button>
-						<Button
-							colorScheme={action === 'DELETE' ? 'danger' : 'primary'}
-							onPress={onOk}
-						>
-							{action === 'DELETE' ? 'Eliminar' : 'Marcar Retirado'}
-						</Button>
-					</Button.Group>
+					<Center flex={1}>
+						<Button.Group space={2}>
+							<Button onPress={onCancel} ref={cancelRef}>
+								Cancelar
+							</Button>
+							<Button
+								colorScheme={action === 'DELETE' ? 'danger' : 'primary'}
+								onPress={onOk}
+							>
+								{action === 'DELETE'
+									? 'Eliminar'
+									: action === 'DELIVERY'
+									? 'Agregar a recorrido'
+									: 'Marcar Retirado'}
+							</Button>
+						</Button.Group>
+					</Center>
 				</AlertDialog.Footer>
 			</AlertDialog.Content>
 		</AlertDialog>
