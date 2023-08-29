@@ -9,6 +9,7 @@ import {
 	TipoResiduoResponse,
 	TransaccionResponse,
 	UserResponse,
+	ZonaResponse,
 } from './responses'
 
 export type TipoUsuario =
@@ -41,13 +42,17 @@ type PuntoBase = {
 	titulo: string
 }
 
+export type Zona = ZonaResponse & {
+	puedeUnirse: boolean
+	puntosDentroZona: Punto[]
+}
+
 export type PuntoVerde = PuntoBase & PuntoVerdeResponse
 export type PuntoReciclaje = PuntoBase & PuntoReciclajeResponse
 export type PuntoResiduo = PuntoBase & PuntoResiduoResponse
 export type Punto = PuntoReciclaje | PuntoVerde | PuntoResiduo
 export type Solicitud = SolicitudResponse
 export type Transaccion = TransaccionResponse
-
 export type Recorrido = RecorridoResponse & {
 	date: Date
 	initDate?: Date

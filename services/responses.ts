@@ -126,14 +126,17 @@ export type TransaccionResponse = {
 
 export type RecicladorResponse = {
 	id: number
+
 }
 
 export type ZonaResponse = {
 	id: number
-	polyline: { latitud: number; longitud: number }[]
-	organizacionUri: string
+	nombre: string
 	organizacionId: number
 	tipoResiduo: TipoResiduoResponse[]
+	recorridos: RecorridoResponse[]
+	polyline: { latitud: number; longitud: number }[]
+	organizacionUri: string
 }
 
 export type RecorridoResponse = {

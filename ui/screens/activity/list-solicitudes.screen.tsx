@@ -398,7 +398,9 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 														key={`stack-${idx}`}
 														alignItems="center"
 													>
-														<Text fontSize="sm">Transaccion #{transaction.id}</Text>
+														<Text fontSize="sm">
+															Transaccion #{transaction.id}
+														</Text>
 													</HStack>
 													<HStack
 														space={2}
@@ -484,27 +486,32 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 			)}
 			<Center w="100%">
 				<Box mb={8} />
-				<TouchableOpacity
-					onPress={() => handleSolicitantePress()}
-					style={{
-						borderRadius: 8,
-						paddingVertical: 10,
-						paddingHorizontal: 16,
-						backgroundColor: showSolicitante ? '#D9F3D5' : 'white',
-						width: 280,
-						height: 40,
-					}}
-				>
-					<HStack space={2} justifyContent="space-between" alignItems="center">
-						<Text color="black" fontSize="md" bold>
-							Solicitudes realizadas por mi
-						</Text>
-						{showSolicitante ? (
-							<ChevronUpIcon size="5" mt="0.5" color="emerald.500" />
-						) : (
-							<ChevronDownIcon size="5" mt="0.5" color="emerald.500" />
-						)}
-					</HStack>
+				<TouchableOpacity onPress={() => handleSolicitantePress()}>
+					<Box
+						mb={2}
+						p={2}
+						borderWidth={1}
+						borderColor="gray.300"
+						borderRadius="md"
+						shadow={1}
+						width={280}
+						background={showSolicitante ? '#D9F3D5' : 'white'}
+					>
+						<HStack
+							space={2}
+							justifyContent="space-between"
+							alignItems="center"
+						>
+							<Text color="black" fontSize="md" bold>
+								Solicitudes realizadas por mi
+							</Text>
+							{showSolicitante ? (
+								<ChevronUpIcon size="5" mt="0.5" color="emerald.500" />
+							) : (
+								<ChevronDownIcon size="5" mt="0.5" color="emerald.500" />
+							)}
+						</HStack>
+					</Box>
 				</TouchableOpacity>
 				{showSolicitante ? (
 					<View>
@@ -637,28 +644,33 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 			</Center>
 			<Center>
 				<Box mb={4} />
-				<TouchableOpacity
-					onPress={() => handleSolicitadoPress()}
-					style={{
-						borderRadius: 8,
-						paddingVertical: 10,
-						paddingHorizontal: 16,
-						backgroundColor: showSolicitado ? '#D9F3D5' : 'white',
-						width: 280,
-						height: 40,
-					}}
-				>
-					<HStack space={2} justifyContent="space-between" alignItems="center">
-						<Text color="black" fontSize="md" bold>
-							Solicitudes realizadas a mi
-						</Text>
+				<TouchableOpacity onPress={() => handleSolicitadoPress()}>
+					<Box
+						mb={2}
+						p={2}
+						borderWidth={1}
+						borderColor="gray.300"
+						borderRadius="md"
+						shadow={1}
+						width={280}
+						background={showSolicitado ? '#D9F3D5' : 'white'}
+					>
+						<HStack
+							space={2}
+							justifyContent="space-between"
+							alignItems="center"
+						>
+							<Text color="black" fontSize="md" bold>
+								Solicitudes realizadas a mi
+							</Text>
 
-						{showSolicitado ? (
-							<ChevronUpIcon size="5" mt="0.5" color="emerald.500" />
-						) : (
-							<ChevronDownIcon size="5" mt="0.5" color="emerald.500" />
-						)}
-					</HStack>
+							{showSolicitado ? (
+								<ChevronUpIcon size="5" mt="0.5" color="emerald.500" />
+							) : (
+								<ChevronDownIcon size="5" mt="0.5" color="emerald.500" />
+							)}
+						</HStack>
+					</Box>
 				</TouchableOpacity>
 				{showSolicitado ? (
 					<>

@@ -8,11 +8,14 @@ import {
 	FormControl,
 	Heading,
 	Input,
+	Modal,
 	ScrollView,
 	Select,
 	TextArea,
 	VStack,
+	View,
 	useToast,
+	Text,
 } from 'native-base'
 import { TipoResiduoService } from '../../../services/tipos.service'
 import { match } from '../../../utils/either'
@@ -117,6 +120,7 @@ const Form = ({
 	const [errors, setErrors] = React.useState<Errors>({ has: false })
 	const [showDatePicker, setShowDatePicker] = React.useState(false)
 	const [loading, setLoading] = React.useState(false)
+	const [selectedDate, setSelectedDate] = React.useState(null);
 
 	const isValid = () => {
 		const newErrors: Errors = { has: false }
@@ -136,9 +140,13 @@ const Form = ({
 
 	const onChangeDate = (event, selected) => {
 		const currentDate = selected || formData.fechaLimite
-		setShowDatePicker(false)
-		setData({ ...formData, fechaLimite: currentDate })
+		setSelectedDate(currentDate)
 	}
+
+	const handleSetDate = () => {
+		setShowDatePicker(false)
+		setData({ ...formData, fechaLimite: selectedDate });
+	  };
 
 	const doSubmit = async () => {
 		setLoading(true)
@@ -164,13 +172,28 @@ const Form = ({
 	return (
 		<>
 			{showDatePicker && (
-				<DateTimePicker
-					value={formData.fechaLimite || new Date()}
-					mode="date"
-					display="default"
-					onChange={onChangeDate}
-					minimumDate={new Date()}
-				/>
+				<Modal isOpen={showDatePicker} onClose={() => setShowDatePicker(false)}>
+					<Modal.Content>
+						<Modal.CloseButton />
+						<Modal.Header alignItems="center">
+							<Text bold fontSize="xl">
+								Selecciona fecha limite
+							</Text>
+						</Modal.Header>
+						<Modal.Body>
+							<View style={{ flex: 1, justifyContent: 'flex-end' }}>
+								<DateTimePicker
+									value={selectedDate || new Date()}
+									mode="date"
+									display="inline"
+									minimumDate={new Date()}
+									onChange={onChangeDate}
+								/>
+								<Button onPress={() => handleSetDate()}> ok </Button>
+							</View>
+						</Modal.Body>
+					</Modal.Content>
+				</Modal>
 			)}
 			<FormControl isRequired isInvalid={'tipo' in errors} isReadOnly>
 				<FormControl.Label>Tipo de Residuo</FormControl.Label>
