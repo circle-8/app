@@ -7,6 +7,7 @@ type Filter = {
 	ciudadanoId?: number
 	puntoResiduoId?: number
 	expandRecorrido?: boolean
+	recicladorId?: number
 }
 
 const convertZonaResponseToZona = (r: ZonaResponse): Zona => {
@@ -23,6 +24,7 @@ const getAll = async (
 	let url = '/zonas?'
 	if (f.ciudadanoId) url += '&ciudadano_id=' + f.ciudadanoId
 	if (f.puntoResiduoId) url += '&punto_residuo_id=' + f.puntoResiduoId
+	if (f.recicladorId) url += '&reciclador_id=' + f.recicladorId
 	if (f.expandRecorrido) url += '&expand=recorridos'
 	const res = await Http.get<ListResponse<ZonaResponse>>(url)
 	return map(
