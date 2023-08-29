@@ -124,10 +124,18 @@ export type PolylineResponse = {
 	longitud: number
 }
 
+export type RecorridoResponse = {
+	id: number
+	fechaRetiro: string
+	recicladorId: number
+
+}
+
 export type ZonaResponse = {
 	id: number
 	nombre: string
 	polyline: PolylineResponse[]
 	organizacionId: number
 	tipoResiduo: TipoResiduoResponse[]
+	recorridos: RecorridoResponse[]
 }

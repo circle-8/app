@@ -197,7 +197,7 @@ export const Home = ({ navigation }: Props) => {
 	}
 
 	const handleGetZonas = async () => {
-		const getZonas = await ZonasService.getAll()
+		const getZonas = await ZonasService.getAll({})
 		match(
 			getZonas,
 			t => setPuedeUnirseZona(t),

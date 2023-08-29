@@ -128,6 +128,13 @@ const del = async (id: number): Promise<Maybe<ErrorMessage>> => {
 	return maybeRight(mapRight(res, err => err.message))
 }
 
+const addRecorrido = async (id: number): Promise<Maybe<ErrorMessage>> => {
+	const url = `/residuo/${id}/reciclaje`
+	const res = await Http.post<ResiduoResponse>(url)
+
+	return maybeRight(mapRight(res, err => err.message))
+}
+
 export const ResiduoService = {
 	getAll,
 	postSolicitarDeposito,
@@ -136,4 +143,5 @@ export const ResiduoService = {
 	fulfill,
 	delete: del,
 	mapResponse,
+	addRecorrido,
 }
