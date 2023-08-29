@@ -20,7 +20,10 @@ export type UserResponse = {
 	nombre: string
 	email: string
 	tipoUsuario: TipoUsuario
-	ciudadanoId: number
+	ciudadanoId?: number
+	recicladorUrbanoId?: number
+	organizacionId?: number
+	zonaId?: number
 }
 
 export type TokenResponse = {
@@ -47,7 +50,6 @@ export type CiudadanoResponse = {
 	email: string
 	tipoUsuario: TipoUsuario
 }
-
 
 type PuntoResponseBase = {
 	id: number
@@ -80,7 +82,10 @@ export type PuntoReciclajeResponse = PuntoVerdeResponse & {
 	titulo: string
 }
 
-export type PuntoResponse = PuntoResiduoResponse | PuntoVerdeResponse | PuntoReciclajeResponse
+export type PuntoResponse =
+	| PuntoResiduoResponse
+	| PuntoVerdeResponse
+	| PuntoReciclajeResponse
 
 export type ResiduoResponse = {
 	id: number
@@ -119,23 +124,43 @@ export type TransaccionResponse = {
 	residuos?: ResiduoResponse[]
 }
 
-export type PolylineResponse = {
-	latitud: number
-	longitud: number
-}
-
-export type RecorridoResponse = {
+export type RecicladorResponse = {
 	id: number
-	fechaRetiro: string
-	recicladorId: number
 
 }
 
 export type ZonaResponse = {
 	id: number
 	nombre: string
-	polyline: PolylineResponse[]
 	organizacionId: number
 	tipoResiduo: TipoResiduoResponse[]
 	recorridos: RecorridoResponse[]
+	polyline: { latitud: number; longitud: number }[]
+	organizacionUri: string
+}
+
+export type RecorridoResponse = {
+	id: number
+	fechaRetiro: string
+	fechaInicio?: string
+	fechaFin?: string
+	recicladorUri: string
+	recicladorId: number
+	reciclador?: RecicladorResponse
+	zonaUri: string
+	zonaId: number
+	zona?: ZonaResponse
+	puntoInicio: {
+		latitud: number
+		longitud: number
+	}
+	puntoFin: {
+		latitud: number
+		longitud: number
+	}
+	puntos?: {
+		latitud: number,
+		longitud: number,
+		residuo: ResiduoResponse
+	}[]
 }
