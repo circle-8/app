@@ -19,6 +19,7 @@ import {
 	InfoOutlineIcon,
 	WarningOutlineIcon,
 	CheckCircleIcon,
+	useToast,
 } from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { FontAwesome } from '@expo/vector-icons'
@@ -61,6 +62,7 @@ const longitudeDelta = 0.01
 type Props = NativeStackScreenProps<MainRoutesParams, 'Home'>
 
 export const Home = ({ navigation }: Props) => {
+	const toast = useToast()
 	const [isLoading, setLoading] = React.useState(true)
 	const [userCoords, setUserCoords] = React.useState<Coord>()
 	const [points, setPoints] = React.useState<Punto[]>([])
@@ -221,9 +223,15 @@ export const Home = ({ navigation }: Props) => {
 		const getZonas = await ZonasService.getAll({})
 		match(
 			getZonas,
-			t => setPuedeUnirseZona(t),
+			t => {
+				if (t.length === 0) {
+					toast.show({ description: "No hay circuitos activos." });
+				} else {
+					setPuedeUnirseZona(t);
+				}
+			},
 			err => {
-				setZonas(null), setModalErrorZonas(true)
+				toast.show({ description: "Ocurrio un error al obtener los circuitos, reintenta." })
 			},
 		)
 		setIsViewZonas(!isViewZonas)
@@ -318,8 +326,6 @@ export const Home = ({ navigation }: Props) => {
 						<CircuitosReciclaje
 							isViewZonas={isViewZonas}
 							zonas={zonas}
-							modalErrorZonas={modalErrorZonas}
-							setModalErrorZonas={setModalErrorZonas}
 							setZonasSelected={setZonasSelected}
 							setModalZonaSelected={setModalZonaSelected}
 							setModalFirstStep={setModalFirstStep}
@@ -475,8 +481,6 @@ type PuntoConDireccion = {
 type CircuitosReciclajeProps = {
 	isViewZonas: boolean
 	zonas: Zona[]
-	modalErrorZonas
-	setModalErrorZonas
 	setZonasSelected: (z: Zona[]) => void
 	setModalZonaSelected: (b: boolean) => void
 	setModalFirstStep: (b: boolean) => void
@@ -606,8 +610,8 @@ const CircuitosReciclaje = (props: CircuitosReciclajeProps) => {
 
 	return (
 		<>
-			{props.isViewZonas ? (
-				props.zonas && props.zonas.length > 0 ? (
+			{props.isViewZonas && (
+				props.zonas && props.zonas.length > 0 && (
 					props.zonas.map((zona, idx) => (
 						<Polygon
 							key={`polygon-${idx}`}
@@ -622,31 +626,7 @@ const CircuitosReciclaje = (props: CircuitosReciclajeProps) => {
 							onPress={() => handleZonaPress(zona)}
 						/>
 					))
-				) : (
-					<Modal
-						isOpen={props.modalErrorZonas}
-						onClose={() => props.handleCloseModal()}
-						size="lg"
-					>
-						<Modal.Content>
-							<Modal.CloseButton />
-							<Modal.Header alignItems="center">
-								<Text bold fontSize="xl">
-									Error
-								</Text>
-							</Modal.Header>
-							<Modal.Body>
-								<Text fontSize="md">
-									Ocurrió un error con los circuitos de reciclaje, reintenta más
-									tarde.
-								</Text>
-							</Modal.Body>
-						</Modal.Content>
-					</Modal>
-				)
-			) : (
-				''
-			)}
+				))}
 		</>
 	)
 }

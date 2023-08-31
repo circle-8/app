@@ -1,7 +1,7 @@
 import React from 'react'
 import { TouchableOpacity } from 'react-native'
-import MapView, { Marker, Polyline } from 'react-native-maps'
-import { Box, Center, Flex, Row, Text, useToast } from 'native-base'
+import MapView, { Marker, Polygon, Polyline } from 'react-native-maps'
+import { Box, Center, Flex, Modal, Row, Text, useToast } from 'native-base'
 import { FontAwesome } from '@expo/vector-icons'
 import { colors } from '../../../constants/styles'
 import * as Location from 'expo-location'
@@ -11,8 +11,9 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { MainRoutesParams } from '../../../constants/routes-reciclador'
 import { RecorridoService } from '../../../services/recorrido.service'
 import { UserService } from '../../../services/user.service'
-import { Recorrido } from '../../../services/types'
+import { Recorrido, Zona } from '../../../services/types'
 import { caseMaybe, map, match } from '../../../utils/either'
+import { ZonasService } from '../../../services/zonas.service'
 
 type Coord = {
 	latitude: number
@@ -39,6 +40,7 @@ export const HomeReciclador = ({ navigation }: Props) => {
 	}>()
 	const [address, setAddress] =
 		React.useState<Location.LocationGeocodedAddress>()
+	const [zonas, setZonas] = React.useState<Zona[]>()
 
 	const getRecorridos = async () => {
 		const user = await UserService.getCurrent()
@@ -93,9 +95,24 @@ export const HomeReciclador = ({ navigation }: Props) => {
 		}
 	}
 
+	const getZonas = async () => {
+		const user = await UserService.getCurrent()
+		const zonas = await ZonasService.getAll({
+			recicladorId: user.recicladorUrbanoId,
+		})
+		match(
+			zonas,
+			t => setZonas(t),
+			err => {
+				toast.show({ description: err })
+			},
+		)
+	}
+
 	const initialLoad = async () => {
 		await getUserLocation()
 		await getRecorridos()
+		await getZonas()
 		setLoading(false)
 	}
 
@@ -208,6 +225,22 @@ export const HomeReciclador = ({ navigation }: Props) => {
 								]}
 							/>
 						)}
+						{zonas &&
+							zonas.length > 0 &&
+							zonas.map((zona, idx) => (
+								<Polygon
+									key={`polygon-${idx}`}
+									coordinates={zona.polyline.map(coord => ({
+										latitude: coord.latitud,
+										longitude: coord.longitud,
+									}))}
+									strokeColor="#8CB085"
+									fillColor="rgba(132, 209, 121, 0.2)"
+									strokeWidth={2}
+									tappable={true}
+								/>
+							))}
+						<ZonasReciclador zonas={zonas} />
 					</MapView>
 				</Box>
 				{todayRecorrido && todayRecorrido.initDate && (
@@ -343,4 +376,33 @@ const BelowBox = ({
 	}
 
 	return <Row alignContent="center">{content}</Row>
+}
+
+type ZonasRecicladorProps = {
+	zonas: Zona[]
+}
+
+const ZonasReciclador = (props: ZonasRecicladorProps) => {
+
+	return (
+		<>
+			{props.zonas && props.zonas.length > 0 ? (
+					props.zonas.map((zona, idx) => (
+						<Polygon
+							key={`polygon-${idx}`}
+							coordinates={zona.polyline.map(coord => ({
+								latitude: coord.latitud,
+								longitude: coord.longitud,
+							}))}
+							strokeColor="#8CB085"
+							fillColor="rgba(132, 209, 121, 0.2)"
+							strokeWidth={2}
+							tappable={true}
+						/>
+					))
+				) :  (
+				''
+			)}
+		</>
+	)
 }
