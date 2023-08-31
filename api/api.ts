@@ -12,7 +12,7 @@ const doFetch = async <T>(
 	body?: unknown
 ): Promise<Either<T, ErrorResponse>> => {
 	try {
-		const resJSON = await fetch('http://circle8.germanmerkel.com.ar' + url, {
+		const resJSON = await fetch('https://circle8.germanmerkel.com.ar' + url, {
 			method,
 			body: JSON.stringify(body),
 		})
