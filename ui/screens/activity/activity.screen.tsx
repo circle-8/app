@@ -7,6 +7,14 @@ import { ActivityRoutes, ActivityRouteParams, TabRoutes } from '../../../constan
 type Props = NativeStackScreenProps<ActivityRouteParams, 'Activity'>
 
 export const Activity = ({navigation}: Props) => {
+	const [isTransportista, setIsTransportista] = React.useState(false)
+	
+	const getIsTransportista = async () => {
+		const user = await UserService.getCurrent()
+		if(user.tipoUsuario === "TRANSPORTISTA"){
+			setIsTransportista(true);
+		}
+	}
 
 	const onMisResiduos = async () => {
 		navigation.navigate(ActivityRoutes.listResiduos)
@@ -26,6 +34,24 @@ export const Activity = ({navigation}: Props) => {
 		})
 	}
 
+	const onMisTransportes = async () => {
+		const user = await UserService.getCurrent()
+		navigation.navigate(ActivityRoutes.listTransacciones, {
+			ciudadanoId: user.ciudadanoId
+		})
+	}
+
+	const onTransportes = async () => {
+		const user = await UserService.getCurrent()
+		navigation.navigate(ActivityRoutes.listTransacciones, {
+			ciudadanoId: user.ciudadanoId
+		})
+	}
+
+	React.useEffect(() => {
+		getIsTransportista()
+	}, [])
+
 	return (
 		<Center w="100%">
 			<Box>Aqui podras consultar toda tu actividad</Box>
@@ -38,6 +64,14 @@ export const Activity = ({navigation}: Props) => {
 			<Button mt="2" color="primary" onPress={onMisRetiros} width="70%">
 				Mis Retiros
 			</Button>
+			{isTransportista && (
+				<><Button mt="2" color="primary" onPress={onMisTransportes} width="70%">
+					Mis transportes
+				</Button>
+				<Button mt="2" color="primary" onPress={onTransportes} width="70%">
+					Ver transportes disponibles
+				</Button></>
+			)}
 		</Center>
 	)
 }
