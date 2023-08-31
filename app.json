@@ -21,7 +21,7 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -31,6 +31,14 @@
 				"expo-location",
 				{
 					"locationAlwaysAndWhenInUsePermission": "Permitir a Circle8 utilizar su ubicacion."
+				}
+			],
+			[
+				"expo-build-properties",
+				{
+					"android": {
+						"usesCleartextTraffic": true
+					}
 				}
 			]
 		]
