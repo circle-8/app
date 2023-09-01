@@ -1,6 +1,6 @@
 import React from 'react'
 import { GestureResponderEvent, TouchableOpacity } from 'react-native'
-import MapView, { Marker, Polygon } from 'react-native-maps'
+import MapView, { Marker, Polygon, PROVIDER_GOOGLE } from 'react-native-maps'
 import {
 	Box,
 	Center,
@@ -322,6 +322,7 @@ export const Home = ({ navigation }: Props) => {
 							latitudeDelta,
 							longitudeDelta,
 						}}
+						provider={PROVIDER_GOOGLE}
 					>
 						<CircuitosReciclaje
 							isViewZonas={isViewZonas}

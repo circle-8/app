@@ -14,7 +14,7 @@ import { ProfileRoutesParams } from '../../../constants/routes'
 import * as Location from 'expo-location'
 import { PuntoService } from '../../../services/punto.service'
 import { LoadingScreen } from '../../components/loading.component'
-import MapView, { Marker } from 'react-native-maps'
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 import { colors } from '../../../constants/styles'
 import { match } from '../../../utils/either'
 
@@ -147,6 +147,7 @@ const Form = ({ id, initialPosition, onSubmit }: FormParams) => {
 						latitudeDelta,
 						longitudeDelta,
 					}}
+					provider={PROVIDER_GOOGLE}
 				>
 					<Marker
 						coordinate={{

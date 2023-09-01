@@ -27,7 +27,12 @@
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.FOREGROUND_SERVICE"
       ],
-      "package": "com.circle8.app"
+      "package": "com.circle8.app",
+      "config":{
+        "googleMaps": {
+          "apikey": "AIzaSyAGId4-rD1cRt0N2dOIADzvaR5j065OevE"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
