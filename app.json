@@ -30,7 +30,7 @@
       "package": "com.circle8.app",
       "config":{
         "googleMaps": {
-          "apikey": "AIzaSyBL1P2CZaEFwawvBqINFJepZbuuZ9zH85A"
+          "apiKey": "AIzaSyBL1P2CZaEFwawvBqINFJepZbuuZ9zH85A"
         }
       }
     },
