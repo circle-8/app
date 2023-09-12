@@ -24,6 +24,7 @@ export type UserResponse = {
 	recicladorUrbanoId?: number
 	organizacionId?: number
 	zonaId?: number
+	transportistaId?: number
 }
 
 export type TokenResponse = {

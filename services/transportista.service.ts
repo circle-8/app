@@ -29,8 +29,16 @@ const tomarTransporte = async(id: number, idTransportista: number): Promise<Eith
 	const body = {
 		transportistaId: idTransportista
 	}
-	console.log(idTransportista)
 	const res = await Http.put<TransporteResponse>(`/transporte/${id}`, body)
+	return map(
+		res,
+		p => p,
+		err => err.message
+	)
+}
+
+const iniciarTransporte = async(id: number): Promise<Either<Transporte, ErrorMessage>> => {
+	const res = await Http.post<TransporteResponse>(`/transporte/${id}/inicio`)
 	return map(
 		res,
 		p => p,
@@ -41,4 +49,5 @@ const tomarTransporte = async(id: number, idTransportista: number): Promise<Eith
 export const TransportistaService = {
 	getAll,
 	tomarTransporte,
+	iniciarTransporte,
 }

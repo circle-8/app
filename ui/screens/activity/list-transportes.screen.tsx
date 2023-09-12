@@ -14,7 +14,7 @@ import {
 } from 'native-base'
 import { match } from '../../../utils/either'
 import { LoadingScreen } from '../../components/loading.component'
-import { Transaccion, Transporte } from '../../../services/types'
+import { Transporte } from '../../../services/types'
 import { TransportistaService } from '../../../services/transportista.service'
 import { UserService } from '../../../services/user.service'
 
@@ -41,7 +41,7 @@ export const ListTransportes = ({ navigation, route }: Props) => {
 
 	const handleTomarTransporte = async (id) => {
 		const user = await UserService.getCurrent()
-		const error = await TransportistaService.tomarTransporte(id, user.id)
+		const error = await TransportistaService.tomarTransporte(id, user.transportistaId)
 		match(
 			error,
 			t => {
@@ -51,6 +51,7 @@ export const ListTransportes = ({ navigation, route }: Props) => {
 				toast.show({ description: "Ocurrio un error al tomar el transporte, reintenta." })
 			},
 		)
+		loadData()
 	}
 
 	React.useEffect(() => {

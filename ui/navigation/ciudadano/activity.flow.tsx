@@ -9,6 +9,7 @@ import { ListTransacciones } from '../../screens/activity/list-transacciones.scr
 import { ViewTransaccion } from '../../screens/activity/view-transaccion.screen'
 import { ListMisTransportes } from '../../screens/activity/list-misTransportes.screen'
 import { ListTransportes } from '../../screens/activity/list-transportes.screen'
+import { MapTransportes } from '../../screens/activity/map-transportes.screen'
 
 
 const ActivityStack = createNativeStackNavigator()
@@ -55,6 +56,11 @@ export const ActivityFlow = () => {
 				name={ActivityRoutes.listTransportes}
 				component={ListTransportes}
 				options={{ title: 'Transportes Disponibles' }}
+			/>
+			<ActivityStack.Screen
+				name={ActivityRoutes.mapTransportes}
+				component={MapTransportes}
+				options={{ title: '' }}
 			/>
 		</ActivityStack.Navigator>
 	)
