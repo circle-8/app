@@ -36,15 +36,15 @@ export const Activity = ({navigation}: Props) => {
 
 	const onMisTransportes = async () => {
 		const user = await UserService.getCurrent()
-		navigation.navigate(ActivityRoutes.listTransacciones, {
-			ciudadanoId: user.ciudadanoId
+		navigation.navigate(ActivityRoutes.listMisTransportes, {
+			userId: user.id
 		})
 	}
 
 	const onTransportes = async () => {
 		const user = await UserService.getCurrent()
-		navigation.navigate(ActivityRoutes.listTransacciones, {
-			ciudadanoId: user.ciudadanoId
+		navigation.navigate(ActivityRoutes.listTransportes, {
+			userId: user.id
 		})
 	}
 

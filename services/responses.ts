@@ -169,3 +169,16 @@ export type RecorridoResponse = {
 		residuo: ResiduoResponse
 	}[]
 }
+
+export type TransporteResponse = {
+	id: number
+	fechaAcordada: string
+	fechaInicio: string
+	fechaFin: string
+	precioAcordado: number
+	transportistaId: number
+	transaccionId: number
+	pagoConfirmado: boolean
+	entregaConfirmada: boolean
+	precioSugerido: number
+}

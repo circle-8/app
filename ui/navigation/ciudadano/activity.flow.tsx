@@ -7,6 +7,8 @@ import { ListResiduos } from '../../screens/activity/list-residuos.screen'
 import { ListSolicitudes } from '../../screens/activity/list-solicitudes.screen'
 import { ListTransacciones } from '../../screens/activity/list-transacciones.screen'
 import { ViewTransaccion } from '../../screens/activity/view-transaccion.screen'
+import { ListMisTransportes } from '../../screens/activity/list-misTransportes.screen'
+import { ListTransportes } from '../../screens/activity/list-transportes.screen'
 
 
 const ActivityStack = createNativeStackNavigator()
@@ -43,6 +45,16 @@ export const ActivityFlow = () => {
 				name={ActivityRoutes.viewTransaccion}
 				component={ViewTransaccion}
 				options={{ title: 'Transaccion' }}
+			/>
+			<ActivityStack.Screen
+				name={ActivityRoutes.listMisTransportes}
+				component={ListMisTransportes}
+				options={{ title: 'Mis Transportes' }}
+			/>
+			<ActivityStack.Screen
+				name={ActivityRoutes.listTransportes}
+				component={ListTransportes}
+				options={{ title: 'Transportes Disponibles' }}
 			/>
 		</ActivityStack.Navigator>
 	)

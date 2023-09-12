@@ -67,6 +67,12 @@ export type ActivityRouteParams = {
 	ViewTransaccion: {
 		ciudadanoId: number
 		transaccionId: number
+	},
+	ListMisTransportes: {
+		userId: number
+	},
+	ListTransportes: {
+		userId: number
 	}
 }
 type ActivityRouteName = keyof ActivityRouteParams
@@ -78,6 +84,8 @@ export const ActivityRoutes: {
 	listTransacciones: 'ListTransacciones'
 	viewTransaccion: 'ViewTransaccion'
 	listResiduos: 'ListResiduos'
+	listMisTransportes: 'ListMisTransportes'
+	listTransportes: 'ListTransportes'
 } = {
 	activity: 'Activity',
 	newResiduo: 'NewResiduo',
@@ -85,6 +93,8 @@ export const ActivityRoutes: {
 	listTransacciones: 'ListTransacciones',
 	viewTransaccion: 'ViewTransaccion',
 	listResiduos: 'ListResiduos',
+	listMisTransportes: 'ListMisTransportes',
+	listTransportes: 'ListTransportes'
 }
 
 type TabRoutesParams = {
