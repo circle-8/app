@@ -25,6 +25,20 @@ const getAll = async (
 	)
 }
 
+const tomarTransporte = async(id: number, idTransportista: number): Promise<Either<Transporte, ErrorMessage>> => {
+	const body = {
+		transportistaId: idTransportista
+	}
+	console.log(idTransportista)
+	const res = await Http.put<TransporteResponse>(`/transporte/${id}`, body)
+	return map(
+		res,
+		p => p,
+		err => err.message
+	)
+}
+
 export const TransportistaService = {
 	getAll,
+	tomarTransporte,
 }

@@ -10,15 +10,18 @@ import {
 	Box,
 	Center,
 	Button,
+	useToast,
 } from 'native-base'
 import { match } from '../../../utils/either'
 import { LoadingScreen } from '../../components/loading.component'
 import { Transaccion, Transporte } from '../../../services/types'
 import { TransportistaService } from '../../../services/transportista.service'
+import { UserService } from '../../../services/user.service'
 
 type Props = NativeStackScreenProps<ActivityRouteParams, 'ListTransportes'>
 
 export const ListTransportes = ({ navigation, route }: Props) => {
+	const toast = useToast()
 	const { userId } = route.params
 	const [isLoading, setLoading] = React.useState(true)
 	const [transportes, setTransportes] = React.useState<Transporte[]>([])
@@ -36,51 +39,18 @@ export const ListTransportes = ({ navigation, route }: Props) => {
 		setLoading(false)
 	}
 
-	const handleTomarTransporte = async () => {
-		/*const residuosSeleccionados = selectedResiduos.map(
-			index => userResiduos[index],
+	const handleTomarTransporte = async (id) => {
+		const user = await UserService.getCurrent()
+		const error = await TransportistaService.tomarTransporte(id, user.id)
+		match(
+			error,
+			t => {
+					toast.show({ description: "Transporte tomado correctamente." });
+			},
+			err => {
+				toast.show({ description: "Ocurrio un error al tomar el transporte, reintenta." })
+			},
 		)
-
-		const puntoReciclajeId = props.point.id
-		const errorMap: string[] = []
-		const successMap: string[] = []
-		for (const r of residuosSeleccionados) {
-			const result = await ResiduoService.postSolicitarDeposito(
-				r.id,
-				puntoReciclajeId,
-			)
-			ifLeft(result, t => {
-				userResiduos.forEach(residuo => {
-					if (r.id == residuo.id) {
-						successMap.push(residuo.descripcion)
-					}
-				})
-			})
-			ifRight(result, t => {
-				userResiduos.forEach(residuo => {
-					console.log(residuo.descripcion)
-					if (r.id == residuo.id) {
-						errorMap.push(residuo.descripcion)
-					}
-				})
-			})
-		}
-		if (errorMap.length === 0) {
-			setRetiroExitoso(true)
-		} else {
-			const successMessaje = `Solicitud generada con exito para estos residuos: ${successMap.join(
-				', ',
-			)}`
-			const errorMessaje = `Ocurrió un error al generar la solicitud de estos residuos: ${errorMap.join(
-				', ',
-			)}`
-			successMap.length === 0
-				? setSuccessMsj(null)
-				: setSuccessMsj(successMessaje)
-			setErrorMsj(errorMessaje)
-			setErrorRetiro(true)
-		}
-        */
 	}
 
 	React.useEffect(() => {
@@ -127,7 +97,7 @@ export const ListTransportes = ({ navigation, route }: Props) => {
 											marginTop: 8,
 										}}
 									>
-										<Button onPress={handleTomarTransporte}>Tomar Transporte</Button>
+										<Button onPress={() => handleTomarTransporte(transporte.id)}>Tomar Transporte</Button>
 									</View>
 							</Box>
 						</View>
