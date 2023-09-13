@@ -179,7 +179,9 @@ export type TransporteResponse = {
 	precioAcordado: number
 	transportistaId: number
 	transaccionId: number
+	transaccion: TransaccionResponse
 	pagoConfirmado: boolean
 	entregaConfirmada: boolean
 	precioSugerido: number
+	direccion: string
 }

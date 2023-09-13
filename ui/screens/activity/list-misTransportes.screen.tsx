@@ -17,6 +17,7 @@ import { LoadingScreen } from '../../components/loading.component'
 import { TransportistaService } from '../../../services/transportista.service'
 import { Transporte } from '../../../services/types'
 import { UserService } from '../../../services/user.service'
+import * as Location from 'expo-location'
 
 type Props = NativeStackScreenProps<ActivityRouteParams, 'ListMisTransportes'>
 
@@ -32,10 +33,48 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 		})
 		match(
 			userTransportes,
-			t => setTransportes(t),
+			async t => {
+				for (const transporte of t) {
+					if (!transporte.transaccion || !transporte.transaccion.puntoReciclaje) {
+						const direccion = 'No pudimos obtener la direccion'
+						transportes.push({ ...transporte, direccion })
+						continue;
+					}
+
+					const direccion = await getDirection(
+						transporte.transaccion.puntoReciclaje.latitud,
+						transporte.transaccion.puntoReciclaje.longitud,
+					)
+
+					transportes.push({ ...transporte, direccion })
+				}
+				console.log(transportes)
+
+				setTransportes(transportes)
+				setLoading(false)
+			},
 			e => setTransportes([]),
 		)
-		setLoading(false)
+	}
+
+	const getDirection = async (latitude, longitude) => {
+		try {
+			const location = await Location.reverseGeocodeAsync({
+				latitude,
+				longitude,
+			})
+			const address =
+				location.at(0).name +
+				', ' +
+				location.at(0).city +
+				', ' +
+				location.at(0).postalCode +
+				', ' +
+				location.at(0).region
+			return address
+		} catch (error) {
+			return 'No podemos brindar la direccion.'
+		}
 	}
 
 	const formatFecha = fecha => {
@@ -70,11 +109,11 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 		loadData()
 	}
 
-	const goMapaRecorrido = async (transaccionId) => {
+	const goMapaRecorrido = async transaccionId => {
 		const user = await UserService.getCurrent()
 		navigation.navigate(ActivityRoutes.mapTransportes, {
 			transportistaId: user.transportistaId,
-			transaccionId: transaccionId
+			transaccionId: transaccionId,
 		})
 	}
 
@@ -139,6 +178,12 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 											: 'Pendiente de entrega'}
 									</Text>
 								</HStack>
+								<HStack space={2} mt="0.5" alignItems="center">
+									<Text fontSize="sm" numberOfLines={4}>
+										<Text style={{ fontWeight: 'bold' }}>Direccion:</Text>{' '}
+										{transporte.direccion}
+									</Text>
+								</HStack>
 								{!transporte.entregaConfirmada && (
 									<View
 										style={{
@@ -149,7 +194,11 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 										}}
 									>
 										{transporte.fechaInicio && transporte.fechaFin == null ? (
-											<Button onPress={() => goMapaRecorrido(transporte.transaccionId)}>
+											<Button
+												onPress={() =>
+													goMapaRecorrido(transporte.transaccionId)
+												}
+											>
 												Ver en mapa
 											</Button>
 										) : (
