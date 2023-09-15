@@ -119,7 +119,11 @@ export const ListPuntoReciclaje = ({ navigation }: Props) => {
 			<VStack space={4} alignItems="center">
 				<Heading>Mis puntos de reciclaje</Heading>
 				<Button
-					onPress={() => navigation.navigate(ProfileRoutes.editPuntoReciclaje)}
+					onPress={() =>
+						navigation.navigate(ProfileRoutes.editPuntoReciclaje, {
+							recicladorId,
+						})
+					}
 				>
 					Nuevo
 				</Button>
