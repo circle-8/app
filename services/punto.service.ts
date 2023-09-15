@@ -90,7 +90,7 @@ type PuntoReciclajeSave = {
 	id?: number
 	recicladorId: number
 	titulo?: string
-	tipoResiduo?: number[]
+	tiposResiduo?: number[]
 	dias?: Dia[]
 	latitud?: number
 	longitud?: number

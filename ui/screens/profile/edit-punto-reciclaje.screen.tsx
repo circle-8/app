@@ -114,7 +114,7 @@ export const EditPuntoReciclaje = ({ navigation, route }: Props) => {
 								id,
 								recicladorId,
 								titulo: formData.titulo,
-								tipoResiduo: tipos,
+								tiposResiduo: tipos,
 								dias: dias,
 								latitud: formData.punto.latitude,
 								longitud: formData.punto.longitude,
