@@ -28,6 +28,7 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 	const [transportes, setTransportes] = React.useState<Transporte[]>([])
 
 	const loadData = async () => {
+		setTransportes([])
 		const userTransportes = await TransportistaService.getAll({
 			userId,
 		})
@@ -48,8 +49,6 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 
 					transportes.push({ ...transporte, direccion })
 				}
-				console.log(transportes)
-
 				setTransportes(transportes)
 				setLoading(false)
 			},
@@ -109,11 +108,10 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 		loadData()
 	}
 
-	const goMapaRecorrido = async transaccionId => {
+	const goMapaRecorrido = async (transporte) => {
 		const user = await UserService.getCurrent()
 		navigation.navigate(ActivityRoutes.mapTransportes, {
-			transportistaId: user.transportistaId,
-			transaccionId: transaccionId,
+			transporte: transporte,
 		})
 	}
 
@@ -193,10 +191,10 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 											marginTop: 8,
 										}}
 									>
-										{transporte.fechaInicio && transporte.fechaFin == null ? (
+										{transporte.fechaInicio != null ? (
 											<Button
 												onPress={() =>
-													goMapaRecorrido(transporte.transaccionId)
+													goMapaRecorrido(transporte)
 												}
 											>
 												Ver en mapa

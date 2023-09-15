@@ -1,4 +1,4 @@
-import { PuntoResiduo } from '../services/types'
+import { PuntoResiduo, Transporte } from '../services/types'
 
 export type LoginRoutesParams = {
 	Login: undefined
@@ -75,8 +75,7 @@ export type ActivityRouteParams = {
 		userId: number
 	},
 	MapTransportes: {
-		transportistaId: number
-		transaccionId: number
+		transporte: Transporte
 	}
 }
 type ActivityRouteName = keyof ActivityRouteParams

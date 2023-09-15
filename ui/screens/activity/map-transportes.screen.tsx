@@ -30,12 +30,14 @@ type Props = NativeStackScreenProps<ActivityRouteParams, 'MapTransportes'>
 
 export const MapTransportes = ({ navigation, route }: Props) => {
 	const toast = useToast()
-	const { transportistaId } = route.params
-	const { transaccionId } = route.params
+	const { transporte } = route.params
+	const [isView, setIsView] = React.useState(true)
+
 	const [isLoading, setLoading] = React.useState(true)
 	const [userCoords, setUserCoords] = React.useState<Coord>()
 	const [todayRecorrido, setTodayRecorrido] = React.useState<Recorrido>()
 	const [currentPoint, setCurrentPoint] = React.useState<number>(0)
+	const [puntos, setPuntos] = React.useState<Coord[]>()
 	const [region, setRegion] = React.useState<{
 		latitude: number
 		longitude: number
@@ -47,11 +49,16 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 
 	const getRecorridos = async () => {
 		const user = await UserService.getCurrent()
-		const transaction = await TransaccionService.get(transaccionId)
+		const transaction = await TransaccionService.get(transporte.transaccionId)
 		match(
 			transaction,
 			t => {
-				PuntoService.getPuntoReciclaje
+				getUserLocation()
+				for(const r of t.residuos){
+						console.log(r.puntoResiduoUri.charAt(11))
+				}
+				setPuntos
+				//PuntoService.getPuntoReciclaje()
 			},
 			err => {
 				toast.show({ description: err })
@@ -178,22 +185,22 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 						region={region}
 						// onRegionChange={setRegion}
 					>
-						{todayRecorrido && (
+						{isView && (
 							<Marker
 								key="initial"
 								coordinate={{
-									latitude: todayRecorrido.puntoInicio.latitud,
-									longitude: todayRecorrido.puntoInicio.longitud,
+									latitude: userCoords.latitude,
+									longitude: userCoords.longitude,
 								}}
 								title="Inicio del recorrido"
 							/>
 						)}
-						{todayRecorrido && (
+						{isView && (
 							<Marker
 								key="end"
 								coordinate={{
-									latitude: todayRecorrido.puntoFin.latitud,
-									longitude: todayRecorrido.puntoFin.longitud,
+									latitude: transporte.transaccion.puntoReciclaje.latitud,
+									longitude: transporte.transaccion.puntoReciclaje.longitud,
 								}}
 								title="Fin del recorrido"
 							/>
@@ -212,16 +219,16 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 							<Polyline
 								coordinates={[
 									{
-										latitude: todayRecorrido.puntoInicio.latitud,
-										longitude: todayRecorrido.puntoInicio.longitud,
+										latitude: userCoords.latitude,
+										longitude: userCoords.longitude,
 									},
 									...todayRecorrido.puntos.map(p => ({
 										latitude: p.latitud,
 										longitude: p.longitud,
 									})),
 									{
-										latitude: todayRecorrido.puntoFin.latitud,
-										longitude: todayRecorrido.puntoFin.longitud,
+										latitude: transporte.transaccion.puntoReciclaje.latitud,
+										longitude: transporte.transaccion.puntoReciclaje.longitud,
 									},
 								]}
 							/>
