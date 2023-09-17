@@ -66,7 +66,6 @@ const getPuntos = async ({
 	if (ciudadanoId) url += 'ciudadano_id=' + ciudadanoId
 
 	const response = await Http.get<ListResponse<PuntoResponse>>(url)
-
 	const points = []
 	ifLeft(response, l => points.push(...l.data.map(p => mapResponse(p, tipo))))
 
@@ -97,7 +96,8 @@ type PuntoReciclajeSave = {
 }
 
 const savePuntoReciclaje = async (p: PuntoReciclajeSave) => {
-	const url = `/reciclador/${p.recicladorId}/punto_reciclaje/${p.id}`
+	let url = `/reciclador/${p.recicladorId}/punto_reciclaje/`
+	p.id ? url += p.id : ''
 	const method = p.id ? Http.put : Http.post
 	const res = await method<PuntoReciclajeResponse>(url, p)
 	return map(
@@ -114,7 +114,8 @@ type PuntoResiduoSave = {
 	longitud: number
 }
 const savePuntoResiduo = async (p: PuntoResiduoSave) => {
-	const url = `/ciudadano/${p.ciudadanoId}/punto_residuo/${p.id}`
+	let url = `/ciudadano/${p.ciudadanoId}/punto_residuo/`
+	p.id ? url += p.id : ''
 	const method = p.id ? Http.put : Http.post
 	const res = await method<PuntoResiduoResponse>(url, p)
 	return map(

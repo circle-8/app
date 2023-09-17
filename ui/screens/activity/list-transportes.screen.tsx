@@ -49,7 +49,6 @@ export const ListTransportes = ({ navigation, route }: Props) => {
 
 					transportes.push({ ...transporte, direccion })
 				}
-				console.log(transportes)
 
 				setTransportes(transportes)
 				setLoading(false)

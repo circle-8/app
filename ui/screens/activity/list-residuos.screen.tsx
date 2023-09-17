@@ -82,15 +82,25 @@ export const ListResiduos = ({ navigation }: Props) => {
 						width={350}
 						background={'white'}
 					>
-						<Text>Residuo #{r.id}</Text>
-						<Text>{r.tipoResiduo.nombre}</Text>
-						<Text>
+						<Text fontSize="sm" numberOfLines={4}>
+							<Text style={{ fontWeight: 'bold' }}>Residuo #{r.id}</Text>{' '}
+						</Text>
+						<Text fontSize="sm" numberOfLines={4}>
+							<Text style={{ fontWeight: 'bold' }}>Tipo:</Text>{' '}
+							{r.tipoResiduo.nombre}
+						</Text>
+						<Text fontSize="sm" numberOfLines={4}>
+							<Text style={{ fontWeight: 'bold' }}>Fecha limite:</Text>{' '}
 							{r.limitDate?.toLocaleDateString() ||
 								'Sin fecha limite de retiro'}
 						</Text>
-						<Text>{r.descripcion}</Text>
+						<Text fontSize="sm" numberOfLines={25}>
+							<Text style={{ fontWeight: 'bold' }}>Descripcion:</Text>{' '}
+							{r.descripcion}
+						</Text>
+						<Text></Text>
 						<Center>
-						<Box mb={2} />
+							<Box mb={2} />
 							<View
 								style={{
 									flexDirection: 'row',
@@ -138,7 +148,12 @@ export const ListResiduos = ({ navigation }: Props) => {
 											setSelectedAction('DELIVERY')
 										}}
 									>
-										<MaterialCommunityIcons name="truck-delivery" size={28} alignSelf="center" color="black" />
+										<MaterialCommunityIcons
+											name="truck-delivery"
+											size={28}
+											alignSelf="center"
+											color="black"
+										/>
 									</TouchableOpacity>
 								</View>
 							</View>
@@ -184,7 +199,8 @@ export const ListResiduos = ({ navigation }: Props) => {
 						caseMaybe(
 							error,
 							err => toast.show({ description: err }),
-							() => toast.show({ description: '¡Residuo agregado correctamente!' }),
+							() =>
+								toast.show({ description: '¡Residuo agregado correctamente!' }),
 						)
 						closeAlert()
 						reload()

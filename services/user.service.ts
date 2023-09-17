@@ -91,6 +91,16 @@ const getCurrent = async (): Promise<User> => {
 	return JSON.parse(await AsyncStorage.getItem('user'))
 }
 
+const get = async (url): Promise<Either<User, ErrorMessage>> => {
+	const res = await Http.get<UserResponse>(url)
+	return map(
+		res,
+		p => p,
+		err => err.message,
+	)
+}
+
+
 export const UserService = {
 	token,
 	post,
@@ -98,4 +108,5 @@ export const UserService = {
 	refreshToken,
 	logout,
 	getCurrent,
+	get,
 }
