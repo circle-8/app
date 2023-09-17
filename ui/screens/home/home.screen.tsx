@@ -31,6 +31,7 @@ import {
 	Punto,
 	PuntoReciclaje,
 	PuntoResiduo,
+	PuntoVerde,
 	TipoPunto,
 	TipoResiduo,
 	Zona,
@@ -1180,38 +1181,23 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 		})
 	}
 
-	const handleContactar = async (point: PuntoReciclaje) => {
-		
-		toast.show({
-			description:
-				'NO IMPLEMENTADO.',
-		})
-		/*
+	const handleContactar = async (point: PuntoVerde) => {
 		console.log(point)
-		const userToContact = await UserService.get(point.recicladorUri)
 
-		match(
-			userToContact,
-			t => {
-				const email = t.email
-				const subject = 'Contacto para reciclar a traves de Circle8'
-				const body = `¡Hola  ${point.titulo}! me gustaria recibir informacion para poder reciclar con ustedes.`
+		const email = point.email
+		const subject = 'Contacto para reciclar a traves de Circle8'
+		const body = `¡Hola  ${point.titulo}! me gustaria recibir informacion para poder reciclar con ustedes.`
 
-				const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(
-					subject,
-				)}&body=${encodeURIComponent(body)}`
+		const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(
+			subject,
+		)}&body=${encodeURIComponent(body)}`
 
-				Linking.openURL(mailtoUrl).catch(error => {
-					toast.show({
-						description:
-							'Ocurrio un error al generar el mail, reintenta mas tarde.',
-					})
-				})
-			},
-			err => {
-				toast.show({ description: 'Ocurrio un error al generar el mail, reintenta mas tarde.' })
-			},
-		) */
+		Linking.openURL(mailtoUrl).catch(error => {
+			toast.show({
+				description:
+					'Ocurrio un error al generar el mail, reintenta mas tarde.',
+			})
+		})
 	}
 
 	React.useEffect(() => {
