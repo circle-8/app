@@ -61,7 +61,6 @@ export const HomeReciclador = ({ navigation }: Props) => {
 		)
 		if (recorrido && recorrido.initDate) {
 			const res = await RecorridoService.get(recorrido.id)
-			console.log(recorrido)
 			match(
 				res,
 				r => {
@@ -168,7 +167,6 @@ export const HomeReciclador = ({ navigation }: Props) => {
 	const mapHeight = todayRecorrido?.initDate || false ? '70%' : '85%'
 	const boxHeight = todayRecorrido?.initDate || false ? '10%' : '15%'
 
-	console.log('1', region)
 	return (
 		<SafeAreaView
 			style={{ flex: 1, backgroundColor: colors.primary50 }}

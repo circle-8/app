@@ -9,6 +9,8 @@ import {
 	WarningOutlineIcon,
 	Box,
 	Center,
+	Button,
+	useToast,
 } from 'native-base'
 import { match } from '../../../utils/either'
 import { TransaccionService } from '../../../services/transaccion.service'
@@ -16,10 +18,12 @@ import { LoadingScreen } from '../../components/loading.component'
 import { Transaccion } from '../../../services/types'
 import { formatFecha } from '../../../utils/days'
 import { TouchableOpacity } from 'react-native'
+import { TransportistaService } from '../../../services/transportista.service'
 
 type Props = NativeStackScreenProps<ActivityRouteParams, 'ListTransacciones'>
 
 export const ListTransacciones = ({ navigation, route }: Props) => {
+	const toast = useToast()
 	const { ciudadanoId } = route.params
 	const [isLoading, setLoading] = React.useState(true)
 	const [transactions, setTransactions] = React.useState<Transaccion[]>([])
@@ -35,6 +39,64 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 		)
 		setLoading(false)
 	}
+	const handleEntregada = async (transaccion) => {
+		try {
+			const errorTransportista = await TransportistaService.entregaConfirmada(transaccion.transporteId);
+		
+			match(
+			  errorTransportista,
+			  t => {
+				TransaccionService.fulfill(transaccion.id)
+				  .then(t => {
+					toast.show({ description: 'Entrega confirmada correctamente.' });
+					loadData();
+				  })
+				  .catch(err => {
+					toast.show({ description: 'Ocurrió un error al confirmar la entrega, reintenta.' });
+				  });
+			  },
+			  err => {
+				toast.show({ description: 'Ocurrió un error al confirmar la entrega, reintenta.' });
+			  }
+			);
+		  } catch (error) {
+			console.error('Error manejando la entrega:', error);
+			toast.show({ description: 'Ocurrió un error, reintenta.' });
+		  }
+		loadData()
+	}
+	
+	const handleCancelarTransportista = async (id) => {
+		const error = await TransaccionService.deleteSolicTransporte(id)
+		match(
+			error,
+			t => {
+				toast.show({ description: 'Transporte cancelado correctamente.' })
+			},
+			err => {
+				toast.show({
+					description: 'Ocurrio un error al cancelar el transporte, reintenta.',
+				})
+			},
+		)
+		loadData()
+	}
+
+	const handleSolicitarTransportista = async (id) => {
+		const error = await TransaccionService.solicTransporte(id)
+		match(
+			error,
+			t => {
+				toast.show({ description: 'Transporte solicitado correctamente.' })
+			},
+			err => {
+				toast.show({
+					description: 'Ocurrio un error al solicitar el Transporte, reintenta.',
+				})
+			},
+		)
+		loadData()
+	}
 
 	React.useEffect(() => {
 		loadData()
@@ -48,7 +110,7 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 				<Box mb={5} />
 				{transactions && transactions.length > 0 ? (
 					transactions.map((transaction, idx) => (
-						<>
+						<React.Fragment key={`transaction-${idx}`}>
 							<TouchableOpacity
 								key={`userT-${idx}`}
 								onPress={() =>
@@ -107,9 +169,48 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 											{transaction.fechaRetiro && 'Ya completada'}
 										</Text>
 									</HStack>
+									<View
+										style={{
+											flexDirection: 'row',
+											justifyContent: 'center',
+											alignItems: 'center',
+											marginTop: 8,
+										}}
+									>
+										{transaction.fechaRetiro == null &&
+										transaction.transporteId != null ? (
+											<>
+												<View style={{flexDirection: 'row', justifyContent: 'space-between'}} >
+													<Button onPress={() =>handleCancelarTransportista(transaction.id)} key={`btnCancelar-${idx}`}>
+														Cancelar Transporte
+													</Button>
+													<View style={{ marginHorizontal: 10 }} />
+													<Button onPress={() => handleEntregada(transaction)} key={`btnEntregar-${idx}`}>
+														Confirmar Entrega
+													</Button>
+												</View>
+											</>
+										) : (
+											transaction.fechaRetiro == null &&
+											transaction.transporteId == null && (
+												<>
+												<View style={{flexDirection: 'row', justifyContent: 'space-between'}} >
+													<Button
+														onPress={() => handleSolicitarTransportista(transaction.id)} key={`btnSolicitar-${idx}`}>
+														Solicitar Transportista
+													</Button>
+													<View style={{ marginHorizontal: 10 }} />
+													<Button onPress={() => handleEntregada(transaction)} key={`btnConfirmar-${idx}`}>
+														Confirmar Entrega
+													</Button>
+												</View>
+												</>
+											)
+										)}
+									</View>
 								</Box>
 							</TouchableOpacity>
-						</>
+						</React.Fragment>
 					))
 				) : (
 					<>

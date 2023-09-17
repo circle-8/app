@@ -1,5 +1,5 @@
 import React from 'react'
-import { GestureResponderEvent, TouchableOpacity } from 'react-native'
+import { GestureResponderEvent, Linking, TouchableOpacity } from 'react-native'
 import MapView, { Marker, Polygon } from 'react-native-maps'
 import {
 	Box,
@@ -83,8 +83,6 @@ export const Home = ({ navigation }: Props) => {
 	const [tipos, setTipos] = React.useState<TipoResiduo[]>()
 	const [zonas, setZonas] = React.useState<Zona[]>()
 	const [isViewZonas, setIsViewZonas] = React.useState(false)
-	const [modalErrorZonas, setModalErrorZonas] = React.useState(false)
-
 	/* Para circuitos */
 	const [zonasSelected, setZonasSelected] = React.useState<Zona[] | null>(null)
 	const [modalZonaSelected, setModalZonaSelected] = React.useState(false)
@@ -225,13 +223,15 @@ export const Home = ({ navigation }: Props) => {
 			getZonas,
 			t => {
 				if (t.length === 0) {
-					toast.show({ description: "No hay circuitos activos." });
+					toast.show({ description: 'No hay circuitos activos.' })
 				} else {
-					setPuedeUnirseZona(t);
+					setPuedeUnirseZona(t)
 				}
 			},
 			err => {
-				toast.show({ description: "Ocurrio un error al obtener los circuitos, reintenta." })
+				toast.show({
+					description: 'Ocurrio un error al obtener los circuitos, reintenta.',
+				})
 			},
 		)
 		setIsViewZonas(!isViewZonas)
@@ -311,7 +311,7 @@ export const Home = ({ navigation }: Props) => {
 			edges={['top']}
 		>
 			<Flex h="100%">
-				<Box height="85%">
+				<Box height="75%">
 					<MapView
 						style={{ width: '100%', height: '100%' }}
 						showsUserLocation
@@ -413,9 +413,31 @@ export const Home = ({ navigation }: Props) => {
 					selectedUserPoint={selectedUserPoint}
 					setSelectedUserPoint={setSelectedUserPoint}
 				/>
-				<Center height="15%" bgColor="white">
-					<Row alignContent="center" mt="4">
+				<Center height="25%" bgColor="white">
+					<Row justifyContent="space-between" mt="0" height={120}>
 						<Center w="33%">
+							<TouchableOpacity
+								onPress={() => {
+									handleEntregarResiduos()
+								}}
+							>
+								<View style={{ alignItems: 'center', marginTop: 0 }}>
+									<Ionicons name="trash" size={40} color={colors.primary800} />
+								</View>
+								<View style={{ alignItems: 'center', marginTop: 0 }}>
+									<Text fontSize="xs" fontWeight="bold">
+										Entregar residuos
+									</Text>
+								</View>
+								<View style={{ alignItems: 'center', marginTop: 2 }}>
+									<Text style={{ fontSize: 10, textAlign: 'center' }}>
+										Aquí podrás crear una solicitud para entregar tus residuos a
+										otras personas que los necesiten.
+									</Text>
+								</View>
+							</TouchableOpacity>
+						</Center>
+						<Center w="32%">
 							<TouchableOpacity
 								onPress={() =>
 									navigation.navigate('ProfileTab', {
@@ -424,33 +446,43 @@ export const Home = ({ navigation }: Props) => {
 									})
 								}
 							>
-								<FontAwesome
-									name="recycle"
-									size={40}
-									color={colors.primary800}
-								/>
+								<View style={{ alignItems: 'center', marginTop: 1 }}>
+									<FontAwesome
+										name="recycle"
+										size={40}
+										color={colors.primary800}
+									/>
+								</View>
+								<View style={{ alignItems: 'center', marginTop: 4 }}>
+									<Text fontSize="xs" fontWeight="bold">
+										Recibir residuos
+									</Text>
+								</View>
+								<View style={{ alignItems: 'center', marginTop: 2 }}>
+									<Text style={{ fontSize: 10, textAlign: 'center' }}>
+										Aquí podrás crear una solicitud para recibir residuos que
+										quieras reciclar.
+									</Text>
+								</View>
 							</TouchableOpacity>
-							<Text fontSize="xs">Retirar residuos</Text>
 						</Center>
-						<Center w="33%">
-							<TouchableOpacity
-								onPress={() => {
-									handleEntregarResiduos()
-								}}
-							>
-								<Ionicons name="trash" size={40} color={colors.primary800} />
+						<Center w="34%">
+							<TouchableOpacity onPress={() => handleGetZonas()}>
+								<View style={{ alignItems: 'center', marginTop: 1 }}>
+									<Ionicons name="leaf" size={40} color={colors.primary800} />
+								</View>
+								<View style={{ alignItems: 'center', marginTop: 1 }}>
+									<Text fontSize="xs" fontWeight="bold">
+										Circuitos de Reciclaje
+									</Text>
+								</View>
+								<View style={{alignItems: 'center', marginTop: 2}}>
+									<Text style={{ fontSize: 10, textAlign: 'center' }}>
+										Aquí podrás adherirte a recorridos de organizaciones de
+										reciclaje.
+									</Text>
+								</View>
 							</TouchableOpacity>
-							<Text fontSize="xs">Entregar residuos</Text>
-						</Center>
-						<Center w="33%">
-							<TouchableOpacity
-								onPress={() => {
-									handleGetZonas()
-								}}
-							>
-								<Ionicons name="leaf" size={40} color={colors.primary800} />
-							</TouchableOpacity>
-							<Text fontSize="xs">Circuitos de Reciclaje</Text>
 						</Center>
 					</Row>
 				</Center>
@@ -610,22 +642,22 @@ const CircuitosReciclaje = (props: CircuitosReciclajeProps) => {
 
 	return (
 		<>
-			{props.isViewZonas && (
-				props.zonas && props.zonas.length > 0 && (
-					props.zonas.map((zona, idx) => (
-						<Polygon
-							key={`polygon-${idx}`}
-							coordinates={zona.polyline.map(coord => ({
-								latitude: coord.latitud,
-								longitude: coord.longitud,
-							}))}
-							strokeColor="#8CB085"
-							fillColor="rgba(132, 209, 121, 0.2)"
-							strokeWidth={2}
-							tappable={true}
-							onPress={() => handleZonaPress(zona)}
-						/>
-					))
+			{props.isViewZonas &&
+				props.zonas &&
+				props.zonas.length > 0 &&
+				props.zonas.map((zona, idx) => (
+					<Polygon
+						key={`polygon-${idx}`}
+						coordinates={zona.polyline.map(coord => ({
+							latitude: coord.latitud,
+							longitude: coord.longitud,
+						}))}
+						strokeColor="#8CB085"
+						fillColor="rgba(132, 209, 121, 0.2)"
+						strokeWidth={2}
+						tappable={true}
+						onPress={() => handleZonaPress(zona)}
+					/>
 				))}
 		</>
 	)
@@ -858,7 +890,8 @@ const ModalsZonas = ({
 							>
 								<WarningOutlineIcon size={5} color="red.600" />
 								<Text style={{ fontSize: 14, textAlign: 'center' }}>
-									Ocurrio un error al generar la solicitud, reintenta mas tarde.
+									Ocurrio un error al generar la solicitud, puede que ya hayas generado una solicitud para esta zona,
+									debes aguardar a que la organizacion te acepte. Reintenta mas tarde.
 								</Text>
 							</View>
 						</>
@@ -926,7 +959,7 @@ const ModalsZonas = ({
 												</HStack>
 											)}
 										</View>
-										{zona.puedeUnirse ? (
+										{zona.puedeUnirse && (
 											<>
 												<Box mb={2} />
 												<Center justifyContent="space-between">
@@ -935,7 +968,7 @@ const ModalsZonas = ({
 													</Button>
 												</Center>
 											</>
-										) : null}
+										)}
 									</Box>
 								))
 							) : (
@@ -978,7 +1011,8 @@ const ModalsZonas = ({
 								<Button onPress={() => handleVolver()}>Volver</Button>
 							</Center>
 							<View style={{ marginHorizontal: 10 }} />
-							<Center>
+							{selectedUserPoint != null && (
+								<Center>
 								<Button
 									onPress={() =>
 										handleJoin(
@@ -990,6 +1024,7 @@ const ModalsZonas = ({
 									Unirme al circuito
 								</Button>
 							</Center>
+							)}
 						</View>
 					) : (
 						<View
@@ -1021,6 +1056,7 @@ type PuntoReciclajeModalProps = {
 
 const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 	if (!props.show) return <></>
+	const toast = useToast()
 	const [modalEntregar, setModalEntregar] = React.useState(false)
 	const [userResiduos, setUserResiduos] = React.useState<ResiduoResponse[]>([])
 	const [selectedResiduos, setSelectedResiduos] = React.useState<number[]>([])
@@ -1136,6 +1172,40 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 				ciudadanoId: user.ciudadanoId,
 			},
 		})
+	}
+
+	const handleContactar = async (point: PuntoReciclaje) => {
+		
+		toast.show({
+			description:
+				'NO IMPLEMENTADO.',
+		})
+		/*
+		console.log(point)
+		const userToContact = await UserService.get(point.recicladorUri)
+
+		match(
+			userToContact,
+			t => {
+				const email = t.email
+				const subject = 'Contacto para reciclar a traves de Circle8'
+				const body = `¡Hola  ${point.titulo}! me gustaria recibir informacion para poder reciclar con ustedes.`
+
+				const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(
+					subject,
+				)}&body=${encodeURIComponent(body)}`
+
+				Linking.openURL(mailtoUrl).catch(error => {
+					toast.show({
+						description:
+							'Ocurrio un error al generar el mail, reintenta mas tarde.',
+					})
+				})
+			},
+			err => {
+				toast.show({ description: 'Ocurrio un error al generar el mail, reintenta mas tarde.' })
+			},
+		) */
 	}
 
 	React.useEffect(() => {
@@ -1347,7 +1417,7 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 								</Button>
 							</View>
 						) : props.point.tipo !== 'RECICLAJE' ? (
-							<Button>Contactar</Button>
+							<Button onPress={() => handleContactar(props.point)}>Contactar</Button>
 						) : modalEntregar && userResiduos.length <= 0 ? (
 							<View
 								style={{
@@ -1755,7 +1825,7 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 									Ir a mis solicitudes
 								</Button>
 							</View>
-						) : firstStep ? (
+						) : firstStep && selectedResiduos.length != 0 ? (
 							<Button onPress={handleUserPointSelection}>Siguiente</Button>
 						) : !firstStep && userPoints.length === 0 ? (
 							<View
@@ -1770,7 +1840,7 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 									Crear punto
 								</Button>
 							</View>
-						) : (
+						) : selectedResiduos.length != 0 ? (
 							<View
 								style={{
 									flexDirection: 'row',
@@ -1781,6 +1851,8 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 								<View style={{ marginHorizontal: 10 }} />
 								<Button onPress={handleRetirarClick}>Retirar</Button>
 							</View>
+						) : (
+							<Button onPress={handleResetClick}>Cerrar</Button>
 						)}
 					</Center>
 				</Modal.Footer>

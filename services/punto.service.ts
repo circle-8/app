@@ -1,5 +1,5 @@
 import { Http } from '../api/api'
-import { Either, ifLeft, map } from '../utils/either'
+import { Either, Maybe, ifLeft, map, mapRight, maybeRight } from '../utils/either'
 import {
 	ListResponse,
 	PuntoReciclajeResponse,
@@ -66,7 +66,6 @@ const getPuntos = async ({
 	if (ciudadanoId) url += 'ciudadano_id=' + ciudadanoId
 
 	const response = await Http.get<ListResponse<PuntoResponse>>(url)
-
 	const points = []
 	ifLeft(response, l => points.push(...l.data.map(p => mapResponse(p, tipo))))
 
@@ -90,14 +89,15 @@ type PuntoReciclajeSave = {
 	id?: number
 	recicladorId: number
 	titulo?: string
-	tipoResiduo?: number[]
+	tiposResiduo?: number[]
 	dias?: Dia[]
 	latitud?: number
 	longitud?: number
 }
 
 const savePuntoReciclaje = async (p: PuntoReciclajeSave) => {
-	const url = `/reciclador/${p.recicladorId}/punto_reciclaje/${p.id}`
+	let url = `/reciclador/${p.recicladorId}/punto_reciclaje/`
+	p.id ? url += p.id : ''
 	const method = p.id ? Http.put : Http.post
 	const res = await method<PuntoReciclajeResponse>(url, p)
 	return map(
@@ -114,7 +114,8 @@ type PuntoResiduoSave = {
 	longitud: number
 }
 const savePuntoResiduo = async (p: PuntoResiduoSave) => {
-	const url = `/ciudadano/${p.ciudadanoId}/punto_residuo/${p.id}`
+	let url = `/ciudadano/${p.ciudadanoId}/punto_residuo/`
+	p.id ? url += p.id : ''
 	const method = p.id ? Http.put : Http.post
 	const res = await method<PuntoResiduoResponse>(url, p)
 	return map(
@@ -150,6 +151,13 @@ const postRetiroResiduo = async (
 	)
 }
 
+const del = async (id: number, recicladorId: number): Promise<Maybe<ErrorMessage>> => {
+	const url =`/reciclador/${recicladorId}/punto_reciclaje/${id}`
+	const res = await Http.delete<null>(url)
+
+	return maybeRight(mapRight(res, err => err.message))
+}
+
 export const PuntoService = {
 	getAll,
 	getPuntoReciclaje,
@@ -157,4 +165,5 @@ export const PuntoService = {
 	savePuntoResiduo,
 	getPuntoResiduo,
 	postRetiroResiudo: postRetiroResiduo,
+	del,
 }

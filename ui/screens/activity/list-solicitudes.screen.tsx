@@ -31,31 +31,19 @@ type Props = NativeStackScreenProps<ActivityRouteParams, 'ListSolicitudes'>
 export const ListSolicitudes = ({ navigation, route }: Props) => {
 	const { ciudadanoId } = route.params
 	const [solicitadas, setSolicitadas] = React.useState<Solicitud[]>()
-	const [solicitudesRecibidas, setSolicitudesRecibidas] =
-		React.useState<Solicitud[]>()
-
+	const [solicitudesRecibidas, setSolicitudesRecibidas] = React.useState<Solicitud[]>()
 	const [isLoading, setLoading] = React.useState(true)
-
 	const [modalCancelar, setModalCancelar] = React.useState(false)
-	const [solicitudCancelable, setSolicitudCancelable] =
-		React.useState<Solicitud>()
-
+	const [solicitudCancelable, setSolicitudCancelable] = React.useState<Solicitud>()
 	const [modalAprobar, setModalAprobar] = React.useState(false)
-	const [solicitudAprobable, setSolicitudAprobable] =
-		React.useState<Solicitud>()
+	const [solicitudAprobable, setSolicitudAprobable] = React.useState<Solicitud>()
 	const [modalAgregar, setModalAgregar] = React.useState(false)
 	const [solicitudAgregar, setSolicitudAgregar] = React.useState<Solicitud>()
-	const [userTransactions, setUserTransactions] = React.useState<Transaccion[]>(
-		[],
-	)
-	const [selectedUserTransaction, setSelectedUserTransaction] = React.useState<
-		number | null
-	>(null)
-	const [modalErrorTransaccion, setModalErrorTransaccion] =
-		React.useState(false)
+	const [userTransactions, setUserTransactions] = React.useState<Transaccion[]>([],)
+	const [selectedUserTransaction, setSelectedUserTransaction] = React.useState<number | null>(null)
+	const [modalErrorTransaccion, setModalErrorTransaccion] = React.useState(false)
 	const [showSolicitante, setSolicitante] = React.useState(false)
 	const [showSolicitado, setSolicitado] = React.useState(false)
-
 	const toast = useToast()
 
 	const loadInitialData = async () => {
@@ -503,7 +491,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 							alignItems="center"
 						>
 							<Text color="black" fontSize="md" bold>
-								Solicitudes realizadas por mi
+								Ver Solicitudes entrantes
 							</Text>
 							{showSolicitante ? (
 								<ChevronUpIcon size="5" mt="0.5" color="emerald.500" />
@@ -516,7 +504,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 				{showSolicitante ? (
 					<View>
 						<Box mb={2} />
-						<Text bold fontSize="md">
+						<Text bold fontSize="md" textAlign="center">
 							Estas son todas las solicitudes que realizaste
 						</Text>
 						<Box mb={2} />
@@ -625,10 +613,10 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 						) : (
 							<View
 								style={{
-									flex: 1,
 									justifyContent: 'center',
 									alignItems: 'center',
 								}}
+								mb="4"
 							>
 								<WarningOutlineIcon size={5} color="red.600" />
 								<Text style={{ fontSize: 14, textAlign: 'center' }}>
@@ -661,7 +649,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 							alignItems="center"
 						>
 							<Text color="black" fontSize="md" bold>
-								Solicitudes realizadas a mi
+								Ver Solicitudes salientes
 							</Text>
 
 							{showSolicitado ? (
@@ -676,7 +664,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 					<>
 						<View>
 							<Box mb={2} />
-							<Text bold fontSize="md">
+							<Text bold fontSize="md" textAlign="center">
 								Estas son todas las solicitudes que recibiste
 							</Text>
 							<Box mb={2} />

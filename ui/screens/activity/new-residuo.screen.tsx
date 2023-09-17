@@ -16,6 +16,7 @@ import {
 	View,
 	useToast,
 	Text,
+	Checkbox,
 } from 'native-base'
 import { TipoResiduoService } from '../../../services/tipos.service'
 import { match } from '../../../utils/either'
@@ -75,7 +76,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 	return (
 		<ScrollView>
 			<Center w="100%">
-				<Box safeArea p="2" py="8" w="90%" maxW="290">
+				<Box safeArea p="2" py="4" w="90%" maxW="290">
 					<Heading
 						size="lg"
 						fontWeight="600"
@@ -88,7 +89,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 						Nuevo Residuo
 					</Heading>
 
-					<VStack space={3} mt="5">
+					<VStack space={3} mt="4">
 						<Form onSubmit={onSubmit} tipos={tipos} />
 					</VStack>
 				</Box>
@@ -107,6 +108,7 @@ type Errors = {
 	has: boolean
 	tipo?: string
 	descripcion?: string
+	entrega?: string
 }
 
 const Form = ({
@@ -120,7 +122,8 @@ const Form = ({
 	const [errors, setErrors] = React.useState<Errors>({ has: false })
 	const [showDatePicker, setShowDatePicker] = React.useState(false)
 	const [loading, setLoading] = React.useState(false)
-	const [selectedDate, setSelectedDate] = React.useState(null);
+	const [selectedDate, setSelectedDate] = React.useState(null)
+	const [selectedEntregado, setSelectedEntregado] = React.useState<string[]>([])
 
 	const isValid = () => {
 		const newErrors: Errors = { has: false }
@@ -128,10 +131,15 @@ const Form = ({
 			newErrors.has = true
 			newErrors.tipo = 'Debe elegir un tipo de residuo'
 		}
-		if (!formData.descripcion) {
+		if (!formData.descripcion || formData.descripcion === '') {
 			newErrors.has = true
-			newErrors.tipo =
+			newErrors.descripcion =
 				'Complete la descripcion indicando que tiene disponible para retirar'
+		}
+		if (selectedEntregado.length === 0) {
+			newErrors.has = true
+			newErrors.entrega =
+				'Seleccione al menos una caracteristica sobre como entregas el residuo.'
 		}
 
 		setErrors(newErrors)
@@ -140,16 +148,49 @@ const Form = ({
 
 	const onChangeDate = (event, selected) => {
 		const currentDate = selected || formData.fechaLimite
-		setSelectedDate(currentDate)
+		setShowDatePicker(false)
+		setData({ ...formData, fechaLimite: currentDate })
 	}
 
-	const handleSetDate = () => {
-		setShowDatePicker(false)
-		setData({ ...formData, fechaLimite: selectedDate });
-	  };
+	
 
 	const doSubmit = async () => {
 		setLoading(true)
+
+		const selectedDescriptions = []
+		if (formData.descripcion) {
+			selectedDescriptions.push(formData.descripcion)
+			selectedDescriptions.push(
+				'\nAdemas tene en cuenta estas caracteristicas para retirar el residuo: ',
+			)
+			selectedEntregado.forEach(value => {
+				switch (value) {
+					case '0':
+						selectedDescriptions.push('Se entrega embalado en caja.')
+						break
+					case '1':
+						selectedDescriptions.push('Se entrega embalado en bolsa.')
+						break
+					case '2':
+						selectedDescriptions.push('Es compacto.')
+						break
+					case '3':
+						selectedDescriptions.push('Está Mojado/Húmedo.')
+						break
+					case '4':
+						selectedDescriptions.push('Pesa más de 5kg.')
+						break
+					default:
+						break
+				}
+			})
+		}
+
+		formData.descripcion = selectedDescriptions.join(' ')
+
+		setData({
+			...formData,
+		})
 
 		if (isValid()) {
 			await onSubmit(formData)
@@ -172,28 +213,13 @@ const Form = ({
 	return (
 		<>
 			{showDatePicker && (
-				<Modal isOpen={showDatePicker} onClose={() => setShowDatePicker(false)}>
-					<Modal.Content>
-						<Modal.CloseButton />
-						<Modal.Header alignItems="center">
-							<Text bold fontSize="xl">
-								Selecciona fecha limite
-							</Text>
-						</Modal.Header>
-						<Modal.Body>
-							<View style={{ flex: 1, justifyContent: 'flex-end' }}>
-								<DateTimePicker
-									value={selectedDate || new Date()}
-									mode="date"
-									display="inline"
-									minimumDate={new Date()}
-									onChange={onChangeDate}
-								/>
-								<Button onPress={() => handleSetDate()}> ok </Button>
-							</View>
-						</Modal.Body>
-					</Modal.Content>
-				</Modal>
+				<DateTimePicker
+					value={formData.fechaLimite || new Date()}
+					mode="date"
+					display="default"
+					onChange={onChangeDate}
+					minimumDate={new Date()}
+				/>
 			)}
 			<FormControl isRequired isInvalid={'tipo' in errors} isReadOnly>
 				<FormControl.Label>Tipo de Residuo</FormControl.Label>
@@ -210,14 +236,51 @@ const Form = ({
 					{errors.tipo}
 				</FormControl.ErrorMessage>
 			</FormControl>
-			<FormControl isRequired isInvalid={'descripcion' in errors}>
+			<FormControl isRequired isInvalid={'entrega' in errors}>
 				<FormControl.Label>Descripcion</FormControl.Label>
+				<Text fontSize="sm" color="coolGray.500">
+					Agrega informacion que te parezca util.
+				</Text>
 				<TextArea
 					onChangeText={v => setData({ ...formData, descripcion: v })}
 					autoCompleteType="none"
+					isInvalid={'descripcion' in errors}
 				/>
-				<FormControl.ErrorMessage _text={{ fontSize: 'xs' }}>
+				<Text fontSize="xs" color="red.500">
 					{errors.descripcion}
+				</Text>
+
+				<Text fontSize="sm" color="coolGray.500">
+					Selecciona cómo va a ser entregado
+				</Text>
+				<Text fontSize="xs" color="gray.400" mt={1}>
+					Indica las características que se asemejen a cómo entregas el residuo
+					para que los recicladores lo tengan en cuenta.
+				</Text>
+				<Checkbox.Group
+					colorScheme="green"
+					defaultValue={selectedEntregado}
+					accessibilityLabel="Elegi las caracteristicas que se asemejen mas a la manera en la que vas a entregar tu residuo."
+					onChange={values => setSelectedEntregado(values || [])}
+				>
+					<Checkbox value="0" my={1}>
+						Embalado en caja
+					</Checkbox>
+					<Checkbox value="1" my={1}>
+						Embalado en bolsa
+					</Checkbox>
+					<Checkbox value="2" my={1}>
+						Compacto
+					</Checkbox>
+					<Checkbox value="3" my={1}>
+						Mojado/Humedo
+					</Checkbox>
+					<Checkbox value="4" my={1}>
+						Pesa mas de 5kg
+					</Checkbox>
+				</Checkbox.Group>
+				<FormControl.ErrorMessage _text={{ fontSize: 'xs' }}>
+					{errors.entrega}
 				</FormControl.ErrorMessage>
 			</FormControl>
 			<FormControl>
@@ -237,3 +300,43 @@ const Form = ({
 		</>
 	)
 }
+
+/*
+
+MODAL QUE FUNCIONA OK EN IOS
+
+const onChangeDate = (event, selected) => {
+		const currentDate = selected || formData.fechaLimite
+		setSelectedDate(currentDate)
+	}
+
+	const handleSetDate = () => {
+		setShowDatePicker(false)
+		setData({ ...formData, fechaLimite: selectedDate })
+	}
+
+{showDatePicker && (
+	<Modal isOpen={showDatePicker} onClose={() => setShowDatePicker(false)}>
+		<Modal.Content>
+			<Modal.CloseButton />
+			<Modal.Header alignItems="center">
+				<Text bold fontSize="xl">
+					Selecciona fecha limite
+				</Text>
+			</Modal.Header>
+			<Modal.Body>
+				<View style={{ flex: 1, justifyContent: 'flex-end' }}>
+					<DateTimePicker
+						value={selectedDate || new Date()}
+						mode="date"
+						display="inline"
+						minimumDate={new Date()}
+						onChange={onChangeDate}
+					/>
+					<Button onPress={() => handleSetDate()}> ok </Button>
+				</View>
+			</Modal.Body>
+		</Modal.Content>
+	</Modal>
+)}
+*/
