@@ -16,7 +16,6 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "package": "com.circle8.app",
       "config": {
         "googleMapsApiKey": "AIzaSyDHFfRLpl4t-N-0BGmFN1zvJ7BNpJSSbow"
       },

@@ -209,8 +209,14 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 	}
 
 	React.useEffect(() => {
-		loadInitialData()
-	}, [])
+		const unsubscribeFocus = navigation.addListener('focus', () => {
+			setSolicitante(false)
+			setSolicitado(false)
+			loadInitialData()
+		})
+
+		return unsubscribeFocus
+	}, [navigation])
 
 	if (isLoading) return <LoadingScreen />
 
@@ -491,7 +497,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 							alignItems="center"
 						>
 							<Text color="black" fontSize="md" bold>
-								Ver Solicitudes entrantes
+								Ver Solicitudes salientes
 							</Text>
 							{showSolicitante ? (
 								<ChevronUpIcon size="5" mt="0.5" color="emerald.500" />
@@ -528,7 +534,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 										alignItems="center"
 									>
 										<Text fontSize="sm">#{solicitud.id}</Text>
-										<Text fontSize="sm">
+										<Text flex={1} fontSize="sm">
 											{solicitud.solicitadoId ==
 											solicitud.residuo.puntoResiduo?.ciudadanoId
 												? `Retirar residuos de ${solicitud.solicitado.nombre}`
@@ -541,8 +547,8 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 										key={`res-${idx}`}
 										alignItems="center"
 									>
-										<InfoOutlineIcon size="3" color="emerald.600" />
-										<Text fontSize="sm">
+										<DeleteIcon size="3" color="emerald.600" />
+										<Text flex={1} fontSize="sm">
 											{solicitud.residuo.tipoResiduo.nombre}
 										</Text>
 									</HStack>
@@ -550,10 +556,10 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 										space={2}
 										mt="0.5"
 										key={`desc-${idx}`}
-										alignItems="center"
-									>
-										<DeleteIcon size="3" color="emerald.600" />
-										<Text fontSize="sm" numberOfLines={4}>
+										alignItems="flex-start"
+										>
+										<InfoOutlineIcon size="3" color="emerald.600" style={{ marginTop: 4 }}/>
+										<Text flex={1} fontSize="sm" numberOfLines={25}>
 											{solicitud.residuo.descripcion}
 										</Text>
 									</HStack>
@@ -564,7 +570,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 										alignItems="center"
 									>
 										<WarningOutlineIcon size="3" color="emerald.600" />
-										<Text fontSize="sm">
+										<Text flex={1} fontSize="sm">
 											{formatFecha(solicitud.residuo.fechaLimiteRetiro, false)}
 										</Text>
 									</HStack>
@@ -575,7 +581,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 										alignItems="center"
 									>
 										<QuestionOutlineIcon size="3" color="emerald.600" />
-										<Text fontSize="sm" numberOfLines={4}>
+										<Text flex={1} fontSize="sm" numberOfLines={4}>
 											{getEstado(solicitud, true)}
 										</Text>
 									</HStack>
@@ -649,7 +655,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 							alignItems="center"
 						>
 							<Text color="black" fontSize="md" bold>
-								Ver Solicitudes salientes
+								Ver Solicitudes entrantes
 							</Text>
 
 							{showSolicitado ? (
@@ -688,7 +694,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 											alignItems="center"
 										>
 											<Text fontSize="sm">#{solicitud.id}</Text>
-											<Text fontSize="sm">
+											<Text flex={1} fontSize="sm">
 												{solicitud.solicitanteId ==
 												solicitud.residuo.puntoResiduo?.ciudadanoId
 													? `${solicitud.solicitante.nombre} quiere depositar un residuo`
@@ -701,19 +707,19 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 											key={`res-${idx}`}
 											alignItems="center"
 										>
-											<InfoOutlineIcon size="3" color="emerald.600" />
-											<Text fontSize="sm">
+											<DeleteIcon size="3" color="emerald.600" />
+											<Text flex={1} fontSize="sm">
 												{solicitud.residuo.tipoResiduo.nombre}
 											</Text>
 										</HStack>
 										<HStack
 											space={2}
-											mt="0.5"
+											mt="1"
 											key={`desc-${idx}`}
-											alignItems="center"
+											alignItems="flex-start"
 										>
-											<DeleteIcon size="3" color="emerald.600" />
-											<Text fontSize="sm" numberOfLines={4}>
+											<InfoOutlineIcon size="3" color="emerald.600" style={{ marginTop: 4 }}/>
+											<Text flex={1} fontSize="sm" numberOfLines={15}>
 												{solicitud.residuo.descripcion}
 											</Text>
 										</HStack>
@@ -724,7 +730,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 											alignItems="center"
 										>
 											<WarningOutlineIcon size="3" color="emerald.600" />
-											<Text fontSize="sm">
+											<Text flex={1} fontSize="sm">
 												{formatFecha(
 													solicitud.residuo.fechaLimiteRetiro,
 													false,
@@ -738,7 +744,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 											alignItems="center"
 										>
 											<QuestionOutlineIcon size="3" color="emerald.600" />
-											<Text fontSize="sm" numberOfLines={4}>
+											<Text flex={1} fontSize="sm" numberOfLines={4}>
 												{getEstado(solicitud, false)}
 											</Text>
 										</HStack>
