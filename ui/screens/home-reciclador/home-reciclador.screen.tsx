@@ -1,6 +1,6 @@
 import React from 'react'
 import { TouchableOpacity } from 'react-native'
-import MapView, { Marker, Polygon, Polyline } from 'react-native-maps'
+import MapView, { Marker, Polygon, Polyline, PROVIDER_GOOGLE } from 'react-native-maps'
 import { Box, Center, Flex, Modal, Row, Text, useToast } from 'native-base'
 import { FontAwesome } from '@expo/vector-icons'
 import { colors } from '../../../constants/styles'
@@ -179,6 +179,7 @@ export const HomeReciclador = ({ navigation }: Props) => {
 						showsUserLocation
 						showsMyLocationButton
 						region={region}
+						provider={PROVIDER_GOOGLE}
 						// onRegionChange={setRegion}
 					>
 						{todayRecorrido && (

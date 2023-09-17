@@ -1,6 +1,6 @@
 import React from 'react'
 import { GestureResponderEvent, Linking, TouchableOpacity } from 'react-native'
-import MapView, { Marker, Polygon } from 'react-native-maps'
+import MapView, { Marker, Polygon, PROVIDER_GOOGLE } from 'react-native-maps'
 import {
 	Box,
 	Center,
@@ -158,14 +158,19 @@ export const Home = ({ navigation }: Props) => {
 				latitude,
 				longitude,
 			})
-			const address =
-				location.at(0).name +
+
+			let address = 'No podemos brindar la direccion.'
+			if(location != null && location.at(0) != null ){
+				address =
+				location.at(0).name? location.at(0).name : '' +
 				', ' +
-				location.at(0).city +
+				location.at(0).city? location.at(0).city : '' +
 				', ' +
-				location.at(0).postalCode +
+				location.at(0).postalCode? location.at(0).postalCode : '' +
 				', ' +
-				location.at(0).region
+				location.at(0).region? location.at(0).region : ''
+			} 
+			
 			setDirection(address)
 			setIsLoadingModal(false)
 		} catch (error) {
@@ -322,6 +327,7 @@ export const Home = ({ navigation }: Props) => {
 							latitudeDelta,
 							longitudeDelta,
 						}}
+						provider={PROVIDER_GOOGLE}
 					>
 						<CircuitosReciclaje
 							isViewZonas={isViewZonas}
@@ -745,14 +751,19 @@ const ModalsZonas = ({
 					longitude: punto.longitud,
 				})
 				const location = await Promise.all(locationPromise)
-				const address =
-					location.at(0).name +
-					', ' +
-					location.at(0).city +
-					', ' +
-					location.at(0).postalCode +
-					', ' +
-					location.at(0).region
+
+				let address = 'No podemos brindar la direccion.'
+				if (location != null && location.at(0) != null) {
+					address = location.at(0).name
+						? location.at(0).name
+						: '' + ', ' + location.at(0).city
+						? location.at(0).city
+						: '' + ', ' + location.at(0).postalCode
+						? location.at(0).postalCode
+						: '' + ', ' + location.at(0).region
+						? location.at(0).region
+						: ''
+				}
 
 				const puntoConDireccion: PuntoConDireccion = {
 					punto: punto,

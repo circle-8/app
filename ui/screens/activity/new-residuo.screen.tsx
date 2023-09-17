@@ -152,8 +152,6 @@ const Form = ({
 		setData({ ...formData, fechaLimite: currentDate })
 	}
 
-	
-
 	const doSubmit = async () => {
 		setLoading(true)
 
