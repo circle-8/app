@@ -15,7 +15,7 @@ import {
 import React from 'react'
 import { ProfileRoutesParams } from '../../../constants/routes'
 import { Dia, PuntoReciclaje, TipoResiduo } from '../../../services/types'
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
+import MapView, { Marker, PROVIDER_DEFAULT, PROVIDER_GOOGLE } from 'react-native-maps'
 import * as Location from 'expo-location'
 import { LoadingScreen } from '../../components/loading.component'
 import { PuntoService } from '../../../services/punto.service'
@@ -284,7 +284,7 @@ const Form = ({ id, punto, initialPosition, tipos, onSubmit }: FormParams) => {
 						latitudeDelta,
 						longitudeDelta,
 					}}
-					provider={Platform.OS === 'ios' ? null : PROVIDER_GOOGLE}
+					provider={Platform.OS === 'ios' ? PROVIDER_DEFAULT : PROVIDER_GOOGLE}
 				>
 					<Marker
 						coordinate={{

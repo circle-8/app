@@ -1,6 +1,6 @@
 import React from 'react'
 import { GestureResponderEvent, Linking, Platform, TouchableOpacity } from 'react-native'
-import MapView, { Marker, Polygon, PROVIDER_GOOGLE } from 'react-native-maps'
+import MapView, { Marker, Polygon, PROVIDER_GOOGLE, PROVIDER_DEFAULT  } from 'react-native-maps'
 import {
 	Box,
 	Center,
@@ -325,7 +325,7 @@ export const Home = ({ navigation }: Props) => {
 							latitudeDelta,
 							longitudeDelta,
 						}}
-						provider={Platform.OS === 'ios' ? null : PROVIDER_GOOGLE}
+						provider={Platform.OS === 'ios' ? PROVIDER_DEFAULT : PROVIDER_GOOGLE}
 					>
 						<CircuitosReciclaje
 							isViewZonas={isViewZonas}
@@ -1139,14 +1139,14 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 			ifLeft(result, t => {
 				userResiduos.forEach(residuo => {
 					if (r.id == residuo.id) {
-						successMap.push(residuo.descripcion)
+						successMap.push(residuo.tipoResiduo.nombre)
 					}
 				})
 			})
 			ifRight(result, t => {
 				userResiduos.forEach(residuo => {
 					if (r.id == residuo.id) {
-						errorMap.push(residuo.descripcion)
+						errorMap.push(residuo.tipoResiduo.nombre)
 					}
 				})
 			})
@@ -1435,7 +1435,7 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 								<View style={{ marginHorizontal: 10 }} />
 								<Button onPress={handleCreateResiduo}>Crear Resiudo</Button>
 							</View>
-						) : modalEntregar && userResiduos.length >= 0 ? (
+						) : modalEntregar && userResiduos.length >= 0 && selectedResiduos.length != 0 ? (
 							<View
 								style={{
 									flexDirection: 'row',
@@ -1448,6 +1448,8 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 									Entregar Residuos
 								</Button>
 							</View>
+						) :  modalEntregar && userResiduos.length >= 0 && selectedResiduos.length == 0 ? (
+							<Button onPress={() => setModalEntregar(false)}>Volver</Button>
 						) : props.point.tipoResiduo &&
 						  props.point.tipoResiduo.length > 0 ? (
 							<Button
