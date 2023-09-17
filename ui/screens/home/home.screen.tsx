@@ -1137,7 +1137,6 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 			})
 			ifRight(result, t => {
 				userResiduos.forEach(residuo => {
-					console.log(residuo.descripcion)
 					if (r.id == residuo.id) {
 						errorMap.push(residuo.descripcion)
 					}

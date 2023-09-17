@@ -12,6 +12,7 @@ import { UserService } from './services/user.service'
 import { colors } from './constants/styles'
 import { Login } from './ui/screens/login/login.screen'
 import { MainRecicladorTabsFlow } from './ui/navigation/reciclador/main-reciclador.flow'
+import { match } from './utils/either'
 
 const navigationTheme = {
 	...DefaultTheme,
@@ -48,7 +49,7 @@ export default function App() {
 	const authContext = React.useMemo(
 		() => ({
 			login: async (usr?: User) => {
-				setTipo(usr?.tipoUsuario || 'CIUDADANO')
+				setTipo(usr?.tipoUsuario)
 				setLogged(true)
 			},
 			logout: () => {
@@ -63,16 +64,13 @@ export default function App() {
 	React.useEffect(() => {
 		(async () => {
 			if (await UserService.isLogged()) {
-				console.log('refreshing token')
-				const error = await UserService.refreshToken()
+				const token = await UserService.refreshToken()
 
-				if (error !== null) {
-					toast.show({
-						description: 'Hubo un error al iniciar sesión automáticamente',
-					})
-				} else {
-					await authContext.login()
-				}
+				match(
+					token,
+					async usr => await authContext.login(usr),
+					err => toast.show({description: 'Hubo un error al iniciar sesion automaticamente'})
+				)
 			}
 
 			setLoading(false)
