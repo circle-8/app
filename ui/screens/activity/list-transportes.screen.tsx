@@ -63,14 +63,19 @@ export const ListTransportes = ({ navigation, route }: Props) => {
 				latitude,
 				longitude,
 			})
-			const address =
-				location.at(0).name +
+
+			let address = 'No podemos brindar la direccion.'
+			if(location != null && location.at(0) != null ){
+				address =
+				location.at(0).name? location.at(0).name : '' +
 				', ' +
-				location.at(0).city +
+				location.at(0).city? location.at(0).city : '' +
 				', ' +
-				location.at(0).postalCode +
+				location.at(0).postalCode? location.at(0).postalCode : '' +
 				', ' +
-				location.at(0).region
+				location.at(0).region? location.at(0).region : ''
+			} 
+			
 			return address
 		} catch (error) {
 			return 'No podemos brindar la direccion.'
