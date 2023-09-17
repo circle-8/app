@@ -74,6 +74,7 @@ export type PuntoVerdeResponse = PuntoResponseBase & {
 	dias: DiaResponse[]
 	tipoResiduo: TipoResiduoResponse[]
 	titulo: string
+	email: string
 }
 
 export type PuntoReciclajeResponse = PuntoVerdeResponse & {
