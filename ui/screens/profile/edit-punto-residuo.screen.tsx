@@ -17,6 +17,7 @@ import { LoadingScreen } from '../../components/loading.component'
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 import { colors } from '../../../constants/styles'
 import { match } from '../../../utils/either'
+import { Platform } from 'react-native'
 
 type Props = NativeStackScreenProps<ProfileRoutesParams, 'EditPuntoResiduo'>
 
@@ -147,7 +148,7 @@ const Form = ({ id, initialPosition, onSubmit }: FormParams) => {
 						latitudeDelta,
 						longitudeDelta,
 					}}
-					provider={PROVIDER_GOOGLE}
+					provider={Platform.OS === 'ios' ? null : PROVIDER_GOOGLE}
 				>
 					<Marker
 						coordinate={{
