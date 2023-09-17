@@ -1,6 +1,6 @@
 import React from 'react'
 import { Platform, TouchableOpacity } from 'react-native'
-import MapView, { Marker, Polygon, Polyline, PROVIDER_GOOGLE } from 'react-native-maps'
+import MapView, { Marker, Polygon, Polyline, PROVIDER_DEFAULT, PROVIDER_GOOGLE } from 'react-native-maps'
 import { Box, Center, Flex, Modal, Row, Text, useToast } from 'native-base'
 import { FontAwesome } from '@expo/vector-icons'
 import { colors } from '../../../constants/styles'
@@ -130,7 +130,7 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 						showsUserLocation
 						showsMyLocationButton
 						region={region}
-						provider={Platform.OS === 'ios' ? null : PROVIDER_GOOGLE}
+						provider={Platform.OS === 'ios' ? PROVIDER_DEFAULT : PROVIDER_GOOGLE}
 						// onRegionChange={setRegion}
 					>
 						{isView && (
