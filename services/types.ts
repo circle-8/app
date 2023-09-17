@@ -8,6 +8,7 @@ import {
 	SolicitudResponse,
 	TipoResiduoResponse,
 	TransaccionResponse,
+	TransporteResponse,
 	UserResponse,
 	ZonaResponse,
 } from './responses'
@@ -58,3 +59,4 @@ export type Recorrido = RecorridoResponse & {
 	initDate?: Date
 	endDate?: Date
 }
+export type Transporte = TransporteResponse

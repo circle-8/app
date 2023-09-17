@@ -9,6 +9,8 @@ import {
 	WarningOutlineIcon,
 	Box,
 	Center,
+	Button,
+	useToast,
 } from 'native-base'
 import { match } from '../../../utils/either'
 import { TransaccionService } from '../../../services/transaccion.service'
@@ -16,10 +18,12 @@ import { LoadingScreen } from '../../components/loading.component'
 import { Transaccion } from '../../../services/types'
 import { formatFecha } from '../../../utils/days'
 import { TouchableOpacity } from 'react-native'
+import { TransportistaService } from '../../../services/transportista.service'
 
 type Props = NativeStackScreenProps<ActivityRouteParams, 'ListTransacciones'>
 
 export const ListTransacciones = ({ navigation, route }: Props) => {
+	const toast = useToast()
 	const { ciudadanoId } = route.params
 	const [isLoading, setLoading] = React.useState(true)
 	const [transactions, setTransactions] = React.useState<Transaccion[]>([])
@@ -34,6 +38,61 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 			e => setTransactions([]),
 		)
 		setLoading(false)
+	}
+	const handleEntregada = async (transporteId) => {
+		const error = await TransportistaService.entregaConfirmada(transporteId)
+		const error2 = await TransaccionService.fulfill(transporteId) 
+		match(
+			error,
+			t => {},
+			err => {
+				toast.show({
+					description: 'Ocurrio un error al confirmar la entrega, reintenta.',
+				})
+			},
+		)
+		match(
+			error2,
+			t => {toast.show({ description: 'Entrega confirmada correctamente.' })},
+			err => {
+				toast.show({
+					description: 'Ocurrio un error al confirmar la entrega, reintenta.',
+				})
+			},
+		)
+		loadData()
+	}
+	
+	const handleCancelarTransportista = async (id) => {
+		const error = await TransaccionService.deleteSolicTransporte(id)
+		match(
+			error,
+			t => {
+				toast.show({ description: 'Transporte cancelado correctamente.' })
+			},
+			err => {
+				toast.show({
+					description: 'Ocurrio un error al cancelar el transporte, reintenta.',
+				})
+			},
+		)
+		loadData()
+	}
+
+	const handleSolicitarTransportista = async (id) => {
+		const error = await TransaccionService.solicTransporte(id)
+		match(
+			error,
+			t => {
+				toast.show({ description: 'Transporte solicitado correctamente.' })
+			},
+			err => {
+				toast.show({
+					description: 'Ocurrio un error al solicitar el Transporte, reintenta.',
+				})
+			},
+		)
+		loadData()
 	}
 
 	React.useEffect(() => {
@@ -107,6 +166,39 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 											{transaction.fechaRetiro && 'Ya completada'}
 										</Text>
 									</HStack>
+									<View
+										style={{
+											flexDirection: 'row',
+											justifyContent: 'center',
+											alignItems: 'center',
+											marginTop: 8,
+										}}
+									>
+										{transaction.fechaRetiro == null &&
+										transaction.transporteId != null ? (
+											<>
+												<View style={{flexDirection: 'row', justifyContent: 'space-between'}} >
+													<Button onPress={() =>handleCancelarTransportista(transaction.id)} >
+														Cancelar Transporte
+													</Button>
+													<View style={{ marginHorizontal: 10 }} />
+													<Button onPress={() => handleEntregada(transaction.transporteId)} >
+														Confirmar Entrega
+													</Button>
+												</View>
+											</>
+										) : (
+											transaction.fechaRetiro == null &&
+											transaction.transporteId == null && (
+												<>
+													<Button
+														onPress={() => handleSolicitarTransportista(transaction.id)} >
+														Solicitar Transportista
+													</Button>
+												</>
+											)
+										)}
+									</View>
 								</Box>
 							</TouchableOpacity>
 						</>

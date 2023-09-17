@@ -24,6 +24,7 @@ export type UserResponse = {
 	recicladorUrbanoId?: number
 	organizacionId?: number
 	zonaId?: number
+	transportistaId?: number
 }
 
 export type TokenResponse = {
@@ -98,6 +99,8 @@ export type ResiduoResponse = {
 	puntoResiduo?: {
 		id: number
 		ciudadanoId: number
+		latitud: number
+		longitud: number
 	}
 	tipoResiduo: TipoResiduoResponse
 }
@@ -122,6 +125,7 @@ export type TransaccionResponse = {
 	puntoReciclajeId: number
 	puntoReciclaje?: PuntoReciclajeResponse
 	residuos?: ResiduoResponse[]
+	transporteId?: number
 }
 
 export type RecicladorResponse = {
@@ -168,4 +172,19 @@ export type RecorridoResponse = {
 		longitud: number,
 		residuo: ResiduoResponse
 	}[]
+}
+
+export type TransporteResponse = {
+	id: number
+	fechaAcordada: string
+	fechaInicio: string
+	fechaFin: string
+	precioAcordado: number
+	transportistaId: number
+	transaccionId: number
+	transaccion: TransaccionResponse
+	pagoConfirmado: boolean
+	entregaConfirmada: boolean
+	precioSugerido: number
+	direccion: string
 }

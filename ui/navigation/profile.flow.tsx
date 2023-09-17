@@ -24,7 +24,7 @@ export const ProfileFlow = () => {
 			<ProfileStack.Screen
 				name={ProfileRoutes.editPuntoReciclaje}
 				component={EditPuntoReciclaje}
-				options={{ title: 'Punto de Reciclaje' }}
+				options={{ title: 'Punto de Reciclaje Particular' }}
 			/>
 			<ProfileStack.Screen
 				name={ProfileRoutes.editPuntoResiduo}

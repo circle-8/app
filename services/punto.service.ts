@@ -1,5 +1,5 @@
 import { Http } from '../api/api'
-import { Either, ifLeft, map } from '../utils/either'
+import { Either, Maybe, ifLeft, map, mapRight, maybeRight } from '../utils/either'
 import {
 	ListResponse,
 	PuntoReciclajeResponse,
@@ -150,6 +150,13 @@ const postRetiroResiduo = async (
 	)
 }
 
+const del = async (id: number, recicladorId: number): Promise<Maybe<ErrorMessage>> => {
+	const url =`/reciclador/${recicladorId}/punto_reciclaje/${id}`
+	const res = await Http.delete<null>(url)
+
+	return maybeRight(mapRight(res, err => err.message))
+}
+
 export const PuntoService = {
 	getAll,
 	getPuntoReciclaje,
@@ -157,4 +164,5 @@ export const PuntoService = {
 	savePuntoResiduo,
 	getPuntoResiduo,
 	postRetiroResiudo: postRetiroResiduo,
+	del,
 }

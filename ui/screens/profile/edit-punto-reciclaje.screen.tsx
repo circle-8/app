@@ -95,15 +95,6 @@ export const EditPuntoReciclaje = ({ navigation, route }: Props) => {
 		<ScrollView>
 			<Center w="100%">
 				<Box safeArea p="2" w="90%" maxW="320">
-					<Heading
-						size="lg"
-						fontWeight="600"
-						color="coolGray.800"
-						alignSelf="center"
-					>
-						{id ? 'Editar Punto' : 'Nuevo Punto'}
-					</Heading>
-
 					<Form
 						id={id}
 						punto={punto}
@@ -249,32 +240,32 @@ const Form = ({ id, punto, initialPosition, tipos, onSubmit }: FormParams) => {
 				</FormControl.ErrorMessage>
 			</FormControl>
 			<FormControl isInvalid={'dias' in errors}>
-				<FormControl.Label>Dias que está abierto</FormControl.Label>
+				<FormControl.Label>Dias con disponibilidad</FormControl.Label>
 				<Checkbox.Group defaultValue={dias} onChange={v => setDias(v)}>
 					<VStack space="4">
 						<HStack>
 							<Checkbox value="0" width="75px">
-								L
+								Lu
 							</Checkbox>
 							<Checkbox value="1" width="75px">
-								M
+								Ma
 							</Checkbox>
 							<Checkbox value="2" width="75px">
-								X
+								Mi
 							</Checkbox>
 							<Checkbox value="3" width="75px">
-								J
+								Ju
 							</Checkbox>
 						</HStack>
 						<HStack>
 							<Checkbox value="4" width="75px">
-								V
+								Vi
 							</Checkbox>
 							<Checkbox value="5" width="75px">
-								S
+								Sa
 							</Checkbox>
 							<Checkbox value="6" width="75px">
-								D
+								Do
 							</Checkbox>
 						</HStack>
 					</VStack>

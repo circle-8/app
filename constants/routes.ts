@@ -1,4 +1,4 @@
-import { PuntoResiduo } from '../services/types'
+import { PuntoResiduo, Transporte } from '../services/types'
 
 export type LoginRoutesParams = {
 	Login: undefined
@@ -67,6 +67,15 @@ export type ActivityRouteParams = {
 	ViewTransaccion: {
 		ciudadanoId: number
 		transaccionId: number
+	},
+	ListMisTransportes: {
+		userId: number
+	},
+	ListTransportes: {
+		userId: number
+	},
+	MapTransportes: {
+		transporte: Transporte
 	}
 }
 type ActivityRouteName = keyof ActivityRouteParams
@@ -78,6 +87,9 @@ export const ActivityRoutes: {
 	listTransacciones: 'ListTransacciones'
 	viewTransaccion: 'ViewTransaccion'
 	listResiduos: 'ListResiduos'
+	listMisTransportes: 'ListMisTransportes'
+	listTransportes: 'ListTransportes'
+	mapTransportes: 'MapTransportes'
 } = {
 	activity: 'Activity',
 	newResiduo: 'NewResiduo',
@@ -85,6 +97,9 @@ export const ActivityRoutes: {
 	listTransacciones: 'ListTransacciones',
 	viewTransaccion: 'ViewTransaccion',
 	listResiduos: 'ListResiduos',
+	listMisTransportes: 'ListMisTransportes',
+	listTransportes: 'ListTransportes',
+	mapTransportes: 'MapTransportes'
 }
 
 type TabRoutesParams = {
