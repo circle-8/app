@@ -15,7 +15,12 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "package": "com.circle8.app",
+      "config": {
+        "googleMapsApiKey": "AIzaSyDHFfRLpl4t-N-0BGmFN1zvJ7BNpJSSbow"
+      },
+      "bundleIdentifier": "com.circle8.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -28,7 +33,7 @@
         "android.permission.FOREGROUND_SERVICE"
       ],
       "package": "com.circle8.app",
-      "config":{
+      "config": {
         "googleMaps": {
           "apiKey": "AIzaSyAGId4-rD1cRt0N2dOIADzvaR5j065OevE"
         }
