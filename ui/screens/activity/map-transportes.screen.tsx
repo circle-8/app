@@ -8,15 +8,12 @@ import * as Location from 'expo-location'
 import { LoadingScreen } from '../../components/loading.component'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { MainRoutesParams } from '../../../constants/routes-reciclador'
-import { RecorridoService } from '../../../services/recorrido.service'
 import { UserService } from '../../../services/user.service'
-import { Recorrido, Zona } from '../../../services/types'
+import { Transaccion, Transporte } from '../../../services/types'
 import { caseMaybe, map, match } from '../../../utils/either'
-import { ZonasService } from '../../../services/zonas.service'
-import { ActivityRouteParams } from '../../../constants/routes'
+import { ActivityRouteParams, ActivityRoutes } from '../../../constants/routes'
 import { TransaccionService } from '../../../services/transaccion.service'
-import { PuntoService } from '../../../services/punto.service'
+import { TransportistaService } from '../../../services/transportista.service'
 
 type Coord = {
 	latitude: number
@@ -32,12 +29,10 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 	const toast = useToast()
 	const { transporte } = route.params
 	const [isView, setIsView] = React.useState(true)
-
 	const [isLoading, setLoading] = React.useState(true)
 	const [userCoords, setUserCoords] = React.useState<Coord>()
-	const [todayRecorrido, setTodayRecorrido] = React.useState<Recorrido>()
+	const [transaccion, setTransaccion] = React.useState<Transaccion>()
 	const [currentPoint, setCurrentPoint] = React.useState<number>(0)
-	const [puntos, setPuntos] = React.useState<Coord[]>()
 	const [region, setRegion] = React.useState<{
 		latitude: number
 		longitude: number
@@ -48,62 +43,27 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 		React.useState<Location.LocationGeocodedAddress>()
 
 	const getRecorridos = async () => {
-		const user = await UserService.getCurrent()
-		const transaction = await TransaccionService.get(transporte.transaccionId)
+		const getTransaction = await TransaccionService.get(transporte.transaccionId)
 		match(
-			transaction,
+			getTransaction,
 			t => {
-				getUserLocation()
-				for(const r of t.residuos){
-						console.log(r.puntoResiduoUri.charAt(11))
-				}
-				setPuntos
-				//PuntoService.getPuntoReciclaje()
+				setTransaccion(t)
+				setRegion({
+					latitude: t.residuos[0]?.puntoResiduo.latitud || userCoords.latitude,
+					longitude:  t.residuos[0]?.puntoResiduo.longitud || userCoords.longitude,
+					latitudeDelta,
+					longitudeDelta,
+				})
+				const coord: Coord = {latitude: t.residuos[0]?.puntoResiduo.latitud || 0, 
+								longitude: t.residuos[0]?.puntoResiduo.longitud || 0, 
+			  }
+				getAddress(coord)
 			},
 			err => {
 				toast.show({ description: err })
-				navigation.goBack()
+				navigation.navigate(ActivityRoutes.activity)
 			},
 		)
-
-		
-		const recorridos = await RecorridoService.list({
-			recicladorId: user.recicladorUrbanoId,
-			fechaRetiro: new Date(), // today
-		})
-		let recorrido: Recorrido
-		match(
-			recorridos,
-			rr => {
-				recorrido = rr.filter(r => !r.endDate)[0]
-				setTodayRecorrido(recorrido)
-			},
-			err => {
-				toast.show({ description: err })
-			},
-		)
-		if (recorrido && recorrido.initDate) {
-			const res = await RecorridoService.get(recorrido.id)
-			match(
-				res,
-				r => {
-					setTodayRecorrido(r)
-					setRegion({
-						latitude: r.puntos[0]?.latitud || r.puntoInicio.latitud,
-						longitude: r.puntos[0]?.longitud || r.puntoInicio.longitud,
-						latitudeDelta,
-						longitudeDelta,
-					})
-				},
-				err => toast.show({ description: err }),
-			)
-		} else {
-			setRegion({
-				...userCoords,
-				latitudeDelta,
-				longitudeDelta,
-			})
-		}
 	}
 
 	const getUserLocation = async () => {
@@ -116,6 +76,13 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 				longitude: p.coords.longitude,
 			})
 		}
+	}
+
+	const getAddress = async (coord: Coord) => {
+		const location = await Location.reverseGeocodeAsync(coord)
+		if (location.length > 0) {
+			setAddress(location[0])
+		} 
 	}
 
 	const initialLoad = async () => {
@@ -133,43 +100,23 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 		return <LoadingScreen />
 	}
 
-	const onInit = async () => {
-		const error = await RecorridoService.init(todayRecorrido.id)
-		caseMaybe(
-			error,
-			err => toast.show({ description: err }),
-			async () => {
-				const res = await RecorridoService.get(todayRecorrido.id)
-				match(
-					res,
-					r => setTodayRecorrido(r),
-					err => toast.show({ description: err }),
-				)
-			},
-		)
-	}
-
 	const onFinish = async () => {
-		const error = await RecorridoService.finish(todayRecorrido.id)
+		const user = await UserService.getCurrent()
+		const error = await TransportistaService.finish(transporte.id)
 		caseMaybe(
 			error,
 			err => toast.show({ description: err }),
 			() => {
-				toast.show({ description: 'Recorrido finalizado' })
-				setTodayRecorrido(undefined)
+				toast.show({ description: 'Transporte finalizado' })
+				navigation.navigate(ActivityRoutes.listMisTransportes, {
+					userId: user.id,
+				})
 			},
 		)
 	}
 
-	const getAddress = async (coord: Coord) => {
-		const location = await Location.reverseGeocodeAsync(coord)
-		if (location.length > 0) {
-			setAddress(location[0])
-		}
-	}
-
-	const mapHeight = todayRecorrido?.initDate || false ? '70%' : '85%'
-	const boxHeight = todayRecorrido?.initDate || false ? '10%' : '15%'
+	const mapHeight = transporte?.fechaInicio || false ? '65%' : '85%'
+	const boxHeight = transporte?.fechaInicio || false ? '15%' : '15%'
 
 	return (
 		<SafeAreaView
@@ -205,26 +152,26 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 								title="Fin del recorrido"
 							/>
 						)}
-						{todayRecorrido?.puntos?.map(p => (
+						{transaccion?.residuos?.map(p => (
 							<Marker
-								key={`${p.residuo.id}`}
+								key={`${p.id}`}
 								coordinate={{
-									latitude: p.latitud,
-									longitude: p.longitud,
+									latitude: p.puntoResiduo.latitud,
+									longitude: p.puntoResiduo.longitud,
 								}}
 								pinColor={colors.byType['RESIDUO']}
 							/>
 						))}
-						{todayRecorrido?.puntos && (
+						{transaccion?.residuos && (
 							<Polyline
 								coordinates={[
 									{
 										latitude: userCoords.latitude,
 										longitude: userCoords.longitude,
 									},
-									...todayRecorrido.puntos.map(p => ({
-										latitude: p.latitud,
-										longitude: p.longitud,
+									...transaccion?.residuos?.map(p => ({
+										latitude: p.puntoResiduo.latitud,
+										longitude: p.puntoResiduo.longitud,
 									})),
 									{
 										latitude: transporte.transaccion.puntoReciclaje.latitud,
@@ -235,19 +182,20 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 						)}
 					</MapView>
 				</Box>
-				{todayRecorrido && todayRecorrido.initDate && (
-					<Box height="20%" bgColor="white" p="10" borderBottomWidth="0.5">
+				{transaccion && transaccion?.residuos && (
+					<Box height="20%" bgColor="white" p="5" borderBottomWidth="0.5">
 						<Text>
-							{todayRecorrido.puntos[currentPoint]?.residuo.descripcion}
+						{'\u2022'}{transaccion.residuos[currentPoint]?.descripcion}
 						</Text>
 						<Text>
-							{todayRecorrido.puntos[currentPoint]?.residuo.tipoResiduo.nombre}
+						{'\u2022'} {transaccion.residuos[currentPoint]?.tipoResiduo.nombre}
 						</Text>
 						<Text>
-							{address?.street} {address?.streetNumber}
+						{'\u2022'} {address?.street ? address?.street : 'No se pudo obtener la direccion'} {address?.streetNumber ? address?.streetNumber : ""} 
 						</Text>
 						<Text>
-							{todayRecorrido.puntos[currentPoint]?.residuo.fechaRetiro
+						{'\u2022'}
+							{transaccion.residuos[currentPoint]?.fechaRetiro
 								? 'Ya ha sido retirado'
 								: 'Todavia no retirado'}
 						</Text>
@@ -255,37 +203,37 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 				)}
 				<Center height={boxHeight} bgColor="white">
 					<BelowBox
-						recorrido={todayRecorrido}
+						transaccion={transaccion}
+						transporte={transporte}
 						currentPoint={currentPoint}
-						onInit={onInit}
 						onFinish={onFinish}
 						onPrevious={async () => {
 							const newPoint = currentPoint > 0 ? currentPoint - 1 : 0
 							setCurrentPoint(newPoint)
 							await getAddress({
-								latitude: todayRecorrido.puntos[newPoint].latitud,
-								longitude: todayRecorrido.puntos[newPoint].longitud,
+								latitude: transaccion.residuos[newPoint].puntoResiduo.latitud,
+								longitude: transaccion.residuos[newPoint].puntoResiduo.longitud,
 							})
 							setRegion({
-								latitude: todayRecorrido.puntos[newPoint].latitud,
-								longitude: todayRecorrido.puntos[newPoint].longitud,
+								latitude: transaccion.residuos[newPoint].puntoResiduo.latitud,
+								longitude: transaccion.residuos[newPoint].puntoResiduo.longitud,
 								latitudeDelta,
 								longitudeDelta,
 							})
 						}}
 						onNext={async () => {
 							const newPoint =
-								currentPoint + 1 < todayRecorrido.puntos.length
+								currentPoint + 1 < transaccion.residuos.length
 									? currentPoint + 1
 									: currentPoint
 							setCurrentPoint(newPoint)
 							await getAddress({
-								latitude: todayRecorrido.puntos[newPoint].latitud,
-								longitude: todayRecorrido.puntos[newPoint].longitud,
+								latitude: transaccion.residuos[newPoint].puntoResiduo.latitud,
+								longitude: transaccion.residuos[newPoint].puntoResiduo.longitud,
 							})
 							setRegion({
-								latitude: todayRecorrido.puntos[newPoint].latitud,
-								longitude: todayRecorrido.puntos[newPoint].longitud,
+								latitude: transaccion.residuos[newPoint].puntoResiduo.latitud,
+								longitude: transaccion.residuos[newPoint].puntoResiduo.longitud,
 								latitudeDelta,
 								longitudeDelta,
 							})
@@ -298,39 +246,23 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 }
 
 type BeloxBoxParams = {
-	recorrido?: Recorrido
+	transaccion?: Transaccion
+	transporte?: Transporte
 	currentPoint: number
-	onInit: () => void
 	onFinish: () => void
 	onPrevious: () => void
 	onNext: () => void
 }
 
 const BelowBox = ({
-	recorrido,
+	transaccion,
+	transporte,
 	currentPoint,
-	onInit,
 	onFinish,
 	onPrevious,
 	onNext,
 }: BeloxBoxParams) => {
 	let content: JSX.Element
-	if (!recorrido) {
-		content = (
-			<Center w="33%">
-				<Text fontSize="xs">No tienes recorridos para hoy</Text>
-			</Center>
-		)
-	} else if (!recorrido.initDate) {
-		content = (
-			<Center w="33%">
-				<TouchableOpacity onPress={onInit}>
-					<FontAwesome name="recycle" size={40} color={colors.primary800} />
-				</TouchableOpacity>
-				<Text fontSize="xs">Iniciar Recorrido</Text>
-			</Center>
-		)
-	} else {
 		content = (
 			<>
 				<Center w="33%">
@@ -349,7 +281,7 @@ const BelowBox = ({
 							name="caret-right"
 							size={50}
 							color={
-								currentPoint == recorrido.puntos.length - 1
+								currentPoint == transaccion.residuos.length - 1
 									? 'lightgray'
 									: colors.primary800
 							}
@@ -365,7 +297,6 @@ const BelowBox = ({
 				</Center>
 			</>
 		)
-	}
 
 	return <Row alignContent="center">{content}</Row>
 }

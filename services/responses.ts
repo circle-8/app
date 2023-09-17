@@ -99,6 +99,8 @@ export type ResiduoResponse = {
 	puntoResiduo?: {
 		id: number
 		ciudadanoId: number
+		latitud: number
+		longitud: number
 	}
 	tipoResiduo: TipoResiduoResponse
 }
@@ -123,6 +125,7 @@ export type TransaccionResponse = {
 	puntoReciclajeId: number
 	puntoReciclaje?: PuntoReciclajeResponse
 	residuos?: ResiduoResponse[]
+	transporteId?: number
 }
 
 export type RecicladorResponse = {

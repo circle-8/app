@@ -76,11 +76,31 @@ const fulfill = async(id: number): Promise<Either<Transaccion, ErrorMessage>> =>
 	)
 }
 
+const solicTransporte = async(id: number): Promise<Either<Transaccion, ErrorMessage>> => {
+	const res = await Http.post<TransaccionResponse>(`/transaccion/${id}/transporte`)
+	return map(
+		res,
+		p => p,
+		err => err.message
+	)
+}
+
+const deleteSolicTransporte = async(id: number): Promise<Either<Transaccion, ErrorMessage>> => {
+	const res = await Http.delete<TransaccionResponse>(`/transaccion/${id}/transporte`)
+	return map(
+		res,
+		p => p,
+		err => err.message
+	)
+}
+
 export const TransaccionService = {
 	getAll,
 	get,
 	addResiduo,
 	deleteResiduo,
 	createTransaccion,
-	fulfill
+	fulfill,
+	solicTransporte,
+	deleteSolicTransporte
 }

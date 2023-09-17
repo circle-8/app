@@ -210,10 +210,10 @@ const AlertBeforeAction = ({ isOpen, action, onCancel, onOk }: AlertProps) => {
 			: 'Marcar residuo como retirado'
 	const body =
 		action === 'DELETE'
-			? 'Esto va a eliminar el residuo, y no podrá ser retirado' :
+			? 'Se eliminara el residuo y no podrá ser retirado' :
 		action === 'DELIVERY' 
 			? 'Se añadira el residuo a un recorrido' 
-			: 'Esto marcará el residuo como retirado y no podrá volver a ser retirado'
+			: 'Se marcara el residuo como retirado y no podrá volver a ser retirado'
 	return (
 		<AlertDialog
 			leastDestructiveRef={cancelRef}

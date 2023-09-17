@@ -225,13 +225,15 @@ export const Home = ({ navigation }: Props) => {
 			getZonas,
 			t => {
 				if (t.length === 0) {
-					toast.show({ description: "No hay circuitos activos." });
+					toast.show({ description: 'No hay circuitos activos.' })
 				} else {
-					setPuedeUnirseZona(t);
+					setPuedeUnirseZona(t)
 				}
 			},
 			err => {
-				toast.show({ description: "Ocurrio un error al obtener los circuitos, reintenta." })
+				toast.show({
+					description: 'Ocurrio un error al obtener los circuitos, reintenta.',
+				})
 			},
 		)
 		setIsViewZonas(!isViewZonas)
@@ -311,7 +313,7 @@ export const Home = ({ navigation }: Props) => {
 			edges={['top']}
 		>
 			<Flex h="100%">
-				<Box height="85%">
+				<Box height="75%">
 					<MapView
 						style={{ width: '100%', height: '100%' }}
 						showsUserLocation
@@ -413,9 +415,31 @@ export const Home = ({ navigation }: Props) => {
 					selectedUserPoint={selectedUserPoint}
 					setSelectedUserPoint={setSelectedUserPoint}
 				/>
-				<Center height="15%" bgColor="white">
-					<Row alignContent="center" mt="4">
+				<Center height="25%" bgColor="white">
+					<Row justifyContent="space-between" mt="0" height={120}>
 						<Center w="33%">
+							<TouchableOpacity
+								onPress={() => {
+									handleEntregarResiduos()
+								}}
+							>
+								<View style={{ alignItems: 'center', marginTop: 0 }}>
+									<Ionicons name="trash" size={40} color={colors.primary800} />
+								</View>
+								<View style={{ alignItems: 'center', marginTop: 0 }}>
+									<Text fontSize="xs" fontWeight="bold">
+										Entregar residuos
+									</Text>
+								</View>
+								<View style={{ alignItems: 'center', marginTop: 2 }}>
+									<Text style={{ fontSize: 10, textAlign: 'center' }}>
+										Aquí podrás crear una solicitud para entregar tus residuos a
+										otras personas que los necesiten.
+									</Text>
+								</View>
+							</TouchableOpacity>
+						</Center>
+						<Center w="32%">
 							<TouchableOpacity
 								onPress={() =>
 									navigation.navigate('ProfileTab', {
@@ -424,33 +448,43 @@ export const Home = ({ navigation }: Props) => {
 									})
 								}
 							>
-								<FontAwesome
-									name="recycle"
-									size={40}
-									color={colors.primary800}
-								/>
+								<View style={{ alignItems: 'center', marginTop: 1 }}>
+									<FontAwesome
+										name="recycle"
+										size={40}
+										color={colors.primary800}
+									/>
+								</View>
+								<View style={{ alignItems: 'center', marginTop: 4 }}>
+									<Text fontSize="xs" fontWeight="bold">
+										Recibir residuos
+									</Text>
+								</View>
+								<View style={{ alignItems: 'center', marginTop: 2 }}>
+									<Text style={{ fontSize: 10, textAlign: 'center' }}>
+										Aquí podrás crear una solicitud para recibir residuos que
+										quieras reciclar.
+									</Text>
+								</View>
 							</TouchableOpacity>
-							<Text fontSize="xs">Retirar residuos</Text>
 						</Center>
-						<Center w="33%">
-							<TouchableOpacity
-								onPress={() => {
-									handleEntregarResiduos()
-								}}
-							>
-								<Ionicons name="trash" size={40} color={colors.primary800} />
+						<Center w="34%">
+							<TouchableOpacity onPress={() => handleGetZonas()}>
+								<View style={{ alignItems: 'center', marginTop: 1 }}>
+									<Ionicons name="leaf" size={40} color={colors.primary800} />
+								</View>
+								<View style={{ alignItems: 'center', marginTop: 1 }}>
+									<Text fontSize="xs" fontWeight="bold">
+										Circuitos de Reciclaje
+									</Text>
+								</View>
+								<View style={{alignItems: 'center', marginTop: 2}}>
+									<Text style={{ fontSize: 10, textAlign: 'center' }}>
+										Aquí podrás adherirte a recorridos de organizaciones de
+										reciclaje.
+									</Text>
+								</View>
 							</TouchableOpacity>
-							<Text fontSize="xs">Entregar residuos</Text>
-						</Center>
-						<Center w="33%">
-							<TouchableOpacity
-								onPress={() => {
-									handleGetZonas()
-								}}
-							>
-								<Ionicons name="leaf" size={40} color={colors.primary800} />
-							</TouchableOpacity>
-							<Text fontSize="xs">Circuitos de Reciclaje</Text>
 						</Center>
 					</Row>
 				</Center>
@@ -610,22 +644,22 @@ const CircuitosReciclaje = (props: CircuitosReciclajeProps) => {
 
 	return (
 		<>
-			{props.isViewZonas && (
-				props.zonas && props.zonas.length > 0 && (
-					props.zonas.map((zona, idx) => (
-						<Polygon
-							key={`polygon-${idx}`}
-							coordinates={zona.polyline.map(coord => ({
-								latitude: coord.latitud,
-								longitude: coord.longitud,
-							}))}
-							strokeColor="#8CB085"
-							fillColor="rgba(132, 209, 121, 0.2)"
-							strokeWidth={2}
-							tappable={true}
-							onPress={() => handleZonaPress(zona)}
-						/>
-					))
+			{props.isViewZonas &&
+				props.zonas &&
+				props.zonas.length > 0 &&
+				props.zonas.map((zona, idx) => (
+					<Polygon
+						key={`polygon-${idx}`}
+						coordinates={zona.polyline.map(coord => ({
+							latitude: coord.latitud,
+							longitude: coord.longitud,
+						}))}
+						strokeColor="#8CB085"
+						fillColor="rgba(132, 209, 121, 0.2)"
+						strokeWidth={2}
+						tappable={true}
+						onPress={() => handleZonaPress(zona)}
+					/>
 				))}
 		</>
 	)

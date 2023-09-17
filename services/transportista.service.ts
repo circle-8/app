@@ -46,8 +46,49 @@ const iniciarTransporte = async(id: number): Promise<Either<Transporte, ErrorMes
 	)
 }
 
+const pagoConfirmado = async(id: number): Promise<Either<Transporte, ErrorMessage>> => {
+	const res = await Http.post<TransporteResponse>(`/transporte/${id}/pago`)
+	return map(
+		res,
+		p => p,
+		err => err.message
+	)
+}
+
+const entregaConfirmada = async(id: number): Promise<Either<Transporte, ErrorMessage>> => {
+	const res = await Http.post<TransporteResponse>(`/transporte/${id}/confirmacion_entrega`)
+	return map(
+		res,
+		p => p,
+		err => err.message
+	)
+}
+
+const modificarImporte = async(id: number, precio: number): Promise<Either<Transporte, ErrorMessage>> => {
+	const body = {
+		precioAcordado: precio,
+	}
+	const res = await Http.put<TransporteResponse>(`/transporte/${id}`, body)
+	return map(
+		res,
+		p => p,
+		err => err.message
+	)
+}
+
+const finish = async(id: number): Promise<Maybe<ErrorMessage>> => {
+	const url = `/transporte/${id}/fin`
+	const res = await Http.post<TransporteResponse>(url)
+
+	return maybeRight(mapRight(res, err => err.message))
+}
+
 export const TransportistaService = {
 	getAll,
 	tomarTransporte,
 	iniciarTransporte,
+	finish,
+	pagoConfirmado,
+	entregaConfirmada,
+	modificarImporte,
 }

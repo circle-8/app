@@ -503,7 +503,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 							alignItems="center"
 						>
 							<Text color="black" fontSize="md" bold>
-								Solicitudes realizadas por mi
+								Ver Solicitudes entrantes
 							</Text>
 							{showSolicitante ? (
 								<ChevronUpIcon size="5" mt="0.5" color="emerald.500" />
@@ -661,7 +661,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 							alignItems="center"
 						>
 							<Text color="black" fontSize="md" bold>
-								Solicitudes realizadas a mi
+								Ver Solicitudes salientes
 							</Text>
 
 							{showSolicitado ? (
