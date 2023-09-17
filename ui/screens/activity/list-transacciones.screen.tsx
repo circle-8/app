@@ -39,27 +39,30 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 		)
 		setLoading(false)
 	}
-	const handleEntregada = async (transporteId) => {
-		const error = await TransportistaService.entregaConfirmada(transporteId)
-		const error2 = await TransaccionService.fulfill(transporteId) 
-		match(
-			error,
-			t => {},
-			err => {
-				toast.show({
-					description: 'Ocurrio un error al confirmar la entrega, reintenta.',
-				})
-			},
-		)
-		match(
-			error2,
-			t => {toast.show({ description: 'Entrega confirmada correctamente.' })},
-			err => {
-				toast.show({
-					description: 'Ocurrio un error al confirmar la entrega, reintenta.',
-				})
-			},
-		)
+	const handleEntregada = async (transaccion) => {
+		try {
+			const errorTransportista = await TransportistaService.entregaConfirmada(transaccion.transporteId);
+		
+			match(
+			  errorTransportista,
+			  t => {
+				TransaccionService.fulfill(transaccion.id)
+				  .then(t => {
+					toast.show({ description: 'Entrega confirmada correctamente.' });
+					loadData();
+				  })
+				  .catch(err => {
+					toast.show({ description: 'Ocurrió un error al confirmar la entrega, reintenta.' });
+				  });
+			  },
+			  err => {
+				toast.show({ description: 'Ocurrió un error al confirmar la entrega, reintenta.' });
+			  }
+			);
+		  } catch (error) {
+			console.error('Error manejando la entrega:', error);
+			toast.show({ description: 'Ocurrió un error, reintenta.' });
+		  }
 		loadData()
 	}
 	
@@ -107,7 +110,7 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 				<Box mb={5} />
 				{transactions && transactions.length > 0 ? (
 					transactions.map((transaction, idx) => (
-						<>
+						<React.Fragment key={`transaction-${idx}`}>
 							<TouchableOpacity
 								key={`userT-${idx}`}
 								onPress={() =>
@@ -178,11 +181,11 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 										transaction.transporteId != null ? (
 											<>
 												<View style={{flexDirection: 'row', justifyContent: 'space-between'}} >
-													<Button onPress={() =>handleCancelarTransportista(transaction.id)} >
+													<Button onPress={() =>handleCancelarTransportista(transaction.id)} key={`btnCancelar-${idx}`}>
 														Cancelar Transporte
 													</Button>
 													<View style={{ marginHorizontal: 10 }} />
-													<Button onPress={() => handleEntregada(transaction.transporteId)} >
+													<Button onPress={() => handleEntregada(transaction)} key={`btnEntregar-${idx}`}>
 														Confirmar Entrega
 													</Button>
 												</View>
@@ -191,17 +194,23 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 											transaction.fechaRetiro == null &&
 											transaction.transporteId == null && (
 												<>
+												<View style={{flexDirection: 'row', justifyContent: 'space-between'}} >
 													<Button
-														onPress={() => handleSolicitarTransportista(transaction.id)} >
+														onPress={() => handleSolicitarTransportista(transaction.id)} key={`btnSolicitar-${idx}`}>
 														Solicitar Transportista
 													</Button>
+													<View style={{ marginHorizontal: 10 }} />
+													<Button onPress={() => handleEntregada(transaction)} key={`btnConfirmar-${idx}`}>
+														Confirmar Entrega
+													</Button>
+												</View>
 												</>
 											)
 										)}
 									</View>
 								</Box>
 							</TouchableOpacity>
-						</>
+						</React.Fragment>
 					))
 				) : (
 					<>

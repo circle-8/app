@@ -58,7 +58,7 @@ const isLogged = async () => {
 	)
 }
 
-const refreshToken = async (): Promise<ErrorMessage | null> => {
+const refreshToken = async (): Promise<Either<User, ErrorMessage>> => {
 	const accessToken = await TokenService.get('access')
 	const refreshToken = await TokenService.get('refresh')
 	const res = await Http.post<TokenResponse>('/refresh_token', {
@@ -71,14 +71,11 @@ const refreshToken = async (): Promise<ErrorMessage | null> => {
 		saveLoggedUser(t.user)
 	})
 
-	let ret: ErrorMessage | null
-	match(
+	return map(
 		res,
-		t => (ret = null),
-		err => (ret = err.message)
+		t => t.user,
+		err => err.message
 	)
-
-	return ret
 }
 
 const logout = async () => {
@@ -94,6 +91,16 @@ const getCurrent = async (): Promise<User> => {
 	return JSON.parse(await AsyncStorage.getItem('user'))
 }
 
+const get = async (url): Promise<Either<User, ErrorMessage>> => {
+	const res = await Http.get<UserResponse>(url)
+	return map(
+		res,
+		p => p,
+		err => err.message,
+	)
+}
+
+
 export const UserService = {
 	token,
 	post,
@@ -101,4 +108,5 @@ export const UserService = {
 	refreshToken,
 	logout,
 	getCurrent,
+	get,
 }

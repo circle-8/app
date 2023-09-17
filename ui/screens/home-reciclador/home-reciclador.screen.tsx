@@ -42,7 +42,7 @@ export const HomeReciclador = ({ navigation }: Props) => {
 		React.useState<Location.LocationGeocodedAddress>()
 	const [zonas, setZonas] = React.useState<Zona[]>()
 
-	const getRecorridos = async () => {
+	const getRecorridos = async (userCoords: Coord) => {
 		const user = await UserService.getCurrent()
 		const recorridos = await RecorridoService.list({
 			recicladorId: user.recicladorUrbanoId,
@@ -52,7 +52,7 @@ export const HomeReciclador = ({ navigation }: Props) => {
 		match(
 			recorridos,
 			rr => {
-				recorrido = rr.filter(r => !r.endDate)[0]
+				recorrido = rr.filter(r => !r.endDate && r.puntos.length > 0)[0]
 				setTodayRecorrido(recorrido)
 			},
 			err => {
@@ -92,6 +92,10 @@ export const HomeReciclador = ({ navigation }: Props) => {
 				latitude: p.coords.latitude,
 				longitude: p.coords.longitude,
 			})
+			return {
+				latitude: p.coords.latitude,
+				longitude: p.coords.longitude,
+			}
 		}
 	}
 
@@ -110,8 +114,8 @@ export const HomeReciclador = ({ navigation }: Props) => {
 	}
 
 	const initialLoad = async () => {
-		await getUserLocation()
-		await getRecorridos()
+		const userCoords: Coord = await getUserLocation()
+		await getRecorridos(userCoords)
 		await getZonas()
 		setLoading(false)
 	}

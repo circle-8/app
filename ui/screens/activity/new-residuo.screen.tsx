@@ -148,12 +148,8 @@ const Form = ({
 
 	const onChangeDate = (event, selected) => {
 		const currentDate = selected || formData.fechaLimite
-		setSelectedDate(currentDate)
-	}
-
-	const handleSetDate = () => {
 		setShowDatePicker(false)
-		setData({ ...formData, fechaLimite: selectedDate })
+		setData({ ...formData, fechaLimite: currentDate })
 	}
 
 	const doSubmit = async () => {
@@ -306,6 +302,16 @@ const Form = ({
 /*
 
 MODAL QUE FUNCIONA OK EN IOS
+
+const onChangeDate = (event, selected) => {
+		const currentDate = selected || formData.fechaLimite
+		setSelectedDate(currentDate)
+	}
+
+	const handleSetDate = () => {
+		setShowDatePicker(false)
+		setData({ ...formData, fechaLimite: selectedDate })
+	}
 
 {showDatePicker && (
 	<Modal isOpen={showDatePicker} onClose={() => setShowDatePicker(false)}>

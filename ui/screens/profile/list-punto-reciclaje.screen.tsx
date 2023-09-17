@@ -47,13 +47,12 @@ export const ListPuntoReciclaje = ({ navigation }: Props) => {
 
 	const handleEliminar = async (id: number, recicladorId: number) => {
 		const elim = await PuntoService.del(id, recicladorId)
-		console.log(elim)
 
 		if (elim.t === 'RIGHT') {
 			toast.show({ description: '¡Punto Eliminado con exito!' })
 			loadPoints()
 		} else {
-			toast.show({ description: 'No se pudo eliminar el punto.' })
+			toast.show({ description: 'No se pudo eliminar el punto, puede que tengas solicitudes asociadas que impidan eliminarlo, cancela las solicitudes y reintenta.' })
 			loadPoints()
 		}
 	}

@@ -1,5 +1,5 @@
 import React from 'react'
-import { GestureResponderEvent, TouchableOpacity } from 'react-native'
+import { GestureResponderEvent, Linking, TouchableOpacity } from 'react-native'
 import MapView, { Marker, Polygon, PROVIDER_GOOGLE } from 'react-native-maps'
 import {
 	Box,
@@ -83,8 +83,6 @@ export const Home = ({ navigation }: Props) => {
 	const [tipos, setTipos] = React.useState<TipoResiduo[]>()
 	const [zonas, setZonas] = React.useState<Zona[]>()
 	const [isViewZonas, setIsViewZonas] = React.useState(false)
-	const [modalErrorZonas, setModalErrorZonas] = React.useState(false)
-
 	/* Para circuitos */
 	const [zonasSelected, setZonasSelected] = React.useState<Zona[] | null>(null)
 	const [modalZonaSelected, setModalZonaSelected] = React.useState(false)
@@ -893,7 +891,8 @@ const ModalsZonas = ({
 							>
 								<WarningOutlineIcon size={5} color="red.600" />
 								<Text style={{ fontSize: 14, textAlign: 'center' }}>
-									Ocurrio un error al generar la solicitud, reintenta mas tarde.
+									Ocurrio un error al generar la solicitud, puede que ya hayas generado una solicitud para esta zona,
+									debes aguardar a que la organizacion te acepte. Reintenta mas tarde.
 								</Text>
 							</View>
 						</>
@@ -961,7 +960,7 @@ const ModalsZonas = ({
 												</HStack>
 											)}
 										</View>
-										{zona.puedeUnirse ? (
+										{zona.puedeUnirse && (
 											<>
 												<Box mb={2} />
 												<Center justifyContent="space-between">
@@ -970,7 +969,7 @@ const ModalsZonas = ({
 													</Button>
 												</Center>
 											</>
-										) : null}
+										)}
 									</Box>
 								))
 							) : (
@@ -1013,7 +1012,8 @@ const ModalsZonas = ({
 								<Button onPress={() => handleVolver()}>Volver</Button>
 							</Center>
 							<View style={{ marginHorizontal: 10 }} />
-							<Center>
+							{selectedUserPoint != null && (
+								<Center>
 								<Button
 									onPress={() =>
 										handleJoin(
@@ -1025,6 +1025,7 @@ const ModalsZonas = ({
 									Unirme al circuito
 								</Button>
 							</Center>
+							)}
 						</View>
 					) : (
 						<View
@@ -1056,6 +1057,7 @@ type PuntoReciclajeModalProps = {
 
 const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 	if (!props.show) return <></>
+	const toast = useToast()
 	const [modalEntregar, setModalEntregar] = React.useState(false)
 	const [userResiduos, setUserResiduos] = React.useState<ResiduoResponse[]>([])
 	const [selectedResiduos, setSelectedResiduos] = React.useState<number[]>([])
@@ -1138,7 +1140,6 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 			})
 			ifRight(result, t => {
 				userResiduos.forEach(residuo => {
-					console.log(residuo.descripcion)
 					if (r.id == residuo.id) {
 						errorMap.push(residuo.descripcion)
 					}
@@ -1172,6 +1173,40 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 				ciudadanoId: user.ciudadanoId,
 			},
 		})
+	}
+
+	const handleContactar = async (point: PuntoReciclaje) => {
+		
+		toast.show({
+			description:
+				'NO IMPLEMENTADO.',
+		})
+		/*
+		console.log(point)
+		const userToContact = await UserService.get(point.recicladorUri)
+
+		match(
+			userToContact,
+			t => {
+				const email = t.email
+				const subject = 'Contacto para reciclar a traves de Circle8'
+				const body = `¡Hola  ${point.titulo}! me gustaria recibir informacion para poder reciclar con ustedes.`
+
+				const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(
+					subject,
+				)}&body=${encodeURIComponent(body)}`
+
+				Linking.openURL(mailtoUrl).catch(error => {
+					toast.show({
+						description:
+							'Ocurrio un error al generar el mail, reintenta mas tarde.',
+					})
+				})
+			},
+			err => {
+				toast.show({ description: 'Ocurrio un error al generar el mail, reintenta mas tarde.' })
+			},
+		) */
 	}
 
 	React.useEffect(() => {
@@ -1383,7 +1418,7 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 								</Button>
 							</View>
 						) : props.point.tipo !== 'RECICLAJE' ? (
-							<Button>Contactar</Button>
+							<Button onPress={() => handleContactar(props.point)}>Contactar</Button>
 						) : modalEntregar && userResiduos.length <= 0 ? (
 							<View
 								style={{
@@ -1791,7 +1826,7 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 									Ir a mis solicitudes
 								</Button>
 							</View>
-						) : firstStep ? (
+						) : firstStep && selectedResiduos.length != 0 ? (
 							<Button onPress={handleUserPointSelection}>Siguiente</Button>
 						) : !firstStep && userPoints.length === 0 ? (
 							<View
@@ -1806,7 +1841,7 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 									Crear punto
 								</Button>
 							</View>
-						) : (
+						) : selectedResiduos.length != 0 ? (
 							<View
 								style={{
 									flexDirection: 'row',
@@ -1817,6 +1852,8 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 								<View style={{ marginHorizontal: 10 }} />
 								<Button onPress={handleRetirarClick}>Retirar</Button>
 							</View>
+						) : (
+							<Button onPress={handleResetClick}>Cerrar</Button>
 						)}
 					</Center>
 				</Modal.Footer>
