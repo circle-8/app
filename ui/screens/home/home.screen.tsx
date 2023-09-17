@@ -1,5 +1,5 @@
 import React from 'react'
-import { GestureResponderEvent, Linking, TouchableOpacity } from 'react-native'
+import { GestureResponderEvent, Linking, Platform, TouchableOpacity } from 'react-native'
 import MapView, { Marker, Polygon, PROVIDER_GOOGLE } from 'react-native-maps'
 import {
 	Box,
@@ -159,18 +159,16 @@ export const Home = ({ navigation }: Props) => {
 				longitude,
 			})
 
-			let address = 'No podemos brindar la direccion.'
-			if(location != null && location.at(0) != null ){
-				address =
-				location.at(0).name? location.at(0).name : '' +
-				', ' +
-				location.at(0).city? location.at(0).city : '' +
-				', ' +
-				location.at(0).postalCode? location.at(0).postalCode : '' +
-				', ' +
-				location.at(0).region? location.at(0).region : ''
-			} 
-			
+			let address = ''
+			if (location != null && location.at(0) != null) {
+				address += location.at(0).name ? location.at(0).name : ''
+				address += location.at(0).city ? ', ' + location.at(0).city : ''
+				address += location.at(0).postalCode ? ', ' + location.at(0).postalCode : ''
+				address += location.at(0).region ? ', ' + location.at(0).region : ''
+			} else {
+				address = 'No podemos brindar la direccion.'
+			}
+
 			setDirection(address)
 			setIsLoadingModal(false)
 		} catch (error) {
@@ -327,7 +325,7 @@ export const Home = ({ navigation }: Props) => {
 							latitudeDelta,
 							longitudeDelta,
 						}}
-						provider={PROVIDER_GOOGLE}
+						provider={Platform.OS === 'ios' ? null : PROVIDER_GOOGLE}
 					>
 						<CircuitosReciclaje
 							isViewZonas={isViewZonas}
@@ -752,17 +750,14 @@ const ModalsZonas = ({
 				})
 				const location = await Promise.all(locationPromise)
 
-				let address = 'No podemos brindar la direccion.'
+				let address = ''
 				if (location != null && location.at(0) != null) {
-					address = location.at(0).name
-						? location.at(0).name
-						: '' + ', ' + location.at(0).city
-						? location.at(0).city
-						: '' + ', ' + location.at(0).postalCode
-						? location.at(0).postalCode
-						: '' + ', ' + location.at(0).region
-						? location.at(0).region
-						: ''
+					address += location.at(0).name ? location.at(0).name : ''
+					address += location.at(0).city ? ', ' + location.at(0).city : ''
+					address += location.at(0).postalCode ? ', ' + location.at(0).postalCode : ''
+					address += location.at(0).region ? ', ' + location.at(0).region : ''
+				} else {
+					address = 'No podemos brindar la direccion.'
 				}
 
 				const puntoConDireccion: PuntoConDireccion = {

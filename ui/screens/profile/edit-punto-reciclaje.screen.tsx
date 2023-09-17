@@ -22,6 +22,7 @@ import { PuntoService } from '../../../services/punto.service'
 import { match } from '../../../utils/either'
 import { colors } from '../../../constants/styles'
 import { TipoResiduoService } from '../../../services/tipos.service'
+import { Platform } from 'react-native'
 
 type Props = NativeStackScreenProps<ProfileRoutesParams, 'EditPuntoReciclaje'>
 
@@ -283,7 +284,7 @@ const Form = ({ id, punto, initialPosition, tipos, onSubmit }: FormParams) => {
 						latitudeDelta,
 						longitudeDelta,
 					}}
-					provider={PROVIDER_GOOGLE}
+					provider={Platform.OS === 'ios' ? null : PROVIDER_GOOGLE}
 				>
 					<Marker
 						coordinate={{
