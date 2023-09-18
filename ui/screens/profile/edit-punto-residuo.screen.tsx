@@ -58,8 +58,12 @@ export const EditPuntoResiduo = ({ navigation, route }: Props) => {
 	}
 
 	React.useEffect(() => {
-		loadInitialData()
-	}, [])
+		const unsubscribeFocus = navigation.addListener('focus', () => {
+			loadInitialData()
+		})
+
+		return unsubscribeFocus
+	}, [navigation])
 
 	if (isLoading) {
 		return <LoadingScreen />
