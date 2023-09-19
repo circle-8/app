@@ -71,6 +71,7 @@ export const Home = ({ navigation }: Props) => {
 	const [selectedPuntos, setSelectedPuntos] = React.useState<TipoPunto[]>([
 		'VERDE',
 		'RECICLAJE',
+		'RESIDUO'
 	])
 	const [selectedTipos, setSelectedTipos] = React.useState<string[]>([])
 	const [selectedDias, setSelectedDias] = React.useState<string[]>([])
@@ -326,7 +327,9 @@ export const Home = ({ navigation }: Props) => {
 							latitudeDelta,
 							longitudeDelta,
 						}}
-						provider={Platform.OS === 'ios' ? PROVIDER_DEFAULT : PROVIDER_GOOGLE}
+						provider={
+							Platform.OS === 'ios' ? PROVIDER_DEFAULT : PROVIDER_GOOGLE
+						}
 					>
 						<CircuitosReciclaje
 							isViewZonas={isViewZonas}
@@ -420,75 +423,76 @@ export const Home = ({ navigation }: Props) => {
 				/>
 				<Center height="25%" bgColor="white">
 					<Row justifyContent="space-between" mt="0" height={120}>
-						<Center w="33%">
-							<TouchableOpacity
-								onPress={() => {
-									handleEntregarResiduos()
-								}}
-							>
-								<View style={{ alignItems: 'center', marginTop: 0 }}>
-									<Ionicons name="trash" size={40} color={colors.primary800} />
-								</View>
-								<View style={{ alignItems: 'center', marginTop: 0 }}>
-									<Text fontSize="xs" fontWeight="bold">
-										Entregar residuos
-									</Text>
-								</View>
-								<View style={{ alignItems: 'center', marginTop: 2 }}>
-									<Text style={{ fontSize: 10, textAlign: 'center' }}>
-										Aquí podrás crear una solicitud para entregar tus residuos a
-										otras personas que los necesiten.
-									</Text>
-								</View>
-							</TouchableOpacity>
-						</Center>
-						<Center w="32%">
-							<TouchableOpacity
-								onPress={() =>
-									navigation.navigate('ProfileTab', {
-										screen: 'ListPuntoReciclaje',
-										initial: false,
-									})
-								}
-							>
-								<View style={{ alignItems: 'center', marginTop: 1 }}>
-									<FontAwesome
-										name="recycle"
-										size={40}
-										color={colors.primary800}
-									/>
-								</View>
-								<View style={{ alignItems: 'center', marginTop: 4 }}>
-									<Text fontSize="xs" fontWeight="bold">
-										Recibir residuos
-									</Text>
-								</View>
-								<View style={{ alignItems: 'center', marginTop: 2 }}>
-									<Text style={{ fontSize: 10, textAlign: 'center' }}>
-										Aquí podrás crear una solicitud para recibir residuos que
-										quieras reciclar.
-									</Text>
-								</View>
-							</TouchableOpacity>
-						</Center>
-						<Center w="34%">
-							<TouchableOpacity onPress={() => handleGetZonas()}>
-								<View style={{ alignItems: 'center', marginTop: 1 }}>
-									<Ionicons name="leaf" size={40} color={colors.primary800} />
-								</View>
-								<View style={{ alignItems: 'center', marginTop: 1 }}>
-									<Text fontSize="xs" fontWeight="bold">
-										Circuitos de Reciclaje
-									</Text>
-								</View>
-								<View style={{alignItems: 'center', marginTop: 2}}>
-									<Text style={{ fontSize: 10, textAlign: 'center' }}>
-										Aquí podrás adherirte a recorridos de organizaciones de
-										reciclaje.
-									</Text>
-								</View>
-							</TouchableOpacity>
-						</Center>
+						<TouchableOpacity
+							style={{ alignItems: 'center', width: '33%' }}
+							onPress={() => {
+								handleEntregarResiduos()
+							}}
+						>
+							<View style={{ alignItems: 'center', marginTop: 0 }}>
+								<Ionicons name="trash" size={40} color={colors.primary800} />
+							</View>
+							<View style={{ alignItems: 'center', marginTop: 0 }}>
+								<Text fontSize="xs" fontWeight="bold">
+									Entregar residuos
+								</Text>
+							</View>
+							<View style={{ alignItems: 'center', marginTop: 2 }}>
+								<Text style={{ fontSize: 10, textAlign: 'center' }}>
+									Aquí podrás crear una solicitud para entregar tus residuos a
+									otras personas que los necesiten.
+								</Text>
+							</View>
+						</TouchableOpacity>
+
+						<TouchableOpacity
+							style={{ alignItems: 'center', width: '32%' }}
+							onPress={() =>
+								navigation.navigate('ProfileTab', {
+									screen: 'ListPuntoReciclaje',
+									initial: false,
+								})
+							}
+						>
+							<View style={{ alignItems: 'center', marginTop: 1 }}>
+								<FontAwesome
+									name="recycle"
+									size={40}
+									color={colors.primary800}
+								/>
+							</View>
+							<View style={{ alignItems: 'center', marginTop: 4 }}>
+								<Text fontSize="xs" fontWeight="bold">
+									Recibir residuos
+								</Text>
+							</View>
+							<View style={{ alignItems: 'center', marginTop: 2 }}>
+								<Text style={{ fontSize: 10, textAlign: 'center' }}>
+									Aquí podrás crear una solicitud para recibir residuos que
+									quieras reciclar.
+								</Text>
+							</View>
+						</TouchableOpacity>
+
+						<TouchableOpacity
+							style={{ alignItems: 'center', width: '34%' }}
+							onPress={() => handleGetZonas()}
+						>
+							<View style={{ alignItems: 'center', marginTop: 1 }}>
+								<Ionicons name="leaf" size={40} color={colors.primary800} />
+							</View>
+							<View style={{ alignItems: 'center', marginTop: 1 }}>
+								<Text fontSize="xs" fontWeight="bold">
+									Circuitos de Reciclaje
+								</Text>
+							</View>
+							<View style={{ alignItems: 'center', marginTop: 2 }}>
+								<Text style={{ fontSize: 10, textAlign: 'center' }}>
+									Aquí podrás adherirte a recorridos de organizaciones de
+									reciclaje.
+								</Text>
+							</View>
+						</TouchableOpacity>
 					</Row>
 				</Center>
 			</Flex>
@@ -1901,13 +1905,13 @@ const FiltrosModal = ({
 							onChange={values => setSelectedPuntos(values || [])}
 						>
 							<Checkbox value="VERDE" my={2}>
-								Puntos de reciclaje comunitario
+								Reciclaje comunitario
 							</Checkbox>
 							<Checkbox value="RECICLAJE" my={2}>
-								Puntos de reciclaje particular
+								Reciclaje particular
 							</Checkbox>
 							<Checkbox value="RESIDUO" my={2}>
-								Punto de retiro de residuos
+								Retiro de residuos
 							</Checkbox>
 						</Checkbox.Group>
 					)}

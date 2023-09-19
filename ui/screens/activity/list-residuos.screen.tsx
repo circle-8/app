@@ -1,8 +1,8 @@
 import React from 'react'
-import { ActivityRouteParams } from '../../../constants/routes'
+import { ActivityRouteParams, ActivityRoutes, ProfileRoutes, TabRoutes } from '../../../constants/routes'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { LoadingScreen } from '../../components/loading.component'
-import { Residuo, Zona } from '../../../services/types'
+import { Residuo } from '../../../services/types'
 import { UserService } from '../../../services/user.service'
 import { ResiduoService } from '../../../services/residuo.service'
 import { caseMaybe, match } from '../../../utils/either'
@@ -14,10 +14,13 @@ import {
 	ScrollView,
 	Text,
 	View,
+	WarningOutlineIcon,
 	useToast,
 } from 'native-base'
 import { FontAwesome, FontAwesome5, MaterialCommunityIcons  } from '@expo/vector-icons'
 import { TouchableOpacity } from 'react-native'
+import { colors } from '../../../constants/styles'
+import { PuntoService } from '../../../services/punto.service'
 
 type Props = NativeStackScreenProps<ActivityRouteParams, 'ListResiduos'>
 
@@ -70,7 +73,7 @@ export const ListResiduos = ({ navigation }: Props) => {
 		<ScrollView alignContent="center">
 			<Center w="100%">
 				<Box mb={5} />
-				{residuos.map((r, idx) => (
+				{ residuos.length != 0 ? residuos.map((r, idx) => (
 					<Box
 						key={`box-${idx}`}
 						mb={2}
@@ -159,7 +162,22 @@ export const ListResiduos = ({ navigation }: Props) => {
 							</View>
 						</Center>
 					</Box>
-				))}
+				)) : (
+					<>
+						<View
+							style={{
+								flex: 1,
+								justifyContent: 'center',
+								alignItems: 'center',
+							}}
+						>
+							<WarningOutlineIcon size={5} color="red.600" />
+							<Text style={{ fontSize: 14, textAlign: 'center' }}>
+							Aún no has cargado tus residuos en la aplicación.
+							</Text>
+						</View>
+					</>
+				)}
 				<AlertBeforeAction
 					isOpen={selectedResiduo && selectedAction === 'DELETE'}
 					action={'DELETE'}
