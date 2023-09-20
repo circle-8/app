@@ -1,16 +1,18 @@
 import React from 'react'
-import { Box, Button, Center, VStack } from 'native-base'
+import { Box, Button, Center, VStack, Text, HStack } from 'native-base'
 import { AuthContext } from '../../../context/auth.context'
 import { UserService } from '../../../services/user.service'
 import { PuntoService } from '../../../services/punto.service'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { ProfileRoutes, ProfileRoutesParams, TabRoutes } from '../../../constants/routes'
-import { PuntoResiduo } from '../../../services/types'
+import { PuntoResiduo, User } from '../../../services/types'
+import { TouchableOpacity } from 'react-native'
 
 type Props = NativeStackScreenProps<ProfileRoutesParams, 'Profile'>
 
 export const Profile = ({navigation}: Props) => {
 	const { logout } = React.useContext(AuthContext)
+	const [user, setUser] = React.useState<User>()
 
 	const onLogout = async () => {
 		await UserService.logout()
@@ -31,15 +33,51 @@ export const Profile = ({navigation}: Props) => {
 		})
 	}
 
+	const loadInitialData = async () => {
+		const user = await UserService.getCurrent()
+		setUser(user)
+	}
+
+	React.useEffect(() => {
+		loadInitialData()
+	}, [])
+
 	return (
-		<Center w="100%">
-			<Box>Profile</Box>
-			<Button mt="2" color='primary' onPress={onEditPuntoResiduo}>
-				Punto de retiro de residuos
-			</Button>
-			<Button mt="2" color='primary' onPress={onLogout}>
-				Cerrar Sesión
-			</Button>
+		<Center w="100%" mt="10">
+			<Box>
+				<Text fontSize="lg" fontWeight="bold" textAlign="center">
+					¡Bienvenido {user?.nombre}!
+				</Text>
+			</Box>
+			<VStack mt="4" width="80%" alignSelf="center">
+				<TouchableOpacity
+					style={{
+						backgroundColor: '#6C796A',
+						padding: 20,
+						marginBottom: 10,
+						alignItems: 'center',
+						width: '100%',
+					}}
+					onPress={onEditPuntoResiduo}
+				>
+					<Text style={{ color: 'white', textAlign: 'center' }}>
+						Punto de retiro de residuos
+					</Text>
+				</TouchableOpacity>
+				<TouchableOpacity
+					style={{
+						backgroundColor: '#6C796A',
+						padding: 20,
+						alignItems: 'center',
+						width: '100%',
+					}}
+					onPress={onLogout}
+				>
+					<Text style={{ color: 'white', textAlign: 'center' }}>
+						Cerrar Sesión
+					</Text>
+				</TouchableOpacity>
+			</VStack>
 		</Center>
 	)
 }

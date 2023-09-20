@@ -85,10 +85,16 @@ export const ListTransportes = ({ navigation, route }: Props) => {
 		const error = await TransportistaService.tomarTransporte(id, user.transportistaId)
 		match(
 			error,
-			t => {
-					toast.show({ description: "Transporte tomado correctamente." });
+			async t => {
+				loadData()
+				toast.show({ description: 'Transporte tomado correctamente.' })
+				const user = await UserService.getCurrent()
+				navigation.navigate(ActivityRoutes.listMisTransportes, {
+					userId: user.ciudadanoId,
+				})
 			},
 			err => {
+				loadData()
 				toast.show({ description: "Ocurrio un error al tomar el transporte, reintenta." })
 			},
 		)

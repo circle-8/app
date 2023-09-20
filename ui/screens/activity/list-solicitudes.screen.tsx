@@ -180,6 +180,8 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 	const handleCrearNuevaTransaccion = async () => {
 		const postTransaccion = await TransaccionService.createTransaccion(
 			solicitudAgregar.puntoReciclajeId,
+			solicitudAgregar.residuo.id,
+			solicitudAgregar.id
 		)
 		ifLeft(postTransaccion, t => {
 			handleAgregarSolicitud(t.id)
@@ -233,7 +235,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 							<Modal.CloseButton />
 							<Modal.Header alignItems="center">
 								<Text bold fontSize="xl">
-									Cancelar Solicitud
+									Crear Transaccion
 								</Text>
 							</Modal.Header>
 							<Modal.Body>
@@ -518,13 +520,14 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 							solicitadas.map((solicitud, idx) => (
 								<React.Fragment key={`sol-${idx}`}>
 									<Box
-										key={`box-${idx}`}
+										key={`boxSal-${idx}`}
 										mb={2}
 										p={2}
 										borderWidth={1}
 										borderColor="gray.300"
 										borderRadius="md"
 										shadow={1}
+										maxWidth={350}
 										background={'white'}
 									>
 										<HStack
@@ -592,39 +595,31 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 												{getEstado(solicitud, true)}
 											</Text>
 										</HStack>
-										{solicitud.estado == 'CANCELADA' ||
-										solicitud.estado == 'EXPIRADA' ? (
-											''
-										) : solicitud.estado == 'PENDIENTE' ? (
+										{solicitud.estado == 'PENDIENTE' ? (
 											<>
-												<Center justifyContent="space-between">
-													<Button
-														onPress={() => modalCancelarSolicitud(solicitud)}
-														marginBottom={3}
-														marginTop={2}
-													>
+												<Box mb={2} />
+												<View style={{ flexDirection: 'row', justifyContent: 'center' }} >
+													<Button onPress={() => modalCancelarSolicitud(solicitud)}>
 														Cancelar solicitud
 													</Button>
-												</Center>
-												<Box mb={2} />
+												</View>
 											</>
 										) : (
-											<>
-												{solicitud.solicitadoId ==
-													solicitud.residuo.puntoResiduo?.ciudadanoId && (
-													<>
-														<Center justifyContent="space-between">
-															<Button
-																onPress={() => modalAgregarTransaccion(solicitud)}
-																marginTop={2}
-															>
-																Agregar a transaccion
-															</Button>
-														</Center>
-														<Box mb={2} />
-													</>
-												)}
-											</>
+											solicitud.estado == 'APROBADA' && (
+												<>
+													<Box mb={2} />
+													<View style={{ flexDirection: 'row', justifyContent: 'center' }} >
+														{solicitud.solicitadoId ==
+															solicitud.residuo.puntoResiduo?.ciudadanoId && (
+															<Center justifyContent="space-between">
+																<Button onPress={() => modalAgregarTransaccion(solicitud) } >
+																	Agregar a transaccion
+																</Button>
+															</Center>
+														)}
+													</View>
+												</>
+											)
 										)}
 									</Box>
 								</React.Fragment>
@@ -769,47 +764,40 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 											{solicitud.estado === 'PENDIENTE' ? (
 												<>
 													<Box mb={2} />
-													<Center justifyContent="space-between">
-														<Button
-															onPress={() => modalAprobarSolicitud(solicitud)}
-														>
-															Aprobar Solicitud
-														</Button>
-													</Center>
-												</>
-											) : (
-												<></>
-											)}
-											{solicitud.estado == 'CANCELADA' ||
-											solicitud.estado == 'EXPIRADA' ? (
-												''
-											) : solicitud.estado == 'PENDIENTE' ? (
-												<>
-													<Box mb={2} />
-													<Center justifyContent="space-between">
+													<View
+														style={{
+															flexDirection: 'row',
+															justifyContent: 'space-between',
+														}}
+													>
 														<Button
 															onPress={() => modalCancelarSolicitud(solicitud)}
 														>
 															Cancelar solicitud
 														</Button>
-													</Center>
+														<Button
+															onPress={() => modalAprobarSolicitud(solicitud)}
+														>
+															Aprobar Solicitud
+														</Button>
+													</View>
 												</>
 											) : (
-												<>
-													<Box mb={2} />
-													{solicitud.solicitanteId ==
-														solicitud.residuo.puntoResiduo?.ciudadanoId && (
-														<Center justifyContent="space-between">
-															<Button
-																onPress={() =>
-																	modalAgregarTransaccion(solicitud)
-																}
-															>
-																Agregar a transaccion
-															</Button>
-														</Center>
-													)}
-												</>
+												solicitud.estado == 'APROBADA' &&(
+													<>
+														<Box mb={2} />
+														<View style={{ flexDirection: 'row', justifyContent: 'center', }} >
+															{solicitud.solicitanteId ==
+																solicitud.residuo.puntoResiduo?.ciudadanoId && (
+																<Center justifyContent="space-between">
+																	<Button onPress={() => modalAgregarTransaccion(solicitud) } >
+																		Agregar a transaccion
+																	</Button>
+																</Center>
+															)}
+														</View>
+													</>
+												)
 											)}
 										</Box>
 									</React.Fragment>

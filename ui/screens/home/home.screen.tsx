@@ -71,6 +71,7 @@ export const Home = ({ navigation }: Props) => {
 	const [selectedPuntos, setSelectedPuntos] = React.useState<TipoPunto[]>([
 		'VERDE',
 		'RECICLAJE',
+		'RESIDUO'
 	])
 	const [selectedTipos, setSelectedTipos] = React.useState<string[]>([])
 	const [selectedDias, setSelectedDias] = React.useState<string[]>([])
@@ -326,7 +327,9 @@ export const Home = ({ navigation }: Props) => {
 							latitudeDelta,
 							longitudeDelta,
 						}}
-						provider={Platform.OS === 'ios' ? PROVIDER_DEFAULT : PROVIDER_GOOGLE}
+						provider={
+							Platform.OS === 'ios' ? PROVIDER_DEFAULT : PROVIDER_GOOGLE
+						}
 					>
 						<CircuitosReciclaje
 							isViewZonas={isViewZonas}
@@ -420,75 +423,76 @@ export const Home = ({ navigation }: Props) => {
 				/>
 				<Center height="25%" bgColor="white">
 					<Row justifyContent="space-between" mt="0" height={120}>
-						<Center w="33%">
-							<TouchableOpacity
-								onPress={() => {
-									handleEntregarResiduos()
-								}}
-							>
-								<View style={{ alignItems: 'center', marginTop: 0 }}>
-									<Ionicons name="trash" size={40} color={colors.primary800} />
-								</View>
-								<View style={{ alignItems: 'center', marginTop: 0 }}>
-									<Text fontSize="xs" fontWeight="bold">
-										Entregar residuos
-									</Text>
-								</View>
-								<View style={{ alignItems: 'center', marginTop: 2 }}>
-									<Text style={{ fontSize: 10, textAlign: 'center' }}>
-										Aquí podrás crear una solicitud para entregar tus residuos a
-										otras personas que los necesiten.
-									</Text>
-								</View>
-							</TouchableOpacity>
-						</Center>
-						<Center w="32%">
-							<TouchableOpacity
-								onPress={() =>
-									navigation.navigate('ProfileTab', {
-										screen: 'ListPuntoReciclaje',
-										initial: false,
-									})
-								}
-							>
-								<View style={{ alignItems: 'center', marginTop: 1 }}>
-									<FontAwesome
-										name="recycle"
-										size={40}
-										color={colors.primary800}
-									/>
-								</View>
-								<View style={{ alignItems: 'center', marginTop: 4 }}>
-									<Text fontSize="xs" fontWeight="bold">
-										Recibir residuos
-									</Text>
-								</View>
-								<View style={{ alignItems: 'center', marginTop: 2 }}>
-									<Text style={{ fontSize: 10, textAlign: 'center' }}>
-										Aquí podrás crear una solicitud para recibir residuos que
-										quieras reciclar.
-									</Text>
-								</View>
-							</TouchableOpacity>
-						</Center>
-						<Center w="34%">
-							<TouchableOpacity onPress={() => handleGetZonas()}>
-								<View style={{ alignItems: 'center', marginTop: 1 }}>
-									<Ionicons name="leaf" size={40} color={colors.primary800} />
-								</View>
-								<View style={{ alignItems: 'center', marginTop: 1 }}>
-									<Text fontSize="xs" fontWeight="bold">
-										Circuitos de Reciclaje
-									</Text>
-								</View>
-								<View style={{alignItems: 'center', marginTop: 2}}>
-									<Text style={{ fontSize: 10, textAlign: 'center' }}>
-										Aquí podrás adherirte a recorridos de organizaciones de
-										reciclaje.
-									</Text>
-								</View>
-							</TouchableOpacity>
-						</Center>
+						<TouchableOpacity
+							style={{ alignItems: 'center', width: '33%' }}
+							onPress={() => {
+								handleEntregarResiduos()
+							}}
+						>
+							<View style={{ alignItems: 'center', marginTop: 0 }}>
+								<Ionicons name="trash" size={40} color={colors.primary800} />
+							</View>
+							<View style={{ alignItems: 'center', marginTop: 0 }}>
+								<Text fontSize="xs" fontWeight="bold">
+									Entregar residuos
+								</Text>
+							</View>
+							<View style={{ alignItems: 'center', marginTop: 2 }}>
+								<Text style={{ fontSize: 10, textAlign: 'center' }}>
+									Aquí podrás crear una solicitud para entregar tus residuos a
+									otras personas que los necesiten.
+								</Text>
+							</View>
+						</TouchableOpacity>
+
+						<TouchableOpacity
+							style={{ alignItems: 'center', width: '32%' }}
+							onPress={() =>
+								navigation.navigate('ProfileTab', {
+									screen: 'ListPuntoReciclaje',
+									initial: false,
+								})
+							}
+						>
+							<View style={{ alignItems: 'center', marginTop: 1 }}>
+								<FontAwesome
+									name="recycle"
+									size={40}
+									color={colors.primary800}
+								/>
+							</View>
+							<View style={{ alignItems: 'center', marginTop: 4 }}>
+								<Text fontSize="xs" fontWeight="bold">
+									Recibir residuos
+								</Text>
+							</View>
+							<View style={{ alignItems: 'center', marginTop: 2 }}>
+								<Text style={{ fontSize: 10, textAlign: 'center' }}>
+									Aquí podrás crear una solicitud para recibir residuos que
+									quieras reciclar.
+								</Text>
+							</View>
+						</TouchableOpacity>
+
+						<TouchableOpacity
+							style={{ alignItems: 'center', width: '34%' }}
+							onPress={() => handleGetZonas()}
+						>
+							<View style={{ alignItems: 'center', marginTop: 1 }}>
+								<Ionicons name="leaf" size={40} color={colors.primary800} />
+							</View>
+							<View style={{ alignItems: 'center', marginTop: 1 }}>
+								<Text fontSize="xs" fontWeight="bold">
+									Circuitos de Reciclaje
+								</Text>
+							</View>
+							<View style={{ alignItems: 'center', marginTop: 2 }}>
+								<Text style={{ fontSize: 10, textAlign: 'center' }}>
+									Aquí podrás adherirte a recorridos de organizaciones de
+									reciclaje.
+								</Text>
+							</View>
+						</TouchableOpacity>
 					</Row>
 				</Center>
 			</Flex>
@@ -897,8 +901,9 @@ const ModalsZonas = ({
 							>
 								<WarningOutlineIcon size={5} color="red.600" />
 								<Text style={{ fontSize: 14, textAlign: 'center' }}>
-									Ocurrio un error al generar la solicitud, puede que ya hayas generado una solicitud para esta zona,
-									debes aguardar a que la organizacion te acepte. Reintenta mas tarde.
+									Ocurrio un error al generar la solicitud, puede que ya hayas
+									generado una solicitud para esta zona, debes aguardar a que la
+									organizacion te acepte. Reintenta mas tarde.
 								</Text>
 							</View>
 						</>
@@ -929,17 +934,13 @@ const ModalsZonas = ({
 										maxWidth={350}
 										background={'white'}
 									>
-										<View
-											style={{ flexDirection: 'row', alignItems: 'center' }}
-										>
-											<View>
-												<Text bold fontSize="md">
+										<View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', }} >
+											<Text numberOfLines={15} style={{ flex: 1 }}>
+												<Text style={{ fontWeight: 'bold' }}>
 													Nombre del circuito:{' '}
 												</Text>
-											</View>
-											<View>
-												<Text>{zona.nombre}</Text>
-											</View>
+												{zona.nombre}
+											</Text>
 										</View>
 										<View>
 											<Text bold fontSize="md">
@@ -1020,17 +1021,17 @@ const ModalsZonas = ({
 							<View style={{ marginHorizontal: 10 }} />
 							{selectedUserPoint != null && (
 								<Center>
-								<Button
-									onPress={() =>
-										handleJoin(
-											zonaToJoin.id,
-											puntosConDireccion[selectedUserPoint].punto.id,
-										)
-									}
-								>
-									Unirme al circuito
-								</Button>
-							</Center>
+									<Button
+										onPress={() =>
+											handleJoin(
+												zonaToJoin.id,
+												puntosConDireccion[selectedUserPoint].punto.id,
+											)
+										}
+									>
+										Unirme al circuito
+									</Button>
+								</Center>
 							)}
 						</View>
 					) : (
@@ -1325,7 +1326,7 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 													alignItems="center"
 												>
 													<InfoOutlineIcon size="3" color="emerald.600" />
-													<Text fontSize="sm" numberOfLines={4}>
+													<Text fontSize="sm" numberOfLines={24} style={{ flex: 1 }}>
 														{userResiduo.descripcion}
 													</Text>
 												</HStack>
@@ -1730,7 +1731,7 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 									))
 								) : (
 									<Text fontSize="sm">
-										No hay información de los tipos de residuo que para retirar.
+										No hay información de los tipos de residuo para que puedas retirar.
 									</Text>
 								)}
 							</View>
@@ -1901,13 +1902,13 @@ const FiltrosModal = ({
 							onChange={values => setSelectedPuntos(values || [])}
 						>
 							<Checkbox value="VERDE" my={2}>
-								Puntos de reciclaje comunitario
+								Reciclaje comunitario
 							</Checkbox>
 							<Checkbox value="RECICLAJE" my={2}>
-								Puntos de reciclaje particular
+								Reciclaje particular
 							</Checkbox>
 							<Checkbox value="RESIDUO" my={2}>
-								Punto de retiro de residuos
+								Retiro de residuos
 							</Checkbox>
 						</Checkbox.Group>
 					)}

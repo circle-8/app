@@ -52,9 +52,11 @@ const deleteResiduo = async (
 	return maybeRight(mapRight(res, err => err.message))
 }
 
-const createTransaccion = async (ptoReciclajeId: number) => {
+const createTransaccion = async (ptoReciclajeId: number, residuoId: number, id:number) => {
 	const body = {
 		puntoReciclaje: ptoReciclajeId,
+		residuoId: [residuoId],
+		solicitudId: id
 	}
 	const res = await Http.post<TransaccionResponse>('/transaccion', body)
 	return map(
