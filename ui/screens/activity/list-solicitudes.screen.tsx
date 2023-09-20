@@ -543,11 +543,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 								<React.Fragment key={`sol-${idx}`}>
 									<Box
 										key={`boxSal-${idx}`}
-										p={2}
-										borderWidth={1}
-										borderColor="gray.300"
-										borderRadius="md"
-										shadow={1}
+										mb={2}
 										maxWidth={500}
 										bg={'white'}
 										width="90%"
