@@ -901,8 +901,9 @@ const ModalsZonas = ({
 							>
 								<WarningOutlineIcon size={5} color="red.600" />
 								<Text style={{ fontSize: 14, textAlign: 'center' }}>
-									Ocurrio un error al generar la solicitud, puede que ya hayas generado una solicitud para esta zona,
-									debes aguardar a que la organizacion te acepte. Reintenta mas tarde.
+									Ocurrio un error al generar la solicitud, puede que ya hayas
+									generado una solicitud para esta zona, debes aguardar a que la
+									organizacion te acepte. Reintenta mas tarde.
 								</Text>
 							</View>
 						</>
@@ -933,17 +934,13 @@ const ModalsZonas = ({
 										maxWidth={350}
 										background={'white'}
 									>
-										<View
-											style={{ flexDirection: 'row', alignItems: 'center' }}
-										>
-											<View>
-												<Text bold fontSize="md">
+										<View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', }} >
+											<Text numberOfLines={15} style={{ flex: 1 }}>
+												<Text style={{ fontWeight: 'bold' }}>
 													Nombre del circuito:{' '}
 												</Text>
-											</View>
-											<View>
-												<Text>{zona.nombre}</Text>
-											</View>
+												{zona.nombre}
+											</Text>
 										</View>
 										<View>
 											<Text bold fontSize="md">
@@ -1024,17 +1021,17 @@ const ModalsZonas = ({
 							<View style={{ marginHorizontal: 10 }} />
 							{selectedUserPoint != null && (
 								<Center>
-								<Button
-									onPress={() =>
-										handleJoin(
-											zonaToJoin.id,
-											puntosConDireccion[selectedUserPoint].punto.id,
-										)
-									}
-								>
-									Unirme al circuito
-								</Button>
-							</Center>
+									<Button
+										onPress={() =>
+											handleJoin(
+												zonaToJoin.id,
+												puntosConDireccion[selectedUserPoint].punto.id,
+											)
+										}
+									>
+										Unirme al circuito
+									</Button>
+								</Center>
 							)}
 						</View>
 					) : (
@@ -1329,7 +1326,7 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 													alignItems="center"
 												>
 													<InfoOutlineIcon size="3" color="emerald.600" />
-													<Text fontSize="sm" numberOfLines={4}>
+													<Text fontSize="sm" numberOfLines={24} style={{ flex: 1 }}>
 														{userResiduo.descripcion}
 													</Text>
 												</HStack>
@@ -1734,7 +1731,7 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 									))
 								) : (
 									<Text fontSize="sm">
-										No hay información de los tipos de residuo que para retirar.
+										No hay información de los tipos de residuo para que puedas retirar.
 									</Text>
 								)}
 							</View>

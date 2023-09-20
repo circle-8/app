@@ -180,9 +180,9 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 	const handleCrearNuevaTransaccion = async () => {
 		const postTransaccion = await TransaccionService.createTransaccion(
 			solicitudAgregar.puntoReciclajeId,
-			solicitudAgregar.residuo.id
+			solicitudAgregar.residuo.id,
+			solicitudAgregar.id
 		)
-		console.log(postTransaccion)
 		ifLeft(postTransaccion, t => {
 			handleAgregarSolicitud(t.id)
 		})
@@ -608,13 +608,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 											solicitud.estado == 'APROBADA' && (
 												<>
 													<Box mb={2} />
-													<View style={{ flexDirection: 'row', justifyContent:  solicitud.solicitadoId ==
-															solicitud.residuo.puntoResiduo?.ciudadanoId ?  'space-between' : 'center' }} >
-														<Center justifyContent="space-between">
-															<Button onPress={() => modalCancelarSolicitud(solicitud) } >
-																Cancelar solicitud
-															</Button>
-														</Center>
+													<View style={{ flexDirection: 'row', justifyContent: 'center' }} >
 														{solicitud.solicitadoId ==
 															solicitud.residuo.puntoResiduo?.ciudadanoId && (
 															<Center justifyContent="space-between">
@@ -789,33 +783,14 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 													</View>
 												</>
 											) : (
-												solicitud.estado == 'APROBADA' && (
+												solicitud.estado == 'APROBADA' &&(
 													<>
 														<Box mb={2} />
-														<View
-															style={{
-																flexDirection: 'row',
-																justifyContent:  solicitud.solicitanteId ==
-																solicitud.residuo.puntoResiduo?.ciudadanoId ?  'space-between' : 'center',
-															}}
-														>
-															<Center justifyContent="space-between">
-																<Button
-																	onPress={() =>
-																		modalCancelarSolicitud(solicitud)
-																	}
-																>
-																	Cancelar solicitud
-																</Button>
-															</Center>
+														<View style={{ flexDirection: 'row', justifyContent: 'center', }} >
 															{solicitud.solicitanteId ==
 																solicitud.residuo.puntoResiduo?.ciudadanoId && (
 																<Center justifyContent="space-between">
-																	<Button
-																		onPress={() =>
-																			modalAgregarTransaccion(solicitud)
-																		}
-																	>
+																	<Button onPress={() => modalAgregarTransaccion(solicitud) } >
 																		Agregar a transaccion
 																	</Button>
 																</Center>

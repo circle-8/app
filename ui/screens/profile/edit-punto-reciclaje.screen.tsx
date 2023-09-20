@@ -219,6 +219,7 @@ const Form = ({ id, punto, initialPosition, tipos, onSubmit }: FormParams) => {
 					autoCapitalize="none"
 					onChangeText={v => setData({ ...formData, titulo: v })}
 					value={formData.titulo}
+					placeholder='Casa de Juan'
 				/>
 				<FormControl.ErrorMessage _text={{ fontSize: 'xs' }}>
 					{errors.titulo}

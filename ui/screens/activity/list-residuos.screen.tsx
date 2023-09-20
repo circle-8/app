@@ -2,7 +2,7 @@ import React from 'react'
 import { ActivityRouteParams, ActivityRoutes, ProfileRoutes, TabRoutes } from '../../../constants/routes'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { LoadingScreen } from '../../components/loading.component'
-import { Residuo } from '../../../services/types'
+import { PuntoResiduo, Residuo } from '../../../services/types'
 import { UserService } from '../../../services/user.service'
 import { ResiduoService } from '../../../services/residuo.service'
 import { caseMaybe, match } from '../../../utils/either'
@@ -13,6 +13,7 @@ import {
 	Center,
 	ScrollView,
 	Text,
+	VStack,
 	View,
 	WarningOutlineIcon,
 	useToast,
@@ -58,6 +59,25 @@ export const ListResiduos = ({ navigation }: Props) => {
 		loadData()
 	}
 
+	const handleNewResiduo = async () => {
+		
+		const user = await UserService.getCurrent()
+		const points = await PuntoService.getAll({
+			tipos: ['RESIDUO'],
+			ciudadanoId: user.ciudadanoId,
+		})
+
+		if (points.length === 0) {
+			//TODO ir a editar punto residuo si no tiene punto residuo
+		} else {
+			navigation.navigate(ActivityRoutes.newResiduo, {
+				ciudadanoId: user.ciudadanoId,
+				puntoResiduoId: points[0].id,
+			})
+		}
+
+	}
+
 	React.useEffect(() => {
 		loadData()
 	}, [])
@@ -71,160 +91,182 @@ export const ListResiduos = ({ navigation }: Props) => {
 
 	return (
 		<ScrollView alignContent="center">
-			<Center w="100%">
-				<Box mb={5} />
-				{ residuos.length != 0 ? residuos.map((r, idx) => (
-					<Box
-						key={`box-${idx}`}
-						mb={2}
-						p={2}
-						borderWidth={1}
-						borderColor="gray.300"
-						borderRadius="md"
-						shadow={1}
-						width={350}
-						background={'white'}
+			<Box margin={10}>
+				<VStack space={4} alignItems="center" alignSelf="center">
+					<View
+						style={{
+							flexDirection: 'row',
+							justifyContent: 'space-between',
+							alignItems: 'center',
+							marginTop: 2,
+						}}
 					>
-						<Text fontSize="sm" numberOfLines={4}>
-							<Text style={{ fontWeight: 'bold' }}>Residuo #{r.id}</Text>{' '}
-						</Text>
-						<Text fontSize="sm" numberOfLines={4}>
-							<Text style={{ fontWeight: 'bold' }}>Tipo:</Text>{' '}
-							{r.tipoResiduo.nombre}
-						</Text>
-						<Text fontSize="sm" numberOfLines={4}>
-							<Text style={{ fontWeight: 'bold' }}>Fecha limite:</Text>{' '}
-							{r.limitDate?.toLocaleDateString() ||
-								'Sin fecha limite de retiro'}
-						</Text>
-						<Text fontSize="sm" numberOfLines={25}>
-							<Text style={{ fontWeight: 'bold' }}>Descripcion:</Text>{' '}
-							{r.descripcion}
-						</Text>
-						<Text></Text>
-						<Center>
-							<Box mb={2} />
+						<View style={{ flex: 1, marginRight: 10 }}>
+							<Text style={{ fontSize: 10, textAlign: 'left' }}>
+								Aqui veras todos tus residuos, puedes marcarlos como entregados,
+								editarlos, eliminarlos o incluirlos a un recorrido de tu zona de reciclaje.
+							</Text>
+						</View>
+						<TouchableOpacity
+							onPress={() => handleNewResiduo() }
+							style={{ backgroundColor: 'transparent' }}
+						>
+							<FontAwesome name="plus" size={30} color={colors.primary800} />
+						</TouchableOpacity>
+					</View>
+					{ residuos.length != 0 ? residuos.map((r, idx) => (
+						<Box
+							key={`box-${idx}`}
+							mb={2}
+							p={2}
+							borderWidth={1}
+							borderColor="gray.300"
+							borderRadius="md"
+							shadow={1}
+							width={350}
+							background={'white'}
+						>
+							<Text fontSize="sm" numberOfLines={4}>
+								<Text style={{ fontWeight: 'bold' }}>Residuo #{r.id}</Text>{' '}
+							</Text>
+							<Text fontSize="sm" numberOfLines={4}>
+								<Text style={{ fontWeight: 'bold' }}>Tipo:</Text>{' '}
+								{r.tipoResiduo.nombre}
+							</Text>
+							<Text fontSize="sm" numberOfLines={4}>
+								<Text style={{ fontWeight: 'bold' }}>Fecha limite:</Text>{' '}
+								{r.limitDate?.toLocaleDateString() ||
+									'Sin fecha limite de retiro'}
+							</Text>
+							<Text fontSize="sm" numberOfLines={25}>
+								<Text style={{ fontWeight: 'bold' }}>Descripcion:</Text>{' '}
+								{r.descripcion}
+							</Text>
+							<Text></Text>
+							<Center>
+								<Box mb={2} />
+								<View
+									style={{
+										flexDirection: 'row',
+										justifyContent: 'space-between',
+										alignItems: 'center',
+									}}
+								>
+									<View style={{ marginHorizontal: 20 }}>
+										<TouchableOpacity
+											onPress={() => {
+												setSelectedResiduo(r.id)
+												setSelectedAction('FULFILL')
+											}}
+										>
+											<FontAwesome5
+												name="box-open"
+												size={28}
+												alignSelf="center"
+											/>
+										</TouchableOpacity>
+									</View>
+									<View style={{ marginHorizontal: 20 }}>
+										<TouchableOpacity
+											onPress={() => {
+												toast.show({ description: 'NO IMPLEMENTADO' })
+											}}
+										>
+											<FontAwesome name="pencil" size={28} alignSelf="center" />
+										</TouchableOpacity>
+									</View>
+									<View style={{ marginHorizontal: 20 }}>
+										<TouchableOpacity
+											onPress={() => {
+												setSelectedResiduo(r.id)
+												setSelectedAction('DELETE')
+											}}
+										>
+											<FontAwesome name="trash" size={28} alignSelf="center" />
+										</TouchableOpacity>
+									</View>
+									<View style={{ marginHorizontal: 20 }}>
+										<TouchableOpacity
+											onPress={() => {
+												setSelectedResiduo(r.id)
+												setSelectedAction('DELIVERY')
+											}}
+										>
+											<MaterialCommunityIcons
+												name="truck-delivery"
+												size={28}
+												alignSelf="center"
+												color="black"
+											/>
+										</TouchableOpacity>
+									</View>
+								</View>
+							</Center>
+						</Box>
+					)) : (
+						<>
 							<View
 								style={{
-									flexDirection: 'row',
-									justifyContent: 'space-between',
+									flex: 1,
+									justifyContent: 'center',
 									alignItems: 'center',
 								}}
 							>
-								<View style={{ marginHorizontal: 20 }}>
-									<TouchableOpacity
-										onPress={() => {
-											setSelectedResiduo(r.id)
-											setSelectedAction('FULFILL')
-										}}
-									>
-										<FontAwesome5
-											name="box-open"
-											size={28}
-											alignSelf="center"
-										/>
-									</TouchableOpacity>
-								</View>
-								<View style={{ marginHorizontal: 20 }}>
-									<TouchableOpacity
-										onPress={() => {
-											toast.show({ description: 'NO IMPLEMENTADO' })
-										}}
-									>
-										<FontAwesome name="pencil" size={28} alignSelf="center" />
-									</TouchableOpacity>
-								</View>
-								<View style={{ marginHorizontal: 20 }}>
-									<TouchableOpacity
-										onPress={() => {
-											setSelectedResiduo(r.id)
-											setSelectedAction('DELETE')
-										}}
-									>
-										<FontAwesome name="trash" size={28} alignSelf="center" />
-									</TouchableOpacity>
-								</View>
-								<View style={{ marginHorizontal: 20 }}>
-									<TouchableOpacity
-										onPress={() => {
-											setSelectedResiduo(r.id)
-											setSelectedAction('DELIVERY')
-										}}
-									>
-										<MaterialCommunityIcons
-											name="truck-delivery"
-											size={28}
-											alignSelf="center"
-											color="black"
-										/>
-									</TouchableOpacity>
-								</View>
+								<WarningOutlineIcon size={5} color="red.600" />
+								<Text style={{ fontSize: 14, textAlign: 'center' }}>
+								Aún no has cargado tus residuos en la aplicación.
+								</Text>
 							</View>
-						</Center>
-					</Box>
-				)) : (
-					<>
-						<View
-							style={{
-								flex: 1,
-								justifyContent: 'center',
-								alignItems: 'center',
-							}}
-						>
-							<WarningOutlineIcon size={5} color="red.600" />
-							<Text style={{ fontSize: 14, textAlign: 'center' }}>
-							Aún no has cargado tus residuos en la aplicación.
-							</Text>
-						</View>
-					</>
-				)}
-				<AlertBeforeAction
-					isOpen={selectedResiduo && selectedAction === 'DELETE'}
-					action={'DELETE'}
-					onCancel={closeAlert}
-					onOk={async () => {
-						const error = await ResiduoService.delete(selectedResiduo)
-						caseMaybe(
-							error,
-							err => toast.show({ description: err }),
-							() => toast.show({ description: '¡Residuo eliminado!' }),
-						)
-						closeAlert()
-						reload()
-					}}
-				/>
-				<AlertBeforeAction
-					isOpen={selectedResiduo && selectedAction === 'FULFILL'}
-					action={'FULFILL'}
-					onCancel={closeAlert}
-					onOk={async () => {
-						const error = await ResiduoService.fulfill(selectedResiduo)
-						caseMaybe(
-							error,
-							err => toast.show({ description: err }),
-							() => toast.show({ description: '¡Residuo retirado!' }),
-						)
-						closeAlert()
-						reload()
-					}}
-				/>
-				<AlertBeforeAction
-					isOpen={selectedResiduo && selectedAction === 'DELIVERY'}
-					action={'DELIVERY'}
-					onCancel={closeAlert}
-					onOk={async () => {
-						const error = await ResiduoService.addRecorrido(selectedResiduo)
-						caseMaybe(
-							error,
-							err => toast.show({ description: err }),
-							() =>
-								toast.show({ description: '¡Residuo agregado correctamente!' }),
-						)
-						closeAlert()
-						reload()
-					}}
-				/>
-			</Center>
+						</>
+					)}
+					<AlertBeforeAction
+						isOpen={selectedResiduo && selectedAction === 'DELETE'}
+						action={'DELETE'}
+						onCancel={closeAlert}
+						onOk={async () => {
+							const error = await ResiduoService.delete(selectedResiduo)
+							caseMaybe(
+								error,
+								err => toast.show({ description: err }),
+								() => toast.show({ description: '¡Residuo eliminado!' }),
+							)
+							closeAlert()
+							reload()
+						}}
+					/>
+					<AlertBeforeAction
+						isOpen={selectedResiduo && selectedAction === 'FULFILL'}
+						action={'FULFILL'}
+						onCancel={closeAlert}
+						onOk={async () => {
+							const error = await ResiduoService.fulfill(selectedResiduo)
+							caseMaybe(
+								error,
+								err => toast.show({ description: err }),
+								() => toast.show({ description: '¡Residuo retirado!' }),
+							)
+							closeAlert()
+							reload()
+						}}
+					/>
+					<AlertBeforeAction
+						isOpen={selectedResiduo && selectedAction === 'DELIVERY'}
+						action={'DELIVERY'}
+						onCancel={closeAlert}
+						onOk={async () => {
+							const error = await ResiduoService.addRecorrido(selectedResiduo)
+							caseMaybe(
+								error,
+								err => toast.show({ description: err }),
+								() =>
+									toast.show({ description: '¡Residuo agregado correctamente!' }),
+							)
+							closeAlert()
+							reload()
+						}}
+					/>
+				</VStack>
+			</Box>
 		</ScrollView>
 	)
 }
