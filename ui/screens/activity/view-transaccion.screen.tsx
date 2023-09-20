@@ -14,6 +14,7 @@ import {
 	Center,
 	AlertDialog,
 	Button,
+	Box,
 } from 'native-base'
 import { caseMaybe, match } from '../../../utils/either'
 import { TransaccionService } from '../../../services/transaccion.service'
@@ -70,89 +71,135 @@ export const ViewTransaccion = ({ navigation, route }: Props) => {
 	if (isLoading) return <LoadingScreen />
 
 	return (
-		<ScrollView alignContent="center">
-			{transaction.residuos &&
-				transaction.residuos.map(ResiduoService.mapResponse).map((r, idx) => (
-					<Card
-						key={r.id}
-						shadow="0"
-						borderWidth="0"
-						borderRadius="0"
-						my="1"
-						p="5"
-					>
-						{/* TODO: esto deberia llevarse a component y evitar el copy paste con List Residuos */}
-						<Row>
-							<Column width="80%">
-								<Text>Residuo #{r.id}</Text>
-								<Text>{r.tipoResiduo.nombre}</Text>
-								<Text>
-									{r.limitDate?.toDateString() || 'Sin fecha limite de retiro'}
-								</Text>
-								<Text>
-									{r.fechaRetiro
-										? 'Ya ha sido retirado'
-										: 'Todavia no ha sido retirado'}
-								</Text>
-								<Text>{r.descripcion}</Text>
-							</Column>
-							<Center flex="1">
-								<Column space="3">
-									<TouchableOpacity
-										onPress={() => {
-											setSelectedResiduo(r.id)
-											setSelectedAction('DELETE')
-										}}
-									>
-										<FontAwesome name="trash" size={28} alignSelf="center" />
-									</TouchableOpacity>
-								</Column>
-							</Center>
-						</Row>
-					</Card>
-				))}
-			{transaction.residuos &&
-				transaction.residuos.length > 0 &&
-				transaction.residuos.filter(r => !r.fechaRetiro).length == 0 && (
-					<Button
-						onPress={async () => {
-							const res = await TransaccionService.fulfill(transaccionId)
-							match(
-								res,
-								p => {
-									toast.show({
-										description: 'Transaccion completada exitosamente',
-									})
-									navigation.goBack()
-								},
-								err => {
-									toast.show({ description: err })
-									navigation.goBack()
-								},
-							)
-						}}
-					>
-						Completar Transaccion
-					</Button>
-				)}
-			<AlertBeforeAction
-				isOpen={selectedResiduo && selectedAction === 'DELETE'}
-				action={'DELETE'}
-				onCancel={closeAlert}
-				onOk={async () => {
-					const error = await TransaccionService.deleteResiduo(
-						transaccionId,
-						selectedResiduo,
-					)
-					caseMaybe(
-						error,
-						err => toast.show({ description: err }),
-						() => toast.show({ description: '¡Residuo eliminado!' }),
-					)
-					closeAlert()
-					reload()
-				}}
-			/>
+		<ScrollView contentContainerStyle={{ alignItems: 'center', paddingTop: 5 }}>
+			<Text fontSize="xs" fontWeight="bold" textAlign="center" mb={2} mt={4} width={"80%"}>
+				Aqui encontras todos los residuos que agregaste a esta transaccion,
+				podras completar la transaccion una vez que los residuos hayan sido retirados.
+			</Text>
+			<Center w="100%" mt="2">
+				{transaction.residuos &&
+					transaction.residuos.map(ResiduoService.mapResponse).map((r, idx) => (
+						<React.Fragment key={`transaction-${idx}`}>
+							<Box
+								key={`box-${idx}`}
+								p={2}
+								borderWidth={1}
+								borderColor="gray.300"
+								borderRadius="md"
+								shadow={1}
+								maxWidth={500}
+								bg={'white'}
+								width="80%"
+								marginBottom={2}
+							>
+								<Row>
+									<Column width="80%">
+										<HStack
+											space={2}
+											mt="0.5"
+											key={`stack-${idx}`}
+											alignItems="center"
+										>
+											<Text fontSize="sm">Residuo #{r.id}</Text>
+										</HStack>
+										<HStack
+											space={2}
+											mt="0.5"
+											key={`name-${idx}`}
+											alignItems="center"
+										>
+											<Text fontSize="sm" numberOfLines={4}>
+												{r.tipoResiduo.nombre}
+											</Text>
+										</HStack>
+										<HStack
+											space={2}
+											mt="0.5"
+											key={`date-${idx}`}
+											alignItems="center"
+										>
+											<Text fontSize="sm" numberOfLines={4}>
+												{r.fechaRetiro
+													? 'Ya ha sido retirado'
+													: 'Todavia no ha sido retirado'}
+											</Text>
+										</HStack>
+										<HStack
+											space={2}
+											mt="0.5"
+											key={`desc-${idx}`}
+											alignItems="center"
+										>
+											<Text fontSize="sm" numberOfLines={25}>
+												{r.descripcion}
+											</Text>
+										</HStack>
+									</Column>
+									<Center flex="1">
+										<Column space="3">
+											<TouchableOpacity
+												onPress={() => {
+													setSelectedResiduo(r.id)
+													setSelectedAction('DELETE')
+												}}
+											>
+												<FontAwesome
+													name="trash"
+													size={28}
+													alignSelf="center"
+												/>
+											</TouchableOpacity>
+										</Column>
+									</Center>
+								</Row>
+							</Box>
+						</React.Fragment>
+					))}
+				{transaction.residuos &&
+					transaction.residuos.length > 0 &&
+					transaction.residuos.filter(r => !r.fechaRetiro).length == 0 && (
+						<Button
+							width="80%"
+							mt="4"
+							onPress={async () => {
+								const res = await TransaccionService.fulfill(transaccionId)
+								match(
+									res,
+									p => {
+										toast.show({
+											description: 'Transaccion completada exitosamente',
+										})
+										navigation.goBack()
+									},
+									err => {
+										toast.show({ description: err })
+										navigation.goBack()
+									},
+								)
+							}}
+						>
+							Completar Transaccion
+						</Button>
+					)}
+				<AlertBeforeAction
+					isOpen={selectedResiduo && selectedAction === 'DELETE'}
+					action={'DELETE'}
+					onCancel={closeAlert}
+					onOk={async () => {
+						const error = await TransaccionService.deleteResiduo(
+							transaccionId,
+							selectedResiduo,
+						)
+						caseMaybe(
+							error,
+							err => toast.show({ description: err }),
+							() => toast.show({ description: '¡Residuo eliminado!' }),
+						)
+						closeAlert()
+						reload()
+					}}
+				/>
+			</Center>
 		</ScrollView>
 	)
 }

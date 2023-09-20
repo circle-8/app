@@ -89,9 +89,7 @@ export const ListTransportes = ({ navigation, route }: Props) => {
 				loadData()
 				toast.show({ description: 'Transporte tomado correctamente.' })
 				const user = await UserService.getCurrent()
-				navigation.navigate(ActivityRoutes.listMisTransportes, {
-					userId: user.ciudadanoId,
-				})
+				navigation.navigate(ActivityRoutes.activity)
 			},
 			err => {
 				loadData()
@@ -102,8 +100,14 @@ export const ListTransportes = ({ navigation, route }: Props) => {
 	}
 
 	React.useEffect(() => {
-		loadData()
-	}, [])
+		const unsubscribeFocus = navigation.addListener('focus', () => {
+			setLoading(true)
+			setTransportes([]);
+			loadData()
+		})
+
+		return unsubscribeFocus
+	}, [navigation])
 
 	if (isLoading) return <LoadingScreen />
 
