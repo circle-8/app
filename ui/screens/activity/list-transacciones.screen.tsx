@@ -39,30 +39,24 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 		)
 		setLoading(false)
 	}
-	const handleEntregada = async (transaccion) => {
-		try {
-			const errorTransportista = await TransportistaService.entregaConfirmada(transaccion.transporteId);
-		
-			match(
-			  errorTransportista,
-			  t => {
-				TransaccionService.fulfill(transaccion.id)
-				  .then(t => {
-					toast.show({ description: 'Entrega confirmada correctamente.' });
-					loadData();
-				  })
-				  .catch(err => {
-					toast.show({ description: 'Ocurrió un error al confirmar la entrega, reintenta.' });
-				  });
-			  },
-			  err => {
-				toast.show({ description: 'Ocurrió un error al confirmar la entrega, reintenta.' });
-			  }
-			);
-		  } catch (error) {
-			console.error('Error manejando la entrega:', error);
-			toast.show({ description: 'Ocurrió un error, reintenta.' });
-		  }
+	const handleEntregada = async transaccion => {
+		const errorTransportista = await TransportistaService.entregaConfirmada(
+			transaccion.transporteId,
+		)
+
+		match(
+			errorTransportista,
+			t => {
+				toast.show({ description: 'Entrega confirmada correctamente.' })
+				loadData()
+			},
+			err => {
+				toast.show({
+					description: 'Ocurrió un error al confirmar la entrega, reintenta.',
+				})
+			},
+		)
+
 		loadData()
 	}
 	
@@ -177,35 +171,31 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 											marginTop: 8,
 										}}
 									>
-										{transaction.fechaRetiro == null &&
-										transaction.transporteId != null ? (
+										{transaction.fechaRetiro && transaction.transporteId ? (
 											<>
-												<View style={{flexDirection: 'row', justifyContent: 'space-between'}} >
-													<Button onPress={() =>handleCancelarTransportista(transaction.id)} key={`btnCancelar-${idx}`}>
-														Cancelar Transporte
-													</Button>
-													<View style={{ marginHorizontal: 10 }} />
+												<View style={{flexDirection: 'row', justifyContent: 'center'}} >
 													<Button onPress={() => handleEntregada(transaction)} key={`btnEntregar-${idx}`}>
 														Confirmar Entrega
 													</Button>
 												</View>
 											</>
-										) : (
-											transaction.fechaRetiro == null &&
-											transaction.transporteId == null && (
-												<>
-												<View style={{flexDirection: 'row', justifyContent: 'space-between'}} >
+										) : !transaction.fechaRetiro && transaction.transporteId ? (
+											<>
+												<View style={{flexDirection: 'row', justifyContent: 'center'}} >
+													<Button onPress={() =>handleCancelarTransportista(transaction.id)} key={`btnCancelar-${idx}`}>
+														Cancelar Transporte
+													</Button>
+												</View>
+											</>
+										) : !transaction.fechaRetiro && !transaction.transporteId && (
+											<>
+												<View style={{flexDirection: 'row', justifyContent: 'center'}} >
 													<Button
 														onPress={() => handleSolicitarTransportista(transaction.id)} key={`btnSolicitar-${idx}`}>
 														Solicitar Transportista
 													</Button>
-													<View style={{ marginHorizontal: 10 }} />
-													<Button onPress={() => handleEntregada(transaction)} key={`btnConfirmar-${idx}`}>
-														Confirmar Entrega
-													</Button>
 												</View>
-												</>
-											)
+											</>
 										)}
 									</View>
 								</Box>

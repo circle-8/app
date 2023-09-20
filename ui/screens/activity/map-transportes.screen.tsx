@@ -1,7 +1,7 @@
 import React from 'react'
 import { Platform, TouchableOpacity } from 'react-native'
 import MapView, { Marker, Polygon, Polyline, PROVIDER_DEFAULT, PROVIDER_GOOGLE } from 'react-native-maps'
-import { Box, Center, Flex, Modal, Row, Text, useToast } from 'native-base'
+import { Box, Center, Flex, Modal, Row, ScrollView, Text, useToast } from 'native-base'
 import { FontAwesome } from '@expo/vector-icons'
 import { colors } from '../../../constants/styles'
 import * as Location from 'expo-location'
@@ -107,7 +107,14 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 			error,
 			err => toast.show({ description: err }),
 			() => {
-				toast.show({ description: 'Transporte finalizado' })
+				TransaccionService.fulfill(transaccion.id)
+				  .then(t => {
+					toast.show({ description: 'Transporte finalizado' })
+				  })
+				  .catch(err => {
+					toast.show({ description: 'Ocurrió un error al confirmar la entrega, reintenta.' });
+				  });
+				
 				navigation.navigate(ActivityRoutes.listMisTransportes, {
 					userId: user.id,
 				})
@@ -185,21 +192,20 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 				</Box>
 				{transaccion && transaccion?.residuos && (
 					<Box height="20%" bgColor="white" p="5" borderBottomWidth="0.5">
-						<Text>
-						{'\u2022'}{transaccion.residuos[currentPoint]?.descripcion}
-						</Text>
-						<Text>
-						{'\u2022'} {transaccion.residuos[currentPoint]?.tipoResiduo.nombre}
-						</Text>
-						<Text>
-						{'\u2022'} {address?.street ? address?.street : 'No se pudo obtener la direccion'} {address?.streetNumber ? address?.streetNumber : ""} 
-						</Text>
-						<Text>
-						{'\u2022'}
-							{transaccion.residuos[currentPoint]?.fechaRetiro
-								? 'Ya ha sido retirado'
-								: 'Todavia no retirado'}
-						</Text>
+						<ScrollView>
+							<Text>
+								{'\u2022'} {address?.street ? address?.street : 'No se pudo obtener la direccion'} {address?.streetNumber ? address?.streetNumber : ""} 
+							</Text>
+							<Text>
+								{'\u2022'} {transaccion.residuos[currentPoint]?.tipoResiduo.nombre}
+							</Text>
+							<Text>
+								{'\u2022'} {transaccion.residuos[currentPoint]?.descripcion}
+							</Text>
+							<Text>
+								{'\u2022'} {transaccion.residuos[currentPoint]?.fechaRetiro? 'Ya ha sido retirado' : 'Todavia no retirado'}
+							</Text>
+						</ScrollView>
 					</Box>
 				)}
 				<Center height={boxHeight} bgColor="white">

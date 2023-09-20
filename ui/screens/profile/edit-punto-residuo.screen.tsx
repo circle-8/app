@@ -175,7 +175,7 @@ const Form = ({ id, initialPosition, onSubmit }: FormParams) => {
 				</MapView>
 			</Box>
 			<Center mb="3">
-				<Button mt="2" onPress={doOnSubmit} isLoading={loading}>
+				<Button mt="2" onPress={doOnSubmit} isLoading={loading} w="100%">
 					{id ? 'Editar' : 'Crear'}
 				</Button>
 			</Center>

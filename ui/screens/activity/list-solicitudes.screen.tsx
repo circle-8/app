@@ -153,7 +153,8 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 		const solAprobada = await SolicitudService.aprobarSolicitud(id)
 		match(
 			solAprobada,
-			t => loadInitialData(),
+			t => {loadInitialData()
+				toast.show({ description: "¡Solicitud aprobada con exito!" })},
 			err => {
 				toast.show({ description: err })
 				navigation.goBack()
@@ -168,7 +169,8 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 		)
 		match(
 			solAgregada,
-			t => loadInitialData(),
+			t => {loadInitialData()
+				toast.show({ description: "¡Transaccion creada con exito!" })},
 			err => {
 				toast.show({ description: err })
 				navigation.goBack()
@@ -223,7 +225,9 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 	if (isLoading) return <LoadingScreen />
 
 	return (
-		<ScrollView>
+		<ScrollView
+			contentContainerStyle={{ alignItems: 'center', paddingTop: 20 }}
+		>
 			{modalErrorTransaccion ? (
 				<>
 					<Modal
@@ -324,9 +328,17 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 							<Text fontSize="md">
 								¿Estás seguro que deseas aprobar esta solicitud?
 							</Text>
-							<Text fontSize="md" mt={2}>
-								{solicitudAprobable.residuo.descripcion} de{' '}
+							<Text fontSize="md" mt={1}>
+								<Text style={{ fontWeight: 'bold' }}>Solicitante: </Text>
 								{solicitudAprobable.solicitado.nombre}
+							</Text>
+							<Text fontSize="md" mt={1}>
+								<Text style={{ fontWeight: 'bold' }}>Tipo de residuo: </Text>
+								{solicitudAprobable.residuo.tipoResiduo.nombre}
+							</Text>
+							<Text fontSize="md" mt={1}>
+								<Text style={{ fontWeight: 'bold' }}>Descripción: </Text>
+								{solicitudAprobable.residuo.descripcion}
 							</Text>
 							<HStack justifyContent="center" mt={4} space={2}>
 								<Button onPress={() => cerrarModalAprobar()}>Volver</Button>
@@ -356,13 +368,23 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 							</Text>
 						</Modal.Header>
 						<Modal.Body>
-							<Text fontSize="md" style={{ marginBottom: 10 }}>
-								¿A que transaccion queres agregar el residuo:{' '}
-								{solicitudAgregar.residuo.descripcion} de{' '}
-								{solicitudAgregar.solicitado.nombre} {'?'}
+							<Text fontSize="md" style={{ marginBottom: 1 }}>
+								¿A que transaccion queres agregar el residuo de{' '}
+								{solicitudAgregar.solicitado.nombre}?
+							</Text>
+							<Text fontSize="md" style={{ marginBottom: 1 }}>
+								Podes elegir una existente o crear una nueva.
+							</Text>
+							<Text fontSize="md" mt={1}>
+								<Text style={{ fontWeight: 'bold' }}>Tipo de residuo: </Text>
+								{solicitudAgregar.residuo.tipoResiduo.nombre}
+							</Text>
+							<Text fontSize="md" mt={1}>
+								<Text style={{ fontWeight: 'bold' }}>Descripción: </Text>
+								{solicitudAgregar.residuo.descripcion}
 							</Text>
 							<View>
-								<Text bold fontSize="md" style={{ marginBottom: 10 }}>
+								<Text bold fontSize="md" style={{ marginBottom: 2, marginTop: 4 }}>
 									Transacciones existentes:
 								</Text>
 								<HStack justifyContent="center" mt={4} space={2}></HStack>
@@ -450,7 +472,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 						<Modal.Footer>
 							<Center flex={1}>
 								<HStack justifyContent="center" mt={4} space={2}>
-									{userTransactions && userTransactions.length > 0 ? (
+									{userTransactions && userTransactions.length > 0 && selectedUserTransaction != null ? (
 										<>
 											<Button onPress={() => cerrarModalAgregar()}>
 												Volver
@@ -480,8 +502,8 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 			) : (
 				<></>
 			)}
-			<Center w="100%">
-				<Box mb={8} />
+			<Center w="100%" mt="2">
+				<Box mb={4} />
 				<TouchableOpacity onPress={() => handleSolicitantePress()}>
 					<Box
 						mb={2}
@@ -510,7 +532,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 					</Box>
 				</TouchableOpacity>
 				{showSolicitante ? (
-					<View>
+					<>
 						<Box mb={2} />
 						<Text bold fontSize="md" textAlign="center">
 							Estas son todas las solicitudes que realizaste
@@ -522,13 +544,10 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 									<Box
 										key={`boxSal-${idx}`}
 										mb={2}
-										p={2}
-										borderWidth={1}
-										borderColor="gray.300"
-										borderRadius="md"
-										shadow={1}
-										maxWidth={350}
-										background={'white'}
+										maxWidth={500}
+										bg={'white'}
+										width="90%"
+										marginBottom={2}
 									>
 										<HStack
 											space={2}
@@ -598,8 +617,15 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 										{solicitud.estado == 'PENDIENTE' ? (
 											<>
 												<Box mb={2} />
-												<View style={{ flexDirection: 'row', justifyContent: 'center' }} >
-													<Button onPress={() => modalCancelarSolicitud(solicitud)}>
+												<View
+													style={{
+														flexDirection: 'row',
+														justifyContent: 'center',
+													}}
+												>
+													<Button
+														onPress={() => modalCancelarSolicitud(solicitud)}
+													>
 														Cancelar solicitud
 													</Button>
 												</View>
@@ -608,11 +634,20 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 											solicitud.estado == 'APROBADA' && (
 												<>
 													<Box mb={2} />
-													<View style={{ flexDirection: 'row', justifyContent: 'center' }} >
+													<View
+														style={{
+															flexDirection: 'row',
+															justifyContent: 'center',
+														}}
+													>
 														{solicitud.solicitadoId ==
 															solicitud.residuo.puntoResiduo?.ciudadanoId && (
 															<Center justifyContent="space-between">
-																<Button onPress={() => modalAgregarTransaccion(solicitud) } >
+																<Button
+																	onPress={() =>
+																		modalAgregarTransaccion(solicitud)
+																	}
+																>
 																	Agregar a transaccion
 																</Button>
 															</Center>
@@ -639,12 +674,12 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 								</Text>
 							</View>
 						)}
-					</View>
+					</>
 				) : (
 					''
 				)}
 			</Center>
-			<Center>
+			<Center w="100%" mt="2">
 				<Box mb={4} />
 				<TouchableOpacity onPress={() => handleSolicitadoPress()}>
 					<Box
@@ -674,152 +709,159 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 						</HStack>
 					</Box>
 				</TouchableOpacity>
-				{showSolicitado ? (
+				{showSolicitado && (
 					<>
-						<View>
-							<Box mb={2} />
-							<Text bold fontSize="md" textAlign="center">
-								Estas son todas las solicitudes que recibiste
-							</Text>
-							<Box mb={2} />
-							{solicitudesRecibidas && solicitudesRecibidas.length > 0 ? (
-								solicitudesRecibidas.map((solicitud, idx) => (
-									<React.Fragment key={`solic-${idx}`}>
-										<Box
-											key={`box-${idx}`}
-											mb={2}
-											p={2}
-											borderWidth={1}
-											borderColor="gray.300"
-											borderRadius="md"
-											shadow={1}
-											maxWidth={350}
-											background={'white'}
+						<Box mb={2} />
+						<Text bold fontSize="md" textAlign="center">
+							Estas son todas las solicitudes que recibiste
+						</Text>
+						<Box mb={2} />
+						{solicitudesRecibidas && solicitudesRecibidas.length > 0 ? (
+							solicitudesRecibidas.map((solicitud, idx) => (
+								<React.Fragment key={`solic-${idx}`}>
+									<Box
+										key={`box-${idx}`}
+										p={2}
+										borderWidth={1}
+										borderColor="gray.300"
+										borderRadius="md"
+										shadow={1}
+										maxWidth={500}
+										bg={'white'}
+										width="90%"
+										marginBottom={2}
+									>
+										<HStack
+											space={2}
+											mt="0.5"
+											key={`name-${idx}`}
+											alignItems="center"
 										>
-											<HStack
-												space={2}
-												mt="0.5"
-												key={`name-${idx}`}
-												alignItems="center"
-											>
-												<Text fontSize="sm">#{solicitud.id}</Text>
-												<Text flex={1} fontSize="sm">
-													{solicitud.solicitanteId ==
-													solicitud.residuo.puntoResiduo?.ciudadanoId
-														? `${solicitud.solicitante.nombre} quiere depositar un residuo`
-														: `${solicitud.solicitante.nombre} quiere retirar tus residuos`}
-												</Text>
-											</HStack>
-											<HStack
-												space={2}
-												mt="0.5"
-												key={`res-${idx}`}
-												alignItems="center"
-											>
-												<DeleteIcon size="3" color="emerald.600" />
-												<Text flex={1} fontSize="sm">
-													{solicitud.residuo.tipoResiduo.nombre}
-												</Text>
-											</HStack>
-											<HStack
-												space={2}
-												mt="1"
-												key={`desc-${idx}`}
-												alignItems="flex-start"
-											>
-												<InfoOutlineIcon
-													size="3"
-													color="emerald.600"
-													style={{ marginTop: 4 }}
-												/>
-												<Text flex={1} fontSize="sm" numberOfLines={15}>
-													{solicitud.residuo.descripcion}
-												</Text>
-											</HStack>
-											<HStack
-												space={2}
-												mt="0.5"
-												key={`date-${idx}`}
-												alignItems="center"
-											>
-												<WarningOutlineIcon size="3" color="emerald.600" />
-												<Text flex={1} fontSize="sm">
-													{formatFecha(
-														solicitud.residuo.fechaLimiteRetiro,
-														false,
-													)}
-												</Text>
-											</HStack>
-											<HStack
-												space={2}
-												mt="0.5"
-												key={`state-${idx}`}
-												alignItems="center"
-											>
-												<QuestionOutlineIcon size="3" color="emerald.600" />
-												<Text flex={1} fontSize="sm" numberOfLines={4}>
-													{getEstado(solicitud, false)}
-												</Text>
-											</HStack>
-											{solicitud.estado === 'PENDIENTE' ? (
+											<Text fontSize="sm">#{solicitud.id}</Text>
+											<Text flex={1} fontSize="sm">
+												{solicitud.solicitanteId ==
+												solicitud.residuo.puntoResiduo?.ciudadanoId
+													? `${solicitud.solicitante.nombre} quiere depositar un residuo`
+													: `${solicitud.solicitante.nombre} quiere retirar tus residuos`}
+											</Text>
+										</HStack>
+										<HStack
+											space={2}
+											mt="0.5"
+											key={`res-${idx}`}
+											alignItems="center"
+										>
+											<DeleteIcon size="3" color="emerald.600" />
+											<Text flex={1} fontSize="sm">
+												{solicitud.residuo.tipoResiduo.nombre}
+											</Text>
+										</HStack>
+										<HStack
+											space={2}
+											mt="1"
+											key={`desc-${idx}`}
+											alignItems="flex-start"
+										>
+											<InfoOutlineIcon
+												size="3"
+												color="emerald.600"
+												style={{ marginTop: 4 }}
+											/>
+											<Text flex={1} fontSize="sm" numberOfLines={15}>
+												{solicitud.residuo.descripcion}
+											</Text>
+										</HStack>
+										<HStack
+											space={2}
+											mt="0.5"
+											key={`date-${idx}`}
+											alignItems="center"
+										>
+											<WarningOutlineIcon size="3" color="emerald.600" />
+											<Text flex={1} fontSize="sm">
+												{formatFecha(
+													solicitud.residuo.fechaLimiteRetiro,
+													false,
+												)}
+											</Text>
+										</HStack>
+										<HStack
+											space={2}
+											mt="0.5"
+											key={`state-${idx}`}
+											alignItems="center"
+										>
+											<QuestionOutlineIcon size="3" color="emerald.600" />
+											<Text flex={1} fontSize="sm" numberOfLines={4}>
+												{getEstado(solicitud, false)}
+											</Text>
+										</HStack>
+										{solicitud.estado === 'PENDIENTE' ? (
+											<>
+												<Box mb={2} />
+												<View
+													style={{
+														flexDirection: 'row',
+														justifyContent: 'center',
+													}}
+												>
+													<Button
+														style={{ marginRight: 10 }}
+														onPress={() => modalCancelarSolicitud(solicitud)}
+													>
+														Cancelar
+													</Button>
+													<Button
+														onPress={() => modalAprobarSolicitud(solicitud)}
+													>
+														Aprobar
+													</Button>
+												</View>
+											</>
+										) : (
+											solicitud.estado == 'APROBADA' && (
 												<>
 													<Box mb={2} />
 													<View
 														style={{
 															flexDirection: 'row',
-															justifyContent: 'space-between',
+															justifyContent: 'center',
 														}}
 													>
-														<Button
-															onPress={() => modalCancelarSolicitud(solicitud)}
-														>
-															Cancelar solicitud
-														</Button>
-														<Button
-															onPress={() => modalAprobarSolicitud(solicitud)}
-														>
-															Aprobar Solicitud
-														</Button>
+														{solicitud.solicitanteId ==
+															solicitud.residuo.puntoResiduo?.ciudadanoId && (
+															<Center justifyContent="space-between">
+																<Button
+																	onPress={() =>
+																		modalAgregarTransaccion(solicitud)
+																	}
+																>
+																	Agregar a transaccion
+																</Button>
+															</Center>
+														)}
 													</View>
 												</>
-											) : (
-												solicitud.estado == 'APROBADA' &&(
-													<>
-														<Box mb={2} />
-														<View style={{ flexDirection: 'row', justifyContent: 'center', }} >
-															{solicitud.solicitanteId ==
-																solicitud.residuo.puntoResiduo?.ciudadanoId && (
-																<Center justifyContent="space-between">
-																	<Button onPress={() => modalAgregarTransaccion(solicitud) } >
-																		Agregar a transaccion
-																	</Button>
-																</Center>
-															)}
-														</View>
-													</>
-												)
-											)}
-										</Box>
-									</React.Fragment>
-								))
-							) : (
-								<View
-									style={{
-										justifyContent: 'center',
-										alignItems: 'center',
-									}}
-									mb="4"
-								>
-									<WarningOutlineIcon size={5} color="red.600" />
-									<Text style={{ fontSize: 14, textAlign: 'center' }}>
-										No recibiste ninguna solicitud
-									</Text>
-								</View>
-							)}
-						</View>
+											)
+										)}
+									</Box>
+								</React.Fragment>
+							))
+						) : (
+							<View
+								style={{
+									justifyContent: 'center',
+									alignItems: 'center',
+								}}
+								mb="4"
+							>
+								<WarningOutlineIcon size={5} color="red.600" />
+								<Text style={{ fontSize: 14, textAlign: 'center' }}>
+									No recibiste ninguna solicitud
+								</Text>
+							</View>
+						)}
 					</>
-				) : (
-					''
 				)}
 			</Center>
 		</ScrollView>
