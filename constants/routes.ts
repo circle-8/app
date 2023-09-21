@@ -56,6 +56,7 @@ export type ActivityRouteParams = {
 	NewResiduo: {
 		ciudadanoId: number
 		puntoResiduoId: number
+		residuoId: number
 	},
 	ListResiduos: undefined
 	ListSolicitudes: {

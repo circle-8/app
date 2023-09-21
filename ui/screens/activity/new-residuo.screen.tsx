@@ -20,7 +20,7 @@ import {
 } from 'native-base'
 import { TipoResiduoService } from '../../../services/tipos.service'
 import { match } from '../../../utils/either'
-import { TipoResiduo } from '../../../services/types'
+import { Residuo, TipoResiduo } from '../../../services/types'
 import { LoadingScreen } from '../../components/loading.component'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { ResiduoService } from '../../../services/residuo.service'
@@ -29,9 +29,17 @@ import { Keyboard } from 'react-native'
 type Props = NativeStackScreenProps<ActivityRouteParams, 'NewResiduo'>
 
 export const NewResiduo = ({ navigation, route }: Props) => {
+	const residuoId = route.params?.residuoId ? route.params?.residuoId : undefined
 	const { ciudadanoId, puntoResiduoId } = route.params
 	const [tipos, setTipos] = React.useState<TipoResiduo[]>()
 	const [isLoading, setLoading] = React.useState(true)
+	const [residuo, setResiduo] = React.useState<Residuo>()
+	const [formData, setFormData] = React.useState<FormState>({
+		tipo: residuo?.tipoResiduo.id,
+		descripcion: residuo?.descripcion || '',
+		fechaLimite: residuo?.fechaLimiteRetiro ? new Date(residuo.fechaLimiteRetiro) : null,
+	  });
+	const [embalajeDefault, setEmbalajeDefault] = React.useState<string[]>([])
 	const toast = useToast()
 
 	const loadInitialData = async () => {
@@ -44,8 +52,51 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 				navigation.goBack()
 			},
 		)
+
+		if (residuoId) {
+			// Es pantalla de edicion
+			const r = await ResiduoService.get(residuoId)
+			match(
+				r,
+				residuo => {
+					setResiduo(residuo)
+					setFormData({
+						tipo: residuo.tipoResiduo.id,
+						descripcion: getDescripcion(residuo.descripcion),
+						fechaLimite: residuo.fechaLimiteRetiro ? new Date(residuo.fechaLimiteRetiro) : null,
+					  });
+					setEmbalajeDefault(getChecks(residuo.descripcion))
+					setLoading(false)
+				},
+				err => {
+					toast.show({ description: err })
+					navigation.goBack()
+				},
+			)
+		}
+			
+		setLoading(false)
 		setLoading(false)
 	}
+
+	function getDescripcion(cadena) {
+		  const partes = cadena.split('\u200B\n');
+		  const descripcion = partes[0].trim();
+		  return descripcion
+	  }
+
+	  function getChecks(cadena) {
+		const partes = cadena.split('\u200B\n');
+		const entregaInfo = partes.slice(1);
+		let values: string[] = [];
+
+		if (entregaInfo[0].includes('caja')){ values.push('0')}
+		if (entregaInfo[0].includes('bolsa')){ values.push('1')}
+		if (entregaInfo[0].includes('compacto')){ values.push('2')}
+		if (entregaInfo[0].includes('Mojado/Húmedo')){ values.push('3')}
+		if (entregaInfo[0].includes('5kg')){ values.push('4')}
+		return values
+	  }
 
 	React.useEffect(() => {
 		loadInitialData()
@@ -58,11 +109,12 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 			descripcion: form.descripcion,
 			tipoResiduoId: form.tipo,
 			fechaLimite: form.fechaLimite?.toISOString() || null,
+			id: residuo? residuo.id : null,
 		})
 		match(
 			savedResiduo,
 			r => {
-				toast.show({ description: 'Residuo creado exitosamente' })
+				residuo ? toast.show({ description: 'Residuo editado exitosamente' }) : toast.show({ description: 'Residuo creado exitosamente' })
 				navigation.popToTop()
 			},
 			err => {
@@ -78,7 +130,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 			<Center w="100%">
 				<Box p="2" py="2" w="90%" maxW="290">
 					<VStack space={3} mt="4">
-						<Form onSubmit={onSubmit} tipos={tipos} />
+						<Form onSubmit={onSubmit} tipos={tipos} formData={formData} setFormData={setFormData} r={residuo}/>
 					</VStack>
 				</Box>
 			</Center>
@@ -102,17 +154,41 @@ type Errors = {
 const Form = ({
 	onSubmit,
 	tipos,
-}: {
-	onSubmit: (form: FormState) => Promise<void>
-	tipos: TipoResiduo[]
-}) => {
-	const [formData, setData] = React.useState<FormState>({})
+	formData,
+	setFormData,
+	r,
+  }: {
+	onSubmit: (form: FormState) => Promise<void>;
+	tipos: TipoResiduo[];
+	formData: FormState;
+	setFormData: React.Dispatch<React.SetStateAction<FormState>>;
+	r: Residuo
+  }) => {
 	const [errors, setErrors] = React.useState<Errors>({ has: false })
 	const [showDatePicker, setShowDatePicker] = React.useState(false)
 	const [loading, setLoading] = React.useState(false)
 	const [selectedDate, setSelectedDate] = React.useState(null)
-	const [selectedEntregado, setSelectedEntregado] = React.useState<string[]>([])
-
+	const [selectedBefore, setSelectedBefore] = React.useState<string[]>([])
+	const [selectedEntregado, setSelectedEntregado] = React.useState<string[]>(() => 
+	{
+		if (r) {
+			const partes = r.descripcion.split('\u200B\n');
+			const entregaInfo = partes.slice(1);
+			let values: string[] = [];
+		
+			if (entregaInfo[0].includes('caja')) { values.push('0'); }
+			if (entregaInfo[0].includes('bolsa')) { values.push('1'); }
+			if (entregaInfo[0].includes('compacto')) { values.push('2'); }
+			if (entregaInfo[0].includes('Mojado/Húmedo')) { values.push('3'); }
+			if (entregaInfo[0].includes('5kg')) { values.push('4'); }
+		
+			setSelectedBefore(values)
+			return [...values]; 
+		  }
+		
+		  return [];
+		})
+	  
 	const isValid = () => {
 		const newErrors: Errors = { has: false }
 		if (!formData.tipo) {
@@ -128,6 +204,10 @@ const Form = ({
 			newErrors.has = true
 			newErrors.entrega =
 				'Seleccione al menos una caracteristica sobre como entregas el residuo.'
+			formData.descripcion = r.descripcion.split('\u200B\n').slice(0)[0] 
+			setFormData({
+				...formData,
+			})
 		}
 
 		setErrors(newErrors)
@@ -137,7 +217,7 @@ const Form = ({
 	const onChangeDate = (event, selected) => {
 		const currentDate = selected || formData.fechaLimite
 		setShowDatePicker(false)
-		setData({ ...formData, fechaLimite: currentDate })
+		setFormData({ ...formData, fechaLimite: currentDate })
 	}
 
 	const doSubmit = async () => {
@@ -147,7 +227,7 @@ const Form = ({
 		if (formData.descripcion) {
 			selectedDescriptions.push(formData.descripcion)
 			selectedDescriptions.push(
-				'\nAdemas tene en cuenta estas caracteristicas para retirar el residuo: ',
+				'\u200B\nAdemas tene en cuenta estas caracteristicas para retirar el residuo: ',
 			)
 			selectedEntregado.forEach(value => {
 				switch (value) {
@@ -174,7 +254,7 @@ const Form = ({
 
 		formData.descripcion = selectedDescriptions.join(' ')
 
-		setData({
+		setFormData({
 			...formData,
 		})
 
@@ -196,6 +276,20 @@ const Form = ({
 		}).format(date)
 	}
 
+	const handleSelecciono = values => {
+		console.log(values)
+		console.log(selectedBefore)
+		const combinedSelections = [...selectedBefore, ...values]
+		console.log(combinedSelections)
+
+		const uniqueSelections = Array.from(new Set(combinedSelections))
+		console.log(uniqueSelections)
+		setSelectedBefore(uniqueSelections)
+		setSelectedEntregado(uniqueSelections)
+	}
+
+
+
 	return (
 		<>
 			{showDatePicker && (
@@ -210,12 +304,14 @@ const Form = ({
 			<FormControl isRequired isInvalid={'tipo' in errors} isReadOnly>
 				<FormControl.Label>Tipo de Residuo</FormControl.Label>
 				<Select
-					selectedValue={'' + formData.tipo}
+					selectedValue={formData.tipo ? `${formData.tipo}` : ''}
 					placeholder="Tipo de Residuo"
-					onValueChange={v => setData({ ...formData, tipo: +v })}
+					onValueChange={v =>
+						setFormData({ ...formData, tipo: v ? parseInt(v) : undefined })
+					}
 				>
 					{tipos.map(t => (
-						<Select.Item value={'' + t.id} key={t.id} label={t.nombre} />
+						<Select.Item value={`${t.id}`} key={t.id} label={t.nombre} />
 					))}
 				</Select>
 				<FormControl.ErrorMessage _text={{ fontSize: 'xs' }}>
@@ -228,7 +324,8 @@ const Form = ({
 					Agrega informacion que te parezca util.
 				</Text>
 				<TextArea
-					onChangeText={v => setData({ ...formData, descripcion: v })}
+					onChangeText={v => setFormData({ ...formData, descripcion: v })}
+					value={formData.descripcion}
 					autoCompleteType="none"
 					isInvalid={'descripcion' in errors}
 				/>
@@ -245,9 +342,11 @@ const Form = ({
 				</Text>
 				<Checkbox.Group
 					colorScheme="green"
-					defaultValue={selectedEntregado}
-					accessibilityLabel="Elegi las caracteristicas que se asemejen mas a la manera en la que vas a entregar tu residuo."
-					onChange={values => setSelectedEntregado(values || [])}
+					value={selectedEntregado}
+					accessibilityLabel="Elige las características que se asemejen más a la manera en la que vas a entregar tu residuo."
+					onChange={(values) => {
+						handleSelecciono(values)
+					  }}
 				>
 					<Checkbox value="0" my={1}>
 						Embalado en caja
@@ -281,7 +380,7 @@ const Form = ({
 				/>
 			</FormControl>
 			<Button mt="10" onPress={doSubmit} isLoading={loading}>
-				Crear
+				{r?.id ? 'Editar' : 'Crear'}
 			</Button>
 		</>
 	)

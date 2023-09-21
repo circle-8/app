@@ -17,7 +17,7 @@ const mapPoint = {
 		url: '/puntos_reciclaje?',
 	},
 	VERDE: {
-		url: '/puntos_verdes',
+		url: '/puntos_verdes?',
 	},
 }
 
@@ -129,10 +129,8 @@ const getPuntoResiduo = async (
 	id: number,
 	ciudadanoId: number,
 ): Promise<Either<PuntoResiduo, ErrorMessage>> => {
-	console.log(id, ciudadanoId)
 	const url = `/ciudadano/${ciudadanoId}/punto_residuo/${id}?expand=ciudadano&expand=residuos`
 	const res = await Http.get<PuntoResiduoResponse>(url)
-	console.log(res)
 	return map(
 		res,
 		p => mapResponse(p, 'RESIDUO') as PuntoResiduo,

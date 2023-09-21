@@ -137,18 +137,15 @@ export const ViewTransaccion = ({ navigation, route }: Props) => {
 									</Column>
 									<Center flex="1">
 										<Column space="3">
-											<TouchableOpacity
-												onPress={() => {
-													setSelectedResiduo(r.id)
-													setSelectedAction('DELETE')
-												}}
-											>
-												<FontAwesome
-													name="trash"
-													size={28}
-													alignSelf="center"
-												/>
+											{!transaction.fechaRetiro && (
+												<TouchableOpacity
+													onPress={() => {
+														setSelectedResiduo(r.id)
+														setSelectedAction('DELETE')
+													}} >
+												<FontAwesome name="trash" size={28} alignSelf="center" />
 											</TouchableOpacity>
+											)}
 										</Column>
 									</Center>
 								</Row>
@@ -157,7 +154,7 @@ export const ViewTransaccion = ({ navigation, route }: Props) => {
 					))}
 				{transaction.residuos &&
 					transaction.residuos.length > 0 &&
-					transaction.residuos.filter(r => !r.fechaRetiro).length == 0 && (
+					transaction.residuos.filter(r => !r.fechaRetiro).length == 0 && !transaction.fechaRetiro && (
 						<Button
 							width="80%"
 							mt="4"

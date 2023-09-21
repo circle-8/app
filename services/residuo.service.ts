@@ -11,6 +11,7 @@ import {
 } from '../utils/either'
 
 type ResiduoSave = {
+	id?:number
 	tipoResiduoId: number
 	ciudadanoId: number
 	puntoResiduoId: number
@@ -73,7 +74,13 @@ const mapResponse = (r: ResiduoResponse): Residuo => {
 
 const save = async (r: ResiduoSave): Promise<Either<Residuo, ErrorMessage>> => {
 	const url = '/residuo'
-	const res = await Http.post<ResiduoResponse>(url, r)
+	const res = r.id ? await Http.put<ResiduoResponse>(url+`/${r.id}`, r) : await Http.post<ResiduoResponse>(url, r)
+	return map(res, mapResponse, err => err.message)
+}
+
+const get = async (id: number): Promise<Either<Residuo, ErrorMessage>> => {
+	const url = `/residuo/${id}`
+	const res = await Http.get<ResiduoResponse>(url)
 	return map(res, mapResponse, err => err.message)
 }
 
@@ -144,4 +151,5 @@ export const ResiduoService = {
 	delete: del,
 	mapResponse,
 	addRecorrido,
+	get,
 }
