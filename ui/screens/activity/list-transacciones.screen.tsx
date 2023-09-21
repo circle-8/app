@@ -11,6 +11,8 @@ import {
 	Center,
 	Button,
 	useToast,
+	InfoOutlineIcon,
+	CheckCircleIcon,
 } from 'native-base'
 import { match } from '../../../utils/either'
 import { TransaccionService } from '../../../services/transaccion.service'
@@ -40,15 +42,25 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 		setLoading(false)
 	}
 	const handleEntregada = async transaccion => {
-		const errorTransportista = await TransportistaService.entregaConfirmada(
-			transaccion.transporteId,
-		)
+		const res = await TransaccionService.fulfill(transaccion.id)
 
 		match(
-			errorTransportista,
-			t => {
-				toast.show({ description: 'Entrega confirmada correctamente.' })
-				loadData()
+			res,
+			async t => {
+				const resp = await TransportistaService.entregaConfirmada(transaccion.transporte.id)
+				match(
+					resp,
+					p => {
+						toast.show({
+							description: '¡Entrega confirmada exitosamente!',
+						})
+						navigation.goBack()
+					},
+					err => {
+						toast.show({ description: err })
+						navigation.goBack()
+					},
+				)
 			},
 			err => {
 				toast.show({
@@ -81,7 +93,7 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 		match(
 			error,
 			t => {
-				toast.show({ description: 'Transporte solicitado correctamente.' })
+				toast.show({ description: 'Transporte solicitado correctamente.' });
 			},
 			err => {
 				toast.show({
@@ -93,13 +105,22 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 	}
 
 	React.useEffect(() => {
-		loadData()
-	}, [])
+		const unsubscribeFocus = navigation.addListener('focus', () => {
+			setLoading(true)
+			loadData()
+		})
+
+		return unsubscribeFocus
+	}, [navigation])
 
 	if (isLoading) return <LoadingScreen />
 
 	return (
-		<ScrollView alignContent="center">
+		<ScrollView contentContainerStyle={{ alignItems: 'center', paddingTop: 5 }}>
+			<Text fontSize="xs" fontWeight="bold" textAlign="center" mb={2} mt={4} width={"80%"}>
+				Aqui encontras tus transacciones, podras solicitar un transportista, confirmar la entrega del residuo y
+				completar la transaccion una vez que poseas los residuos en tu poder.
+			</Text>
 			<Center w="100%">
 				<Box mb={5} />
 				{transactions && transactions.length > 0 ? (
@@ -171,7 +192,26 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 											marginTop: 8,
 										}}
 									>
-										{transaction.fechaRetiro && transaction.transporteId ? (
+										{transaction.fechaRetiro && transaction.transporte && transaction.transporte?.pagoConfirmado 
+											&& transaction.transporte?.entregaConfirmada ? (
+											<>
+												<View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+													<CheckCircleIcon  size={5} color="green.600" />
+													<Text style={{ fontSize: 14, textAlign: 'center' }}>
+														¡Esta transaccion finalizo correctamente!
+													</Text>
+												</View>
+											</>
+										) : transaction.fechaRetiro && transaction.transporte && !transaction.transporte?.pagoConfirmado ? (
+											<>
+												<View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+													<InfoOutlineIcon  size={5} color="green.600" />
+													<Text style={{ fontSize: 14, textAlign: 'center' }}>
+														Esperando que el transportista confirme el pago.
+													</Text>
+												</View>
+											</>
+										) : transaction.fechaRetiro && transaction.transporte && !transaction.transporte?.entregaConfirmada ? (
 											<>
 												<View style={{flexDirection: 'row', justifyContent: 'center'}} >
 													<Button onPress={() => handleEntregada(transaction)} key={`btnEntregar-${idx}`}>
@@ -179,7 +219,7 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 													</Button>
 												</View>
 											</>
-										) : !transaction.fechaRetiro && transaction.transporteId ? (
+										) : !transaction.fechaRetiro && transaction.transporte ? (
 											<>
 												<View style={{flexDirection: 'row', justifyContent: 'center'}} >
 													<Button onPress={() =>handleCancelarTransportista(transaction.id)} key={`btnCancelar-${idx}`}>
@@ -187,7 +227,7 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 													</Button>
 												</View>
 											</>
-										) : !transaction.fechaRetiro && !transaction.transporteId && (
+										) : !transaction.fechaRetiro && !transaction.transporte && (
 											<>
 												<View style={{flexDirection: 'row', justifyContent: 'center'}} >
 													<Button

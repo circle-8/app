@@ -1,4 +1,5 @@
 import {
+	ConsejoResponse,
 	DiaResponse,
 	PuntoReciclajeResponse,
 	PuntoResiduoResponse,
@@ -60,3 +61,4 @@ export type Recorrido = RecorridoResponse & {
 	endDate?: Date
 }
 export type Transporte = TransporteResponse
+export type Consejo = ConsejoResponse

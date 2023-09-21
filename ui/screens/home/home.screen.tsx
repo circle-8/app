@@ -128,7 +128,7 @@ export const Home = ({ navigation }: Props) => {
 				setPuntoResiduo(punto)
 			},
 			err => {
-				console.error('Error al obtener el punto de residuo:', err)
+				toast.show({ description: err })
 			},
 		)
 	}
@@ -148,7 +148,7 @@ export const Home = ({ navigation }: Props) => {
 			tipos,
 			t => setTipos(t),
 			err => {
-				// que hago si falla
+				toast.show({ description: err })
 			},
 		)
 	}
@@ -1107,7 +1107,6 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 			}
 			return 'Sin fecha limite'
 		} catch (error) {
-			console.error('Error al formatear la fecha:', error)
 			return 'Sin fecha limite'
 		}
 	}
@@ -1183,8 +1182,6 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 	}
 
 	const handleContactar = async (point: PuntoVerde) => {
-		console.log(point)
-
 		const email = point.email
 		const subject = 'Contacto para reciclar a traves de Circle8'
 		const body = `¡Hola  ${point.titulo}! me gustaria recibir informacion para poder reciclar con ustedes.`
@@ -1588,7 +1585,6 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 			}
 			return 'Sin fecha limite de retiro'
 		} catch (error) {
-			console.error('Error al formatear la fecha:', error)
 			return 'Sin fecha limite de retiro'
 		}
 	}
@@ -1711,7 +1707,7 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 													alignItems="center"
 												>
 													<InfoOutlineIcon size="3" color="emerald.600" />
-													<Text fontSize="sm" numberOfLines={4}>
+													<Text fontSize="sm" numberOfLines={24} style={{ flex: 1 }}>
 														{tipo.descripcion}
 													</Text>
 												</HStack>

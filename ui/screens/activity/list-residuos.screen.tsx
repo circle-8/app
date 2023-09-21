@@ -73,6 +73,26 @@ export const ListResiduos = ({ navigation }: Props) => {
 			navigation.navigate(ActivityRoutes.newResiduo, {
 				ciudadanoId: user.ciudadanoId,
 				puntoResiduoId: points[0].id,
+				residuoId: null
+			})
+		}
+	}
+
+	const handleEditarResiduo = async (id) => {
+		
+		const user = await UserService.getCurrent()
+		const points = await PuntoService.getAll({
+			tipos: ['RESIDUO'],
+			ciudadanoId: user.ciudadanoId,
+		})
+
+		if (points.length === 0) {
+			//TODO ir a editar punto residuo si no tiene punto residuo
+		} else {
+			navigation.navigate(ActivityRoutes.newResiduo, {
+				ciudadanoId: user.ciudadanoId,
+				puntoResiduoId: points[0].id,
+				residuoId: id
 			})
 		}
 
@@ -169,7 +189,7 @@ export const ListResiduos = ({ navigation }: Props) => {
 									<View style={{ marginHorizontal: 20 }}>
 										<TouchableOpacity
 											onPress={() => {
-												toast.show({ description: 'NO IMPLEMENTADO' })
+												handleEditarResiduo(r.id)
 											}}
 										>
 											<FontAwesome name="pencil" size={28} alignSelf="center" />

@@ -127,6 +127,7 @@ export type TransaccionResponse = {
 	puntoReciclaje?: PuntoReciclajeResponse
 	residuos?: ResiduoResponse[]
 	transporteId?: number
+	transporte?: TransporteResponse
 }
 
 export type RecicladorResponse = {
@@ -188,4 +189,11 @@ export type TransporteResponse = {
 	entregaConfirmada: boolean
 	precioSugerido: number
 	direccion: string
+}
+
+export type ConsejoResponse = {
+	id: number
+	titulo: string
+	descripcion: string
+	fechaCreacion: string
 }
