@@ -1083,6 +1083,7 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 			const getUserResiduos = await ResiduoService.getAll({
 				ciudadanos: [user.ciudadanoId.toString()],
 				tipos: residuosPuntoActualToString,
+				retirado: false,
 				fechaLimiteRetiro: new Date().toISOString(),
 			})
 
