@@ -38,9 +38,10 @@ const getAll = async (
 	for (const ciudadano of f.ciudadanos || [])
 		url += 'ciudadanos=' + ciudadano + '&'
 	for (const tipo of f.tipos || []) url += 'tipos=' + tipo + '&'
-	if (f.transaccion) url += 'transaccion=' + f.transaccion
-	if (f.recorrido) url += 'recorrido=' + f.recorrido
-	if (f.retirado) url += 'retirado=' + f.retirado
+	if (f.transaccion) url += 'transaccion=' + f.transaccion + '&'
+	if (f.recorrido) url += 'recorrido=' + f.recorrido + '&'
+	if (f.retirado === false) url += 'retirado=false&'
+	if (f.retirado === true) url += 'retirado=true&'
 	if (f.fechaLimiteRetiro) url += 'fecha_limite_retiro=' + f.fechaLimiteRetiro
 
 	const res = await Http.get<ListResponse<ResiduoResponse>>(url)

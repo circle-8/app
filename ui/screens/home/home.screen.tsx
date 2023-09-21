@@ -439,8 +439,7 @@ export const Home = ({ navigation }: Props) => {
 							</View>
 							<View style={{ alignItems: 'center', marginTop: 2 }}>
 								<Text style={{ fontSize: 10, textAlign: 'center' }}>
-									Aquí podrás crear una solicitud para entregar tus residuos a
-									otras personas que los necesiten.
+									Entrega tus residuos a quien lo necesiten.
 								</Text>
 							</View>
 						</TouchableOpacity>
@@ -468,8 +467,7 @@ export const Home = ({ navigation }: Props) => {
 							</View>
 							<View style={{ alignItems: 'center', marginTop: 2 }}>
 								<Text style={{ fontSize: 10, textAlign: 'center' }}>
-									Aquí podrás crear una solicitud para recibir residuos que
-									quieras reciclar.
+									Crea puntos para recibir residuos que te interesen.
 								</Text>
 							</View>
 						</TouchableOpacity>
@@ -488,8 +486,7 @@ export const Home = ({ navigation }: Props) => {
 							</View>
 							<View style={{ alignItems: 'center', marginTop: 2 }}>
 								<Text style={{ fontSize: 10, textAlign: 'center' }}>
-									Aquí podrás adherirte a recorridos de organizaciones de
-									reciclaje.
+									Sumate a recorridos que retiren tus residuos.
 								</Text>
 							</View>
 						</TouchableOpacity>
@@ -1418,7 +1415,7 @@ const PuntoReciclajeModal = (props: PuntoReciclajeModalProps) => {
 							>
 								<Button onPress={props.onClose}>Cerrar</Button>
 								<View style={{ marginHorizontal: 10 }} />
-								<Button onPress={handleCreateResiduo}>Crear Resiudo</Button>
+								<Button onPress={handleCreateResiduo}>Crear Residuo</Button>
 							</View>
 						) : modalEntregar && userResiduos.length >= 0 && selectedResiduos.length != 0 ? (
 							<View
@@ -1556,11 +1553,15 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 		setFirstStep(true)
 	}
 
-	const handleCreatePuntoReciclaje = () => {
+	const handleCreatePuntoReciclaje = async () => {
+		const user = await UserService.getCurrent()
 		props.onClose()
 		props.navigation.navigate('ProfileTab', {
 			screen: 'EditPuntoReciclaje',
 			initial: false,
+			params: {
+				ciudadanoId: user.ciudadanoId
+			}
 		})
 	}
 

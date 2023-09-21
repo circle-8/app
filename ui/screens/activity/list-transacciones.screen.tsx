@@ -202,7 +202,7 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 													</Text>
 												</View>
 											</>
-										) : transaction.fechaRetiro && transaction.transporte && !transaction.transporte?.pagoConfirmado ? (
+										) : transaction.transporte && transaction.transporte.fechaFin && !transaction.transporte?.pagoConfirmado ? (
 											<>
 												<View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
 													<InfoOutlineIcon  size={5} color="green.600" />
@@ -211,7 +211,7 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 													</Text>
 												</View>
 											</>
-										) : transaction.fechaRetiro && transaction.transporte && !transaction.transporte?.entregaConfirmada ? (
+										) : transaction.transporte && transaction.transporte.fechaFin && !transaction.transporte?.entregaConfirmada ? (
 											<>
 												<View style={{flexDirection: 'row', justifyContent: 'center'}} >
 													<Button onPress={() => handleEntregada(transaction)} key={`btnEntregar-${idx}`}>
@@ -219,7 +219,7 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 													</Button>
 												</View>
 											</>
-										) : !transaction.fechaRetiro && transaction.transporte ? (
+										) : transaction.transporte && !transaction.transporte.fechaFin ? (
 											<>
 												<View style={{flexDirection: 'row', justifyContent: 'center'}} >
 													<Button onPress={() =>handleCancelarTransportista(transaction.id)} key={`btnCancelar-${idx}`}>
@@ -227,7 +227,7 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 													</Button>
 												</View>
 											</>
-										) : !transaction.fechaRetiro && !transaction.transporte && (
+										) : !transaction.transporte && (
 											<>
 												<View style={{flexDirection: 'row', justifyContent: 'center'}} >
 													<Button

@@ -330,7 +330,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 							</Text>
 							<Text fontSize="md" mt={1}>
 								<Text style={{ fontWeight: 'bold' }}>Solicitante: </Text>
-								{solicitudAprobable.solicitado.nombre}
+								{solicitudAprobable.solicitante.nombre}
 							</Text>
 							<Text fontSize="md" mt={1}>
 								<Text style={{ fontWeight: 'bold' }}>Tipo de residuo: </Text>

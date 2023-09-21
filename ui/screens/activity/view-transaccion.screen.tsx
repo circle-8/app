@@ -137,7 +137,7 @@ export const ViewTransaccion = ({ navigation, route }: Props) => {
 									</Column>
 									<Center flex="1">
 										<Column space="3">
-											{!transaction.fechaRetiro && (
+											{(!transaction.fechaRetiro || !r.fechaRetiro) && (
 												<TouchableOpacity
 													onPress={() => {
 														setSelectedResiduo(r.id)
