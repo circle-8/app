@@ -110,7 +110,7 @@ export const Activity = ({ navigation }: Props) => {
 			</View>
 			<View style={{ marginTop: 2, paddingLeft: 30, paddingRight:30 }}>
 				<Text fontSize="xs" style={{ textAlign: 'left' }}>
-					{'\u2022'} Podras ver los circuitos de reciclaje a las que perteneces y pueden retirar tus residuos.
+					{'\u2022'} Podras ver y gestionar los circuitos de reciclaje a los que perteneces y pueden retirar tus residuos.
 				</Text>
 			</View>
 			<View style={{ marginTop: 6, paddingLeft: 20 }}>

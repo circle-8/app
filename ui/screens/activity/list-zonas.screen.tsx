@@ -88,8 +88,8 @@ export const ListZonas = ({ navigation }: Props) => {
 					>
 						<View style={{ flex: 1, marginRight: 10 }}>
 							<Text style={{ fontSize: 10, textAlign: 'center' }}>
-								Aqui veras todos los circuitos de reciclaje a las que perteneces
-								y pueden pasar a retirar tus residuos.
+								Aqui veras todos los circuitos de reciclaje a los que perteneces
+								y que pueden pasar a retirar tus residuos. Tambien, si lo deseas, puedes salirte de un circuito.
 							</Text>
 						</View>
 					</View>
