@@ -10,6 +10,7 @@ import { ViewTransaccion } from '../../screens/activity/view-transaccion.screen'
 import { ListMisTransportes } from '../../screens/activity/list-misTransportes.screen'
 import { ListTransportes } from '../../screens/activity/list-transportes.screen'
 import { MapTransportes } from '../../screens/activity/map-transportes.screen'
+import { ListZonas } from '../../screens/activity/list-zonas.screen'
 
 
 const ActivityStack = createNativeStackNavigator()
@@ -56,6 +57,11 @@ export const ActivityFlow = () => {
 				name={ActivityRoutes.listTransportes}
 				component={ListTransportes}
 				options={{ title: 'Transportes Disponibles' }}
+			/>
+			<ActivityStack.Screen
+				name={ActivityRoutes.listZonas}
+				component={ListZonas}
+				options={{ title: 'Mis Circuitos de reciclaje' }}
 			/>
 			<ActivityStack.Screen
 				name={ActivityRoutes.mapTransportes}

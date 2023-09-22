@@ -1,7 +1,7 @@
 import React from 'react'
 import { Platform, TouchableOpacity } from 'react-native'
 import MapView, { Marker, Polygon, Polyline, PROVIDER_DEFAULT, PROVIDER_GOOGLE } from 'react-native-maps'
-import { Box, Center, Flex, Modal, Row, Text, useToast } from 'native-base'
+import { Box, Center, Flex, Modal, Row, ScrollView, Text, useToast } from 'native-base'
 import { FontAwesome } from '@expo/vector-icons'
 import { colors } from '../../../constants/styles'
 import * as Location from 'expo-location'
@@ -249,21 +249,23 @@ export const HomeReciclador = ({ navigation }: Props) => {
 					</MapView>
 				</Box>
 				{todayRecorrido && todayRecorrido.initDate && (
-					<Box height="20%" bgColor="white" p="10" borderBottomWidth="0.5">
-						<Text>
-							{todayRecorrido.puntos[currentPoint]?.residuo.descripcion}
-						</Text>
-						<Text>
-							{todayRecorrido.puntos[currentPoint]?.residuo.tipoResiduo.nombre}
-						</Text>
-						<Text>
-							{address?.street} {address?.streetNumber}
-						</Text>
-						<Text>
-							{todayRecorrido.puntos[currentPoint]?.residuo.fechaRetiro
-								? 'Ya ha sido retirado'
-								: 'Todavia no retirado'}
-						</Text>
+					<Box height="20%" bgColor="white" p="5" borderBottomWidth="0.5">
+						<ScrollView>
+							<Text>
+							{'\u2022'} {address?.street ? address.street : 'No se pudo obtener la direccion'} {address?.streetNumber ? address?.streetNumber :  ""}
+							</Text>
+							<Text>
+							{'\u2022'} {todayRecorrido.puntos[currentPoint]?.residuo.tipoResiduo.nombre}
+							</Text>
+							<Text>
+							{'\u2022'} {todayRecorrido.puntos[currentPoint]?.residuo.descripcion}
+							</Text>
+							<Text>
+							{'\u2022'} {todayRecorrido.puntos[currentPoint]?.residuo.fechaRetiro
+									? 'Ya ha sido retirado'
+									: 'Todavia no retirado'}
+							</Text>
+						</ScrollView>
 					</Box>
 				)}
 				<Center height={boxHeight} bgColor="white">

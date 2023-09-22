@@ -99,8 +99,12 @@ export const ListResiduos = ({ navigation }: Props) => {
 	}
 
 	React.useEffect(() => {
-		loadData()
-	}, [])
+		const unsubscribeFocus = navigation.addListener('focus', () => {
+			loadData()
+		})
+
+		return unsubscribeFocus
+	}, [navigation])
 
 	if (isLoading) return <LoadingScreen />
 
@@ -124,106 +128,127 @@ export const ListResiduos = ({ navigation }: Props) => {
 						<View style={{ flex: 1, marginRight: 10 }}>
 							<Text style={{ fontSize: 10, textAlign: 'left' }}>
 								Aqui veras todos tus residuos, puedes marcarlos como entregados,
-								editarlos, eliminarlos o incluirlos a un recorrido de tu zona de reciclaje.
+								editarlos, eliminarlos o incluirlos a un recorrido de tu zona de
+								reciclaje.
 							</Text>
 						</View>
 						<TouchableOpacity
-							onPress={() => handleNewResiduo() }
+							onPress={() => handleNewResiduo()}
 							style={{ backgroundColor: 'transparent' }}
 						>
 							<FontAwesome name="plus" size={30} color={colors.primary800} />
 						</TouchableOpacity>
 					</View>
-					{ residuos.length != 0 ? residuos.map((r, idx) => (
-						<Box
-							key={`box-${idx}`}
-							mb={2}
-							p={2}
-							borderWidth={1}
-							borderColor="gray.300"
-							borderRadius="md"
-							shadow={1}
-							width={350}
-							background={'white'}
-						>
-							<Text fontSize="sm" numberOfLines={4}>
-								<Text style={{ fontWeight: 'bold' }}>Residuo #{r.id}</Text>{' '}
-							</Text>
-							<Text fontSize="sm" numberOfLines={4}>
-								<Text style={{ fontWeight: 'bold' }}>Tipo:</Text>{' '}
-								{r.tipoResiduo.nombre}
-							</Text>
-							<Text fontSize="sm" numberOfLines={4}>
-								<Text style={{ fontWeight: 'bold' }}>Fecha limite:</Text>{' '}
-								{r.limitDate?.toLocaleDateString() ||
-									'Sin fecha limite de retiro'}
-							</Text>
-							<Text fontSize="sm" numberOfLines={25}>
-								<Text style={{ fontWeight: 'bold' }}>Descripcion:</Text>{' '}
-								{r.descripcion}
-							</Text>
-							<Text></Text>
-							<Center>
-								<Box mb={2} />
-								<View
-									style={{
-										flexDirection: 'row',
-										justifyContent: 'space-between',
-										alignItems: 'center',
-									}}
-								>
-									<View style={{ marginHorizontal: 20 }}>
-										<TouchableOpacity
-											onPress={() => {
-												setSelectedResiduo(r.id)
-												setSelectedAction('FULFILL')
-											}}
-										>
-											<FontAwesome5
-												name="box-open"
-												size={28}
-												alignSelf="center"
-											/>
-										</TouchableOpacity>
+					{residuos.length != 0 ? (
+						residuos.map((r, idx) => (
+							<Box
+								key={`box-${idx}`}
+								mb={2}
+								p={2}
+								borderWidth={1}
+								borderColor="gray.300"
+								borderRadius="md"
+								shadow={1}
+								width={350}
+								background={'white'}
+							>
+								<Text fontSize="sm" numberOfLines={4}>
+									<Text style={{ fontWeight: 'bold' }}>Residuo #{r.id}</Text>{' '}
+								</Text>
+								<Text fontSize="sm" numberOfLines={4}>
+									<Text style={{ fontWeight: 'bold' }}>Tipo:</Text>{' '}
+									{r.tipoResiduo.nombre}
+								</Text>
+								<Text fontSize="sm" numberOfLines={4}>
+									<Text style={{ fontWeight: 'bold' }}>Fecha limite:</Text>{' '}
+									{r.limitDate?.toLocaleDateString() ||
+										'Sin fecha limite de retiro'}
+								</Text>
+								<Text fontSize="sm" numberOfLines={25}>
+									<Text style={{ fontWeight: 'bold' }}>Descripcion:</Text>{' '}
+									{r.descripcion}
+								</Text>
+								{r.transaccionId && !r.recorridoId && (
+									<Text fontSize="xs" position="absolute" top={0} right={0} fontWeight="bold" color="green.700" p={1} bg="green.200" >
+										en una transacción
+									</Text>
+								)}
+								{r.recorridoId && !r.transaccionId && (
+									<Text fontSize="xs" position="absolute" top={0} right={0} fontWeight="bold" color="green.700" p={1} bg="green.200" >
+										en un recorrido
+									</Text>
+								)}
+								<Text></Text>
+								<Center>
+									<Box mb={2} />
+									<View
+										style={{
+											flexDirection: 'row',
+											justifyContent: 'space-between',
+											alignItems: 'center',
+										}}
+									>
+										<View style={{ marginHorizontal: 20 }}>
+											<TouchableOpacity
+												onPress={() => {
+													setSelectedResiduo(r.id)
+													setSelectedAction('FULFILL')
+												}}
+											>
+												<FontAwesome5
+													name="box-open"
+													size={28}
+													alignSelf="center"
+												/>
+											</TouchableOpacity>
+										</View>
+										<View style={{ marginHorizontal: 20 }}>
+											<TouchableOpacity
+												onPress={() => {
+													handleEditarResiduo(r.id)
+												}}
+											>
+												<FontAwesome
+													name="pencil"
+													size={28}
+													alignSelf="center"
+												/>
+											</TouchableOpacity>
+										</View>
+										<View style={{ marginHorizontal: 20 }}>
+											<TouchableOpacity
+												onPress={() => {
+													setSelectedResiduo(r.id)
+													setSelectedAction('DELETE')
+												}}
+											>
+												<FontAwesome
+													name="trash"
+													size={28}
+													alignSelf="center"
+												/>
+											</TouchableOpacity>
+										</View>
+										<View style={{ marginHorizontal: 20 }}>
+											<TouchableOpacity
+												onPress={() => {
+													setSelectedResiduo(r.id)
+													setSelectedAction('DELIVERY')
+												}}
+											>
+												<MaterialCommunityIcons
+													name="truck-delivery"
+													size={28}
+													alignSelf="center"
+													color="black"
+												/>
+											</TouchableOpacity>
+										</View>
 									</View>
-									<View style={{ marginHorizontal: 20 }}>
-										<TouchableOpacity
-											onPress={() => {
-												handleEditarResiduo(r.id)
-											}}
-										>
-											<FontAwesome name="pencil" size={28} alignSelf="center" />
-										</TouchableOpacity>
-									</View>
-									<View style={{ marginHorizontal: 20 }}>
-										<TouchableOpacity
-											onPress={() => {
-												setSelectedResiduo(r.id)
-												setSelectedAction('DELETE')
-											}}
-										>
-											<FontAwesome name="trash" size={28} alignSelf="center" />
-										</TouchableOpacity>
-									</View>
-									<View style={{ marginHorizontal: 20 }}>
-										<TouchableOpacity
-											onPress={() => {
-												setSelectedResiduo(r.id)
-												setSelectedAction('DELIVERY')
-											}}
-										>
-											<MaterialCommunityIcons
-												name="truck-delivery"
-												size={28}
-												alignSelf="center"
-												color="black"
-											/>
-										</TouchableOpacity>
-									</View>
-								</View>
-							</Center>
-						</Box>
-					)) : (
+								</Center>
+							</Box>
+						))
+					) : (
 						<>
 							<View
 								style={{
@@ -234,7 +259,7 @@ export const ListResiduos = ({ navigation }: Props) => {
 							>
 								<WarningOutlineIcon size={5} color="red.600" />
 								<Text style={{ fontSize: 14, textAlign: 'center' }}>
-								Aún no has cargado tus residuos en la aplicación.
+									Aún no has cargado tus residuos en la aplicación.
 								</Text>
 							</View>
 						</>
@@ -279,7 +304,9 @@ export const ListResiduos = ({ navigation }: Props) => {
 								error,
 								err => toast.show({ description: err }),
 								() =>
-									toast.show({ description: '¡Residuo agregado correctamente!' }),
+									toast.show({
+										description: '¡Residuo agregado correctamente!',
+									}),
 							)
 							closeAlert()
 							reload()

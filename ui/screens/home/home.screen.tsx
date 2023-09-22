@@ -403,7 +403,7 @@ export const Home = ({ navigation }: Props) => {
 					getPuntoResiduo={getPuntoResiduo}
 					navigation={navigation}
 				/>
-				<ModalsZonas
+				<ModalZonas
 					modalZonaSelected={modalZonaSelected}
 					modalJoin={modalJoin}
 					zonaToJoin={zonaToJoin}
@@ -420,6 +420,7 @@ export const Home = ({ navigation }: Props) => {
 					zonasSelected={zonasSelected}
 					selectedUserPoint={selectedUserPoint}
 					setSelectedUserPoint={setSelectedUserPoint}
+					navigation={navigation}
 				/>
 				<Center height="25%" bgColor="white">
 					<Row justifyContent="space-between" mt="0" height={120}>
@@ -669,7 +670,7 @@ const CircuitosReciclaje = (props: CircuitosReciclajeProps) => {
 	)
 }
 
-type ModalsZonasProps = {
+type ModalZonasProps = {
 	modalZonaSelected: boolean
 	modalJoin: boolean
 	zonaToJoin?: Zona
@@ -686,9 +687,10 @@ type ModalsZonasProps = {
 	zonasSelected: Zona[]
 	selectedUserPoint: number
 	setSelectedUserPoint: (idx: number) => void
+	navigation
 }
 
-const ModalsZonas = ({
+const ModalZonas = ({
 	modalZonaSelected,
 	modalJoin,
 	zonaToJoin,
@@ -704,7 +706,8 @@ const ModalsZonas = ({
 	zonasSelected,
 	selectedUserPoint,
 	setSelectedUserPoint,
-}: ModalsZonasProps) => {
+	navigation,
+}: ModalZonasProps) => {
 	const [puntosConDireccion, setPuntosConDireccion] = React.useState<
 		PuntoConDireccion[] | null
 	>(null)
@@ -738,6 +741,18 @@ const ModalsZonas = ({
 				setModalError(true)
 			},
 		)
+	}
+
+	const handleMisCircuitos = async () => {
+		const user = await UserService.getCurrent()
+		handleCloseModal()
+		navigation.navigate(TabRoutes.activity, {
+			screen: ActivityRoutes.listZonas,
+			initial: false,
+			params: {
+				ciudadanoId: user.ciudadanoId,
+			},
+		})
 	}
 
 	const setDirectionPoint = async (zona: Zona) => {
@@ -882,29 +897,30 @@ const ModalsZonas = ({
 							>
 								<CheckCircleIcon size={5} color="emerald.600" />
 								<Text style={{ fontSize: 14, textAlign: 'center' }}>
-									Solicitud enviada con exito, aguarda la respuesta de la
-									organizacion.
+									Te has unido con exito al circuito.
 								</Text>
 							</View>
 						</>
-					) : modalError ? (
-						<>
-							<View
-								style={{
-									flex: 1,
-									justifyContent: 'center',
-									alignItems: 'center',
-								}}
-							>
-								<WarningOutlineIcon size={5} color="red.600" />
-								<Text style={{ fontSize: 14, textAlign: 'center' }}>
-									Ocurrio un error al generar la solicitud, puede que ya hayas
-									generado una solicitud para esta zona, debes aguardar a que la
-									organizacion te acepte. Reintenta mas tarde.
-								</Text>
-							</View>
-						</>
-					) : null}
+					) : (
+						modalError && (
+							<>
+								<View
+									style={{
+										flex: 1,
+										justifyContent: 'center',
+										alignItems: 'center',
+									}}
+								>
+									<WarningOutlineIcon size={5} color="red.600" />
+									<Text style={{ fontSize: 14, textAlign: 'center' }}>
+										Ocurrio un error al generar la solicitud, puede que ya estes
+										incluido en este circuito, verifica tus circuitos desde
+										Actividad.
+									</Text>
+								</View>
+							</>
+						)
+					)}
 
 					{modalFirstStep && (
 						<>
@@ -931,7 +947,13 @@ const ModalsZonas = ({
 										maxWidth={350}
 										background={'white'}
 									>
-										<View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', }} >
+										<View
+											style={{
+												flexDirection: 'row',
+												alignItems: 'center',
+												flexWrap: 'wrap',
+											}}
+										>
 											<Text numberOfLines={15} style={{ flex: 1 }}>
 												<Text style={{ fontWeight: 'bold' }}>
 													Nombre del circuito:{' '}
@@ -959,7 +981,7 @@ const ModalsZonas = ({
 												<HStack space={2} mt="0.5" alignItems="center">
 													<CircleIcon size="2" color="black" />
 													<Text fontSize="sm">
-														La zona actualmente no acepta ningún residuo.
+														El circuito actualmente no acepta ningún residuo.
 													</Text>
 												</HStack>
 											)}
@@ -980,7 +1002,7 @@ const ModalsZonas = ({
 								<HStack space={2} mt="0.5" alignItems="center">
 									<CircleIcon size="2" color="black" />
 									<Text fontSize="sm">
-										Ocurrió un error al seleccionar la zona, reintenta más
+										Ocurrió un error al seleccionar el circuito, reintenta más
 										tarde.
 									</Text>
 								</HStack>
@@ -1031,6 +1053,20 @@ const ModalsZonas = ({
 								</Center>
 							)}
 						</View>
+					) : modalExito || modalError ? (
+						<>
+							<View style={{ width: '100%', flexDirection: 'row', justifyContent: 'center', }} >
+								<Center>
+									<Button onPress={() => handleCloseModal()}>Cerrar</Button>
+								</Center>
+								<View style={{ marginHorizontal: 10 }} />
+								<Center>
+									<Button onPress={() => handleMisCircuitos()} >
+										Mis Circuitos
+									</Button>
+								</Center>
+							</View>
+						</>
 					) : (
 						<View
 							style={{
@@ -1560,7 +1596,7 @@ const PuntoResiduoModal = (props: PuntoResiduoModalProps) => {
 			screen: 'EditPuntoReciclaje',
 			initial: false,
 			params: {
-				ciudadanoId: user.ciudadanoId
+				recicladorId: user.ciudadanoId
 			}
 		})
 	}

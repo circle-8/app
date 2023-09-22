@@ -100,7 +100,7 @@ export const ViewTransaccion = ({ navigation, route }: Props) => {
 											key={`stack-${idx}`}
 											alignItems="center"
 										>
-											<Text fontSize="sm">Residuo #{r.id}</Text>
+											<Text fontSize="sm">Residuo  <Text fontSize="sm" fontWeight="bold">#{r.id}</Text></Text>
 										</HStack>
 										<HStack
 											space={2}
@@ -115,18 +115,6 @@ export const ViewTransaccion = ({ navigation, route }: Props) => {
 										<HStack
 											space={2}
 											mt="0.5"
-											key={`date-${idx}`}
-											alignItems="center"
-										>
-											<Text fontSize="sm" numberOfLines={4}>
-												{r.fechaRetiro
-													? 'Ya ha sido retirado'
-													: 'Todavia no ha sido retirado'}
-											</Text>
-										</HStack>
-										<HStack
-											space={2}
-											mt="0.5"
 											key={`desc-${idx}`}
 											alignItems="center"
 										>
@@ -134,10 +122,22 @@ export const ViewTransaccion = ({ navigation, route }: Props) => {
 												{r.descripcion}
 											</Text>
 										</HStack>
+										<HStack
+											space={2}
+											mt="0.5"
+											key={`date-${idx}`}
+											alignItems="center"
+										>
+											<Text fontSize="sm" numberOfLines={4} fontWeight="bold">
+												{r.fechaRetiro
+													? 'Ya ha sido retirado'
+													: 'Todavia no ha sido retirado'}
+											</Text>
+										</HStack>
 									</Column>
 									<Center flex="1">
 										<Column space="3">
-											{(!transaction.fechaRetiro || !r.fechaRetiro) && (
+											{!r.fechaRetiro && (
 												<TouchableOpacity
 													onPress={() => {
 														setSelectedResiduo(r.id)

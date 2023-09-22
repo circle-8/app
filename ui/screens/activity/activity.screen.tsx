@@ -24,6 +24,13 @@ export const Activity = ({ navigation }: Props) => {
 		navigation.navigate(ActivityRoutes.listResiduos)
 	}
 
+	const onMisZonas = async () => {
+		const user = await UserService.getCurrent()
+		navigation.navigate(ActivityRoutes.listZonas, {
+			ciudadanoId: user.ciudadanoId,
+		})
+	}
+
 	const onMisSolicitudes = async () => {
 		const user = await UserService.getCurrent()
 		navigation.navigate(ActivityRoutes.listSolicitudes, {
@@ -60,8 +67,32 @@ export const Activity = ({ navigation }: Props) => {
 		<>
 		<ScrollView>
 			<Center w="100%">
-				<Box marginTop={10} >Aquí podrás consultar toda tu actividad</Box>
+				<Box marginTop={5} >Aquí podrás consultar toda tu actividad</Box>
 			</Center>
+			{isTransportista && (
+				<>
+					<View style={{ marginTop: 6, paddingLeft: 20 }}>
+						<Text fontSize="sm" fontWeight="bold" textAlign="left">
+							"Mis transportes"
+						</Text>
+					</View>
+					<View style={{ marginTop: 2, marginLeft: 30, paddingRight:30 }}>
+						<Text fontSize="xs" style={{ textAlign: 'left' }}>
+							{'\u2022'} Podras ver todas los transportes aceptados por ti, acordar el valor, iniciar la entrega, seguir el mapa y finalizarlos.
+						</Text>
+					</View>
+					<View style={{ marginTop: 6, paddingLeft: 20 }}>
+						<Text fontSize="sm" fontWeight="bold" textAlign="left">
+							"Ver transportes disponibles"
+						</Text>
+					</View>
+					<View style={{ marginTop: 2, marginLeft: 30, paddingRight:30 }}>
+						<Text fontSize="xs" style={{ textAlign: 'left' }}>
+							{'\u2022'} Podras ver todas aquellas transacciones que requieran de un transportista y solicitar la que te interese.
+						</Text>
+					</View>
+				</>
+			)}
 			<View style={{ marginTop: 10, paddingLeft: 20 }}>
 				<Text fontSize="sm" fontWeight="bold" textAlign="left">
 					"Mis residuos"
@@ -69,9 +100,17 @@ export const Activity = ({ navigation }: Props) => {
 			</View>
 			<View style={{ marginTop: 2, paddingLeft: 30, paddingRight:30 }}>
 				<Text fontSize="xs" style={{ textAlign: 'left' }}>
-					{'\u2022'} Todos tus residuos disponibles para entregar. Vas a poder
-					marcarlos como retirados, editarlos o solicitar adherirte a un
-					circuito de reciclaje.
+					{'\u2022'} Podras marcarlos como retirados, editarlos o agregarlos a un recorrido.
+				</Text>
+			</View>
+			<View style={{ marginTop: 10, paddingLeft: 20 }}>
+				<Text fontSize="sm" fontWeight="bold" textAlign="left">
+					"Mis Circuitos de reciclaje"
+				</Text>
+			</View>
+			<View style={{ marginTop: 2, paddingLeft: 30, paddingRight:30 }}>
+				<Text fontSize="xs" style={{ textAlign: 'left' }}>
+					{'\u2022'} Podras ver los circuitos de reciclaje a las que perteneces y pueden retirar tus residuos.
 				</Text>
 			</View>
 			<View style={{ marginTop: 6, paddingLeft: 20 }}>
@@ -94,41 +133,8 @@ export const Activity = ({ navigation }: Props) => {
 					{'\u2022'} Podras ver todas aquellas transacciones que hayan sido finalizadas y cuales fueron los residuos asociados.
 				</Text>
 			</View>
-			{isTransportista && (
-					<>
-					<View style={{ marginTop: 6, paddingLeft: 20 }}>
-				<Text fontSize="sm" fontWeight="bold" textAlign="left">
-					"Mis transportes"
-				</Text>
-			</View>
-			<View style={{ marginTop: 2, marginLeft: 30, paddingRight:30 }}>
-				<Text fontSize="xs" style={{ textAlign: 'left' }}>
-					{'\u2022'} Podras ver todas los transportes aceptados por ti, acordar el valor, iniciar la entrega, seguir el mapa y finalizarlos.
-				</Text>
-			</View>
-						<View style={{ marginTop: 6, paddingLeft: 20 }}>
-				<Text fontSize="sm" fontWeight="bold" textAlign="left">
-					"Ver transportes disponibles"
-				</Text>
-			</View>
-			<View style={{ marginTop: 2, marginLeft: 30, paddingRight:30 }}>
-				<Text fontSize="xs" style={{ textAlign: 'left' }}>
-					{'\u2022'} Podras ver todas aquellas transacciones que requieran de un transportista y solicitar la que te interese.
-				</Text>
-			</View>
-					</>
-				)}
 			<Center w="100%"  marginTop={5} marginBottom={10}>
-				<Button mt="2" color="primary" onPress={onMisResiduos} width="70%">
-					Mis residuos
-				</Button>
-				<Button mt="2" color="primary" onPress={onMisSolicitudes} width="70%">
-					Mis solicitudes
-				</Button>
-				<Button mt="2" color="primary" onPress={onMisRetiros} width="70%">
-					Mis Retiros
-				</Button>
-				{isTransportista && (
+			{isTransportista && (
 					<>
 						<Button
 							mt="2"
@@ -143,6 +149,18 @@ export const Activity = ({ navigation }: Props) => {
 						</Button>
 					</>
 				)}
+				<Button mt="2" color="primary" onPress={onMisResiduos} width="70%">
+					Mis residuos
+				</Button>
+				<Button mt="2" color="primary" onPress={onMisZonas} width="70%">
+					Mis circuitos de reciclaje
+				</Button>
+				<Button mt="2" color="primary" onPress={onMisSolicitudes} width="70%">
+					Mis solicitudes
+				</Button>
+				<Button mt="2" color="primary" onPress={onMisRetiros} width="70%">
+					Mis retiros
+				</Button>
 			</Center>
 			</ScrollView>
 		</>
