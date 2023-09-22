@@ -43,7 +43,17 @@ const postJoinCircuito = async (id, puntoResiduoId): Promise<Either<ZonaResponse
 	)
 }
 
+const exclude = async (id, puntoResiduoId): Promise<Either<ZonaResponse, ErrorMessage>> => {
+	const res = await Http.delete<ZonaResponse>(`/punto_residuo/${puntoResiduoId}/zona/${id}`)
+	return map(
+		res,
+		p => p,
+		err => err.message
+	)
+}
+
 export const ZonasService = {
 	getAll,
 	postJoinCircuito,
+	exclude,
 }

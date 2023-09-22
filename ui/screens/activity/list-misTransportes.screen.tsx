@@ -206,8 +206,14 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 								</HStack>
 								<HStack space={2} mt="0.5" alignItems="center">
 									<Text fontSize="sm" numberOfLines={4}>
+										<Text style={{ fontWeight: 'bold' }}>Precio sugerido:</Text>{' '}
+										${transporte.precioSugerido}
+									</Text>
+								</HStack>
+								<HStack space={2} mt="0.5" alignItems="center">
+									<Text fontSize="sm" numberOfLines={4}>
 										<Text style={{ fontWeight: 'bold' }}>Precio acordado:</Text>{' '}
-										${transporte.precioAcordado}
+										{transporte.precioAcordado ? '$' + transporte.precioAcordado : 'Modifica el importe a recibir.'}
 									</Text>
 								</HStack>
 								<HStack space={2} mt="0.5" alignItems="center">

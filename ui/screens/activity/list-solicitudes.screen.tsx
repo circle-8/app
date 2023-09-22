@@ -171,6 +171,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 			solAgregada,
 			t => {loadInitialData()
 				toast.show({ description: "¡Transaccion creada con exito!" })},
+				
 			err => {
 				toast.show({ description: err })
 				navigation.goBack()
@@ -330,7 +331,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 							</Text>
 							<Text fontSize="md" mt={1}>
 								<Text style={{ fontWeight: 'bold' }}>Solicitante: </Text>
-								{solicitudAprobable.solicitado.nombre}
+								{solicitudAprobable.solicitante.nombre}
 							</Text>
 							<Text fontSize="md" mt={1}>
 								<Text style={{ fontWeight: 'bold' }}>Tipo de residuo: </Text>
@@ -384,7 +385,11 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 								{solicitudAgregar.residuo.descripcion}
 							</Text>
 							<View>
-								<Text bold fontSize="md" style={{ marginBottom: 2, marginTop: 4 }}>
+								<Text
+									bold
+									fontSize="md"
+									style={{ marginBottom: 2, marginTop: 4 }}
+								>
 									Transacciones existentes:
 								</Text>
 								<HStack justifyContent="center" mt={4} space={2}></HStack>
@@ -472,7 +477,9 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 						<Modal.Footer>
 							<Center flex={1}>
 								<HStack justifyContent="center" mt={4} space={2}>
-									{userTransactions && userTransactions.length > 0 && selectedUserTransaction != null ? (
+									{userTransactions &&
+									userTransactions.length > 0 &&
+									selectedUserTransaction != null ? (
 										<>
 											<Button onPress={() => cerrarModalAgregar()}>
 												Volver
@@ -614,7 +621,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 											alignItems="center"
 										>
 											<QuestionOutlineIcon size="3" color="emerald.600" />
-											<Text flex={1} fontSize="sm" numberOfLines={4}>
+											<Text flex={1} fontSize="sm" numberOfLines={4} fontWeight="bold" color="#008000" >
 												{getEstado(solicitud, true)}
 											</Text>
 										</HStack>
@@ -796,7 +803,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 											alignItems="center"
 										>
 											<QuestionOutlineIcon size="3" color="emerald.600" />
-											<Text flex={1} fontSize="sm" numberOfLines={4}>
+											<Text flex={1} fontSize="sm" numberOfLines={4} fontWeight="bold" color="#008000">
 												{getEstado(solicitud, false)}
 											</Text>
 										</HStack>

@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import React from 'react'
-import { ActivityRouteParams } from '../../../constants/routes'
+import { ActivityRouteParams, ActivityRoutes } from '../../../constants/routes'
 import {
 	Box,
 	Button,
@@ -39,7 +39,6 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 		descripcion: residuo?.descripcion || '',
 		fechaLimite: residuo?.fechaLimiteRetiro ? new Date(residuo.fechaLimiteRetiro) : null,
 	  });
-	const [embalajeDefault, setEmbalajeDefault] = React.useState<string[]>([])
 	const toast = useToast()
 
 	const loadInitialData = async () => {
@@ -65,7 +64,6 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 						descripcion: getDescripcion(residuo.descripcion),
 						fechaLimite: residuo.fechaLimiteRetiro ? new Date(residuo.fechaLimiteRetiro) : null,
 					  });
-					setEmbalajeDefault(getChecks(residuo.descripcion))
 					setLoading(false)
 				},
 				err => {
@@ -85,19 +83,6 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 		  return descripcion
 	  }
 
-	  function getChecks(cadena) {
-		const partes = cadena.split('\u200B\n');
-		const entregaInfo = partes.slice(1);
-		let values: string[] = [];
-
-		if (entregaInfo[0].includes('caja')){ values.push('0')}
-		if (entregaInfo[0].includes('bolsa')){ values.push('1')}
-		if (entregaInfo[0].includes('compacto')){ values.push('2')}
-		if (entregaInfo[0].includes('Mojado/Húmedo')){ values.push('3')}
-		if (entregaInfo[0].includes('5kg')){ values.push('4')}
-		return values
-	  }
-
 	React.useEffect(() => {
 		loadInitialData()
 	}, [])
@@ -115,7 +100,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 			savedResiduo,
 			r => {
 				residuo ? toast.show({ description: 'Residuo editado exitosamente' }) : toast.show({ description: 'Residuo creado exitosamente' })
-				navigation.popToTop()
+				navigation.navigate(ActivityRoutes.listResiduos)
 			},
 			err => {
 				toast.show({ description: err })
@@ -167,8 +152,6 @@ const Form = ({
 	const [errors, setErrors] = React.useState<Errors>({ has: false })
 	const [showDatePicker, setShowDatePicker] = React.useState(false)
 	const [loading, setLoading] = React.useState(false)
-	const [selectedDate, setSelectedDate] = React.useState(null)
-	const [selectedBefore, setSelectedBefore] = React.useState<string[]>([])
 	const [selectedEntregado, setSelectedEntregado] = React.useState<string[]>(() => 
 	{
 		if (r) {
@@ -182,7 +165,6 @@ const Form = ({
 			if (entregaInfo[0].includes('Mojado/Húmedo')) { values.push('3'); }
 			if (entregaInfo[0].includes('5kg')) { values.push('4'); }
 		
-			setSelectedBefore(values)
 			return [...values]; 
 		  }
 		
@@ -276,20 +258,6 @@ const Form = ({
 		}).format(date)
 	}
 
-	const handleSelecciono = values => {
-		console.log(values)
-		console.log(selectedBefore)
-		const combinedSelections = [...selectedBefore, ...values]
-		console.log(combinedSelections)
-
-		const uniqueSelections = Array.from(new Set(combinedSelections))
-		console.log(uniqueSelections)
-		setSelectedBefore(uniqueSelections)
-		setSelectedEntregado(uniqueSelections)
-	}
-
-
-
 	return (
 		<>
 			{showDatePicker && (
@@ -342,11 +310,9 @@ const Form = ({
 				</Text>
 				<Checkbox.Group
 					colorScheme="green"
-					value={selectedEntregado}
-					accessibilityLabel="Elige las características que se asemejen más a la manera en la que vas a entregar tu residuo."
-					onChange={(values) => {
-						handleSelecciono(values)
-					  }}
+					defaultValue={selectedEntregado}
+					accessibilityLabel="Elegi las caracteristicas que se asemejen mas a la manera en la que vas a entregar tu residuo."
+					onChange={values => setSelectedEntregado(values || [])}
 				>
 					<Checkbox value="0" my={1}>
 						Embalado en caja

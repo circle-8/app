@@ -104,6 +104,9 @@ export type ResiduoResponse = {
 		longitud: number
 	}
 	tipoResiduo: TipoResiduoResponse
+	transaccionId?: number
+	recorridoId?: number
+
 }
 
 export type SolicitudResponse = {

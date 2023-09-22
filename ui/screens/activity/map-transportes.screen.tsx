@@ -107,14 +107,7 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 			error,
 			err => toast.show({ description: err }),
 			() => {
-				TransaccionService.fulfill(transaccion.id)
-				  .then(t => {
-					toast.show({ description: 'Transporte finalizado' })
-				  })
-				  .catch(err => {
-					toast.show({ description: 'Ocurrió un error al confirmar la entrega, reintenta.' });
-				  });
-				
+				toast.show({ description: 'Transporte finalizado' })
 				navigation.navigate(ActivityRoutes.listMisTransportes, {
 					userId: user.id,
 				})

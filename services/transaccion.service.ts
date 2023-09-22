@@ -11,7 +11,7 @@ type Filter = {
 const getAll = async (
 	f: Filter,
 ): Promise<Either<Transaccion[], ErrorMessage>> => {
-	let url = '/transacciones?expand=transporte&'
+	let url = '/transacciones?expand=transporte&expand=residuos&'
 	if (f.ciudadanoId) url += 'ciudadano_id=' + f.ciudadanoId
 
 	const res = await Http.get<ListResponse<TransaccionResponse>>(url)

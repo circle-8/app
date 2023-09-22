@@ -77,6 +77,9 @@ export type ActivityRouteParams = {
 	},
 	MapTransportes: {
 		transporte: Transporte
+	},
+	ListZonas: {
+		ciudadanoId: number
 	}
 }
 type ActivityRouteName = keyof ActivityRouteParams
@@ -91,6 +94,7 @@ export const ActivityRoutes: {
 	listMisTransportes: 'ListMisTransportes'
 	listTransportes: 'ListTransportes'
 	mapTransportes: 'MapTransportes'
+	listZonas: 'ListZonas'
 } = {
 	activity: 'Activity',
 	newResiduo: 'NewResiduo',
@@ -100,7 +104,8 @@ export const ActivityRoutes: {
 	listResiduos: 'ListResiduos',
 	listMisTransportes: 'ListMisTransportes',
 	listTransportes: 'ListTransportes',
-	mapTransportes: 'MapTransportes'
+	mapTransportes: 'MapTransportes',
+	listZonas: 'ListZonas'
 }
 
 type TabRoutesParams = {
