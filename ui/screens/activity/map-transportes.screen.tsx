@@ -165,6 +165,8 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 						))}
 						{transaccion?.residuos && (
 							<Polyline
+								strokeWidth={2}
+        						strokeColor="green"
 								coordinates={[
 									{
 										latitude: userCoords.latitude,
@@ -186,17 +188,20 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 				{transaccion && transaccion?.residuos && (
 					<Box height="20%" bgColor="white" p="5" borderBottomWidth="0.5">
 						<ScrollView>
-							<Text>
-								{'\u2022'} {address?.street ? address?.street : 'No se pudo obtener la direccion'} {address?.streetNumber ? address?.streetNumber : ""} 
+							<Text style={{ fontWeight: 'bold' }}>
+								{'\u2022'}  Residuo {currentPoint + 1} de {transaccion.residuos.length}
 							</Text>
 							<Text>
-								{'\u2022'} {transaccion.residuos[currentPoint]?.tipoResiduo.nombre}
+								{'\u2022'} <Text style={{ fontWeight: 'bold' }}>Dirección:</Text> {address?.street ? address?.street : 'No se pudo obtener la direccion'} {address?.streetNumber ? address?.streetNumber : ""} 
 							</Text>
 							<Text>
-								{'\u2022'} {transaccion.residuos[currentPoint]?.descripcion}
+								{'\u2022'} <Text style={{ fontWeight: 'bold' }}>Tipo:</Text> {transaccion.residuos[currentPoint]?.tipoResiduo.nombre}
 							</Text>
 							<Text>
-								{'\u2022'} {transaccion.residuos[currentPoint]?.fechaRetiro? 'Ya ha sido retirado' : 'Todavia no retirado'}
+								{'\u2022'} <Text style={{ fontWeight: 'bold' }}>Descripcion:</Text> {transaccion.residuos[currentPoint]?.descripcion}
+							</Text>
+							<Text>
+								{'\u2022'} <Text style={{ fontWeight: 'bold' }}>Estado:</Text> {transaccion.residuos[currentPoint]?.fechaRetiro? 'Ya ha sido retirado' : 'Todavia no retirado'}
 							</Text>
 						</ScrollView>
 					</Box>

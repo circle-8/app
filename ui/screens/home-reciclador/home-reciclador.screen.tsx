@@ -214,6 +214,8 @@ export const HomeReciclador = ({ navigation }: Props) => {
 						))}
 						{todayRecorrido?.puntos && (
 							<Polyline
+								strokeWidth={2}
+        						strokeColor="green"
 								coordinates={[
 									{
 										latitude: todayRecorrido.puntoInicio.latitud,
@@ -251,17 +253,20 @@ export const HomeReciclador = ({ navigation }: Props) => {
 				{todayRecorrido && todayRecorrido.initDate && (
 					<Box height="20%" bgColor="white" p="5" borderBottomWidth="0.5">
 						<ScrollView>
-							<Text>
-							{'\u2022'} {address?.street ? address.street : 'No se pudo obtener la direccion'} {address?.streetNumber ? address?.streetNumber :  ""}
+							<Text style={{ fontWeight: 'bold' }}>
+								{'\u2022'}  Residuo {currentPoint + 1} de {todayRecorrido.puntos.length}
 							</Text>
 							<Text>
-							{'\u2022'} {todayRecorrido.puntos[currentPoint]?.residuo.tipoResiduo.nombre}
+							{'\u2022'} <Text style={{ fontWeight: 'bold' }}>Dirección:</Text> {address?.street ? address.street : 'No se pudo obtener la direccion'} {address?.streetNumber ? address?.streetNumber :  ""}
 							</Text>
 							<Text>
-							{'\u2022'} {todayRecorrido.puntos[currentPoint]?.residuo.descripcion}
+							{'\u2022'} <Text style={{ fontWeight: 'bold' }}>Tipo:</Text> {todayRecorrido.puntos[currentPoint]?.residuo.tipoResiduo.nombre}
 							</Text>
 							<Text>
-							{'\u2022'} {todayRecorrido.puntos[currentPoint]?.residuo.fechaRetiro
+							{'\u2022'} <Text style={{ fontWeight: 'bold' }}>Descripcion:</Text> {todayRecorrido.puntos[currentPoint]?.residuo.descripcion}
+							</Text>
+							<Text>
+							{'\u2022'} <Text style={{ fontWeight: 'bold' }}>Estado:</Text> {todayRecorrido.puntos[currentPoint]?.residuo.fechaRetiro
 									? 'Ya ha sido retirado'
 									: 'Todavia no retirado'}
 							</Text>
