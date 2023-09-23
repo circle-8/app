@@ -136,12 +136,14 @@ export const TabRoutes: {
 	messages: 'MessagesTab'
 	learn: 'LearnTab'
 	profile: 'ProfileTab'
+	test: 'TestTab'
 } = {
 	home: 'HomeTab',
 	activity: 'ActivityTab',
 	messages: 'MessagesTab',
 	learn: 'LearnTab',
 	profile: 'ProfileTab',
+	test: 'TestTab',
 }
 
 export type MainRoutesParams = HomeRoutesParams &

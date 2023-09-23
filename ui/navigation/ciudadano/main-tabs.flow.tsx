@@ -8,6 +8,7 @@ import { ProfileFlow } from '../profile.flow'
 import { ActivityFlow } from './activity.flow'
 import { MessagesFlow } from '../messages.flow'
 import { LearnFlow } from './learn.flow'
+import { TestFlow } from './test.flow'
 
 interface Icons {
 	[key: string]: {
@@ -37,6 +38,10 @@ const icons: Icons = {
 		outline: 'person-outline',
 		focused: 'person',
 	},
+	[TabRoutes.test]: {
+		outline: 'person-outline',
+		focused: 'person',
+	},
 }
 
 const Tab = createBottomTabNavigator()
@@ -60,6 +65,7 @@ export const MainTabsFlow = () => {
 			<Tab.Screen name={TabRoutes.messages} component={MessagesFlow} options={{title: 'Mensajes'}}/>
 			<Tab.Screen name={TabRoutes.learn} component={LearnFlow} options={{title: 'Aprende'}}/>
 			<Tab.Screen name={TabRoutes.profile} component={ProfileFlow} options={{title: 'Perfil'}}/>
+			<Tab.Screen name={TabRoutes.test} component={TestFlow} options={{title: 'Test'}}/>
 		</Tab.Navigator>
 	)
 }

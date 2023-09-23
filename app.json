@@ -47,7 +47,13 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Permitir a Circle8 utilizar su ubicacion."
         }
-      ]
+      ],
+			[
+				"expo-image-picker",
+				{
+					"photosPermission": "Para guardar imagenes de tus residuos"
+				}
+			]
     ],
     "extra": {
       "eas": {
