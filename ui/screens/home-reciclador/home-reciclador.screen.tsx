@@ -14,6 +14,7 @@ import { UserService } from '../../../services/user.service'
 import { Recorrido, Zona } from '../../../services/types'
 import { caseMaybe, map, match } from '../../../utils/either'
 import { ZonasService } from '../../../services/zonas.service'
+import MapViewDirections from 'react-native-maps-directions'
 
 type Coord = {
 	latitude: number
@@ -213,23 +214,19 @@ export const HomeReciclador = ({ navigation }: Props) => {
 							/>
 						))}
 						{todayRecorrido?.puntos && (
-							<Polyline
-								strokeWidth={2}
-        						strokeColor="green"
-								coordinates={[
-									{
-										latitude: todayRecorrido.puntoInicio.latitud,
-										longitude: todayRecorrido.puntoInicio.longitud,
-									},
-									...todayRecorrido.puntos.map(p => ({
-										latitude: p.latitud,
-										longitude: p.longitud,
-									})),
-									{
-										latitude: todayRecorrido.puntoFin.latitud,
-										longitude: todayRecorrido.puntoFin.longitud,
-									},
-								]}
+							<MapViewDirections
+							origin={{ latitude: todayRecorrido.puntoInicio.latitud, longitude: todayRecorrido.puntoInicio.longitud }}
+							waypoints={todayRecorrido.puntos.map(p => ({
+								latitude: p.latitud,
+								longitude: p.longitud,
+							}))}
+							destination={{
+							  latitude: todayRecorrido.puntoFin.latitud,
+							  longitude: todayRecorrido.puntoFin.longitud
+							}}
+							apikey={Platform.OS === 'ios' ? "AIzaSyAGId4-rD1cRt0N2dOIADzvaR5j065OevE" : PROVIDER_GOOGLE}
+							strokeWidth={2}
+							strokeColor="green"
 							/>
 						)}
 						{zonas &&
