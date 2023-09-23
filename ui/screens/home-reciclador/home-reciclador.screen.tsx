@@ -224,7 +224,7 @@ export const HomeReciclador = ({ navigation }: Props) => {
 							  latitude: todayRecorrido.puntoFin.latitud,
 							  longitude: todayRecorrido.puntoFin.longitud
 							}}
-							apikey={Platform.OS === 'ios' ? "AIzaSyAGId4-rD1cRt0N2dOIADzvaR5j065OevE" : PROVIDER_GOOGLE}
+							apikey={Platform.OS === 'ios' ? "AIzaSyDHFfRLpl4t-N-0BGmFN1zvJ7BNpJSSbow" : PROVIDER_GOOGLE}
 							strokeWidth={2}
 							strokeColor="green"
 							/>
