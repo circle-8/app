@@ -245,6 +245,7 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 														flex: 1,
 														justifyContent: 'center',
 														alignItems: 'center',
+														
 													}}
 												>
 													<InfoOutlineIcon size={5} color="green.600" />
@@ -271,15 +272,10 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 													</Button>
 												</View>
 											</>
-										) : transaction.residuos.filter(r => !r.fechaRetiro)
+										) : !transaction.transporte && transaction.residuos.filter(r => !r.fechaRetiro)
 												.length == 0 ? (
 											<>
-												<View
-													style={{
-														flexDirection: 'row',
-														justifyContent: 'center',
-													}}
-												>
+												<View style={{ flexDirection: 'row', justifyContent: 'center', }} >
 													<Text
 														textAlign="center"
 														fontSize="sm"
@@ -293,33 +289,37 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 												</View>
 											</>
 										) : transaction.transporte &&
-										  !transaction.transporte.fechaFin ? (
+										  !transaction.transporte.fechaFin && !transaction.transporte.fechaInicio ? (
 											<>
-												<View
-													style={{
-														flexDirection: 'row',
-														justifyContent: 'center',
-													}}
-												>
+												<View style={{ flexDirection: 'row', justifyContent: 'center', }} >
 													<Button
-														onPress={() =>
-															handleCancelarTransportista(transaction.id)
-														}
+														onPress={() => handleCancelarTransportista(transaction.id) }
 														key={`btnCancelar-${idx}`}
 													>
 														Cancelar Transporte
 													</Button>
 												</View>
 											</>
-										) : (
+										)  : transaction.transporte &&
+										!transaction.transporte.fechaFin && transaction.transporte.fechaInicio ? (
+										  <>
+											  <View style={{ flexDirection: 'row', justifyContent: 'center', }}>
+													<Text
+														textAlign="center"
+														fontSize="sm"
+														numberOfLines={6}
+														fontWeight="bold"
+														color="#008000"
+													>
+														El transportista esta retirando tus residuos, 
+														pronto te los entregara y podras confirmar la entrega.
+													</Text>
+												</View>
+										  </>
+									  ) : (
 											!transaction.transporte && (
 												<>
-													<View
-														style={{
-															flexDirection: 'row',
-															justifyContent: 'center',
-														}}
-													>
+													<View style={{ flexDirection: 'row', justifyContent: 'center', }} >
 														<Button
 															onPress={() =>
 																handleSolicitarTransportista(transaction.id)
@@ -339,13 +339,7 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 					))
 				) : (
 					<>
-						<View
-							style={{
-								flex: 1,
-								justifyContent: 'center',
-								alignItems: 'center',
-							}}
-						>
+						<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', }} >
 							<WarningOutlineIcon size={5} color="red.600" />
 							<Text style={{ fontSize: 14, textAlign: 'center' }}>
 								No dispones de transacciones abiertas

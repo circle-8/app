@@ -62,7 +62,9 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 				setTransportes(transportesActualizados)
 				setLoading(false)
 			},
-			e => setTransportes([]),
+			e => { setTransportes([])
+					setLoading(false)
+			},
 		)
 	}
 

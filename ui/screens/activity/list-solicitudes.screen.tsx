@@ -171,7 +171,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 		match(
 			solAgregada,
 			t => {loadInitialData()
-				toast.show({ description: "¡Transaccion creada con exito!" })},
+				toast.show({ description: "¡Solicitud agregada con exito!" })},
 
 			err => {
 				toast.show({ description: err })
@@ -188,7 +188,9 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 			solicitudAgregar.id
 		)
 		ifLeft(postTransaccion, t => {
-			handleAgregarSolicitud(t.id)
+			toast.show({ description: "¡Transaccion creada con exito!" })
+			cerrarModalAgregar()
+			//handleAgregarSolicitud(t.id)
 		})
 		ifRight(postTransaccion, t => {
 			setModalAgregar(false)
