@@ -159,7 +159,7 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 									<HStack
 										space={2}
 										mt="0.5"
-										key={`stack-${idx}`}
+										key={`arrow-${idx}`}
 										alignItems="center"
 									>
 										<View

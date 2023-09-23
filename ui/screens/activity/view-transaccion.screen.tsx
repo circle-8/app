@@ -154,7 +154,7 @@ export const ViewTransaccion = ({ navigation, route }: Props) => {
 					))}
 				{transaction.residuos &&
 					transaction.residuos.length > 0 &&
-					transaction.residuos.filter(r => !r.fechaRetiro).length == 0 && !transaction.fechaRetiro && (
+					transaction.residuos.filter(r => !r.fechaRetiro).length == 0 && !transaction.transporteId && (
 						<Button
 							width="80%"
 							mt="4"
