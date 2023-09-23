@@ -5,6 +5,7 @@ import { ErrorMessage, Transaccion } from './types'
 
 type Filter = {
 	ciudadanoId?: number
+	puntosReciclaje?: number[]
 	//TODO creo el filtro por si queremos filtrar por mas cosas en un futuro
 }
 
@@ -12,7 +13,8 @@ const getAll = async (
 	f: Filter,
 ): Promise<Either<Transaccion[], ErrorMessage>> => {
 	let url = '/transacciones?expand=transporte&expand=residuos&'
-	if (f.ciudadanoId) url += 'ciudadano_id=' + f.ciudadanoId
+	if (f.ciudadanoId) url += 'ciudadano_id=' + f.ciudadanoId +'&'
+	for (const p of f.puntosReciclaje || []) url += `punto_reciclaje=${p}&`
 
 	const res = await Http.get<ListResponse<TransaccionResponse>>(url)
 	return map(

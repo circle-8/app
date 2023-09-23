@@ -112,9 +112,10 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 		setModalCancelar(true)
 	}
 
-	const modalAgregarTransaccion = async solicitud => {
+	const modalAgregarTransaccion = async (solicitud: Solicitud) => {
 		const userTransactions = await TransaccionService.getAll({
 			ciudadanoId: ciudadanoId,
+			puntosReciclaje: [solicitud.puntoReciclajeId]
 		})
 		match(
 			userTransactions,
@@ -171,7 +172,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 			solAgregada,
 			t => {loadInitialData()
 				toast.show({ description: "¡Transaccion creada con exito!" })},
-				
+
 			err => {
 				toast.show({ description: err })
 				navigation.goBack()
