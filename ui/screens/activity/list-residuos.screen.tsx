@@ -169,7 +169,7 @@ export const ListResiduos = ({ navigation }: Props) => {
 									{r.descripcion}
 								</Text>
 								{r.transaccionId && !r.recorridoId && (
-									<Text fontSize="xs" position="absolute" top={0} right={0} fontWeight="bold" color="green.700" p={1} bg="green.200" >
+									<Text fontSize="xs" position="absolute" top={0} right={0} fontWeight="bold" color="yellow.700" p={1} bg="yellow.200" >
 										en una transacción
 									</Text>
 								)}

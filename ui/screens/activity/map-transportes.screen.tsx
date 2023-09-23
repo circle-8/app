@@ -14,6 +14,7 @@ import { caseMaybe, map, match } from '../../../utils/either'
 import { ActivityRouteParams, ActivityRoutes } from '../../../constants/routes'
 import { TransaccionService } from '../../../services/transaccion.service'
 import { TransportistaService } from '../../../services/transportista.service'
+import MapViewDirections from 'react-native-maps-directions';
 
 type Coord = {
 	latitude: number
@@ -86,9 +87,17 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 	}
 
 	const initialLoad = async () => {
-		await getUserLocation()
-		await getRecorridos()
-		setLoading(false)
+		try {
+			const getRecorridosPromise = getRecorridos();
+			const getUserLocationPromise = getUserLocation();
+		
+			await Promise.all([getRecorridosPromise, getUserLocationPromise]);
+		
+			setLoading(false);
+		  } catch (error) {
+			toast.show({ description: 'Ocurrio un error al cargar el mapa, reintenta' })
+			navigation.navigate(ActivityRoutes.activity)
+		  }
 	}
 
 	/* Initial data loading */
@@ -164,23 +173,19 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 							/>
 						))}
 						{transaccion?.residuos && (
-							<Polyline
-								strokeWidth={2}
-        						strokeColor="green"
-								coordinates={[
-									{
-										latitude: userCoords.latitude,
-										longitude: userCoords.longitude,
-									},
-									...transaccion?.residuos?.map(p => ({
-										latitude: p.puntoResiduo.latitud,
-										longitude: p.puntoResiduo.longitud,
-									})),
-									{
-										latitude: transporte.transaccion.puntoReciclaje.latitud,
-										longitude: transporte.transaccion.puntoReciclaje.longitud,
-									},
-								]}
+							<MapViewDirections
+							origin={{ latitude: userCoords.latitude, longitude: userCoords.longitude }}
+							waypoints={transaccion?.residuos?.map(p => ({
+								latitude: p.puntoResiduo.latitud,
+								longitude: p.puntoResiduo.longitud,
+							}))}
+							destination={{
+							  latitude: transporte.transaccion.puntoReciclaje.latitud,
+							  longitude: transporte.transaccion.puntoReciclaje.longitud
+							}}
+							apikey={Platform.OS === 'ios' ? "AIzaSyDHFfRLpl4t-N-0BGmFN1zvJ7BNpJSSbow" : "AIzaSyAGId4-rD1cRt0N2dOIADzvaR5j065OevE"}
+							strokeWidth={2}
+							strokeColor="green"
 							/>
 						)}
 					</MapView>
