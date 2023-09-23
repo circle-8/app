@@ -87,9 +87,17 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 	}
 
 	const initialLoad = async () => {
-		await getUserLocation()
-		await getRecorridos()
-		setLoading(false)
+		try {
+			const getRecorridosPromise = getRecorridos();
+			const getUserLocationPromise = getUserLocation();
+		
+			await Promise.all([getRecorridosPromise, getUserLocationPromise]);
+		
+			setLoading(false);
+		  } catch (error) {
+			toast.show({ description: 'Ocurrio un error al cargar el mapa, reintenta' })
+			navigation.navigate(ActivityRoutes.activity)
+		  }
 	}
 
 	/* Initial data loading */
@@ -175,7 +183,7 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 							  latitude: transporte.transaccion.puntoReciclaje.latitud,
 							  longitude: transporte.transaccion.puntoReciclaje.longitud
 							}}
-							apikey={"AIzaSyAGId4-rD1cRt0N2dOIADzvaR5j065OevE"}
+							apikey={Platform.OS === 'ios' ? "AIzaSyDHFfRLpl4t-N-0BGmFN1zvJ7BNpJSSbow" : "AIzaSyAGId4-rD1cRt0N2dOIADzvaR5j065OevE"}
 							strokeWidth={2}
 							strokeColor="green"
 							/>
