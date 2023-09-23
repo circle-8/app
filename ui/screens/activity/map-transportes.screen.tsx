@@ -183,7 +183,7 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 							  latitude: transporte.transaccion.puntoReciclaje.latitud,
 							  longitude: transporte.transaccion.puntoReciclaje.longitud
 							}}
-							apikey={Platform.OS === 'ios' ? "AIzaSyDHFfRLpl4t-N-0BGmFN1zvJ7BNpJSSbow" : PROVIDER_GOOGLE}
+							apikey={Platform.OS === 'ios' ? "AIzaSyDHFfRLpl4t-N-0BGmFN1zvJ7BNpJSSbow" : "AIzaSyAGId4-rD1cRt0N2dOIADzvaR5j065OevE"}
 							strokeWidth={2}
 							strokeColor="green"
 							/>
