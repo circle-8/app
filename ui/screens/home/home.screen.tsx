@@ -1,5 +1,5 @@
 import React from 'react'
-import { GestureResponderEvent, Linking, Platform, TouchableOpacity } from 'react-native'
+import { GestureResponderEvent, Linking, Platform, TouchableOpacity, Image } from 'react-native'
 import MapView, { Marker, Polygon, PROVIDER_GOOGLE, PROVIDER_DEFAULT  } from 'react-native-maps'
 import {
 	Box,
