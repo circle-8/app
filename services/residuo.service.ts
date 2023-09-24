@@ -76,7 +76,9 @@ const mapResponse = (r: ResiduoResponse): Residuo => {
 
 const save = async (r: ResiduoSave): Promise<Either<Residuo, ErrorMessage>> => {
 	const url = '/residuo'
-	const res = r.id ? await Http.put<ResiduoResponse>(url+`/${r.id}`, r) : await Http.post<ResiduoResponse>(url, r)
+	const res = r.id
+		? await Http.put<ResiduoResponse>(url+`/${r.id}`, r)
+		: await Http.post<ResiduoResponse>(url, r)
 	return map(res, mapResponse, err => err.message)
 }
 

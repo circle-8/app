@@ -30,8 +30,10 @@ import { Keyboard, Image } from 'react-native'
 import { UserService } from '../../../services/user.service'
 import { PuntoService } from '../../../services/punto.service'
 import * as Location from 'expo-location'
-import MapViewDirections from 'react-native-maps-directions';
 import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
+import FileSystem from 'expo-file-system';
+
 
 type Props = NativeStackScreenProps<ActivityRouteParams, 'NewResiduo'>
 
@@ -89,7 +91,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 				},
 			)
 		}
-			
+
 		setLoading(false)
 		setLoading(false)
 	}
@@ -118,14 +120,14 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 			})
 			.catch((error) => {
 			  console.error('Error obteniendo direcciones:', error);
-			  setShowModal(true); 
+			  setShowModal(true);
 			}).finally(() => {setLoadingModal(false)})
 		}
 	}
 
 	const getDirections = async (points: Punto[]) => {
 		const updatedPoints: PuntoConDireccion[] = [];
-	  
+
 		try {
 		  for (const point of points) {
 			const location = await Location.reverseGeocodeAsync({
@@ -143,7 +145,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 			} else {
 			  address = 'No podemos brindar la dirección.';
 			}
-	  
+
 			updatedPoints.push( {
 			  ...point,
 			  direccion: address,
@@ -157,7 +159,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 
 	  const handleRealizarSolicitud = async (id, puntoId) => {
 		const result = await ResiduoService.postSolicitarDeposito(id,puntoId)
-		
+
 		match(
 			result,
 			r => {
@@ -202,7 +204,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 					setNewResiduo(r)
 					getPuntos(r.tipoResiduo.id)
 					return
-				} 
+				}
 			},
 			err => {
 				toast.show({ description: err })
@@ -352,22 +354,22 @@ const Form = ({
 	const [showDatePicker, setShowDatePicker] = React.useState(false)
 	const [loading, setLoading] = React.useState(false)
 	const [image, setImage] = React.useState(formData.foto);
-	const [selectedEntregado, setSelectedEntregado] = React.useState<string[]>(() => 
+	const [selectedEntregado, setSelectedEntregado] = React.useState<string[]>(() =>
 	{
 		if (r) {
 			const partes = r.descripcion.split('\u200B\n');
 			const entregaInfo = partes.slice(1);
 			let values: string[] = [];
-		
+
 			if (entregaInfo[0].includes('caja')) { values.push('0'); }
 			if (entregaInfo[0].includes('bolsa')) { values.push('1'); }
 			if (entregaInfo[0].includes('compacto')) { values.push('2'); }
 			if (entregaInfo[0].includes('Mojado/Húmedo')) { values.push('3'); }
 			if (entregaInfo[0].includes('5kg')) { values.push('4'); }
-		
-			return [...values]; 
+
+			return [...values];
 		  }
-		
+
 		  return [];
 	})
 
@@ -375,22 +377,26 @@ const Form = ({
 		let result = await ImagePicker.launchCameraAsync({
 		mediaTypes: ImagePicker.MediaTypeOptions.All,
 		allowsEditing: true,
-		base64: true,
+		base64: false,
 		aspect: [4, 3],
-		quality: 1,
+		quality: 0.3,
 		});
-	
+
 		formData.foto = "holi"
 		if (!result.canceled) {
-			console.log(result.assets[0].base64.substring(0,999))
-			console.log(result.assets[0].base64.substring(999,3000))
-		setImage(result.assets[0].base64)
-		setFormData({
-			...formData, foto: result.assets[0].base64
-		})
-		// este base64 tiene la imagen encodeada en un string
-		// la idea es mandar este base64 en el POST/PUT
-		// luego, en el GET va a venir un nuevo campo que se va a llamar base64 que va a tener la foto
+			const resized = await ImageManipulator.manipulateAsync(
+				result.assets[0].uri,
+				[{ resize: { width: 400 } }],
+				{ base64: true, compress: 1, format: ImageManipulator.SaveFormat.JPEG }
+			);
+
+			setImage(resized.base64)
+			setFormData({
+				...formData, foto: resized.base64
+			})
+			// este base64 tiene la imagen encodeada en un string
+			// la idea es mandar este base64 en el POST/PUT
+			// luego, en el GET va a venir un nuevo campo que se va a llamar base64 que va a tener la foto
 		}
 	};
 
@@ -409,7 +415,7 @@ const Form = ({
 			newErrors.has = true
 			newErrors.entrega =
 				'Seleccione al menos una caracteristica sobre como entregas el residuo.'
-			formData.descripcion = r.descripcion.split('\u200B\n').slice(0)[0] 
+			formData.descripcion = r.descripcion.split('\u200B\n').slice(0)[0]
 			setFormData({
 				...formData,
 			})
