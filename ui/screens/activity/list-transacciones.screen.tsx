@@ -166,7 +166,7 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 											style={{
 												position: 'absolute',
 												top: 10,
-												right: 10, 
+												right: 10,
 											}}
 										>
 											<ArrowForwardIcon size={5} color="green.800" />
@@ -245,7 +245,6 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 														flex: 1,
 														justifyContent: 'center',
 														alignItems: 'center',
-														
 													}}
 												>
 													<InfoOutlineIcon size={5} color="green.600" />
@@ -258,24 +257,31 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 										  transaction.transporte.fechaFin &&
 										  !transaction.transporte?.entregaConfirmada ? (
 											<>
+												<View style={{ flexDirection: 'column', alignItems: 'center', }}>
+													<Button onPress={() => handleEntregada(transaction)} key={`btnEntregar-${idx}`}>
+														Confirmar Entrega
+													</Button>
+													<Text
+														textAlign="center"
+														style={{ fontSize: 7 }}
+														numberOfLines={4}
+														fontWeight="bold"
+														color="#41483F"
+													>
+														*Se confirmará automáticamente luego de 15 días.
+													</Text>
+												</View>
+											</>
+										) : !transaction.transporte &&
+										  transaction.residuos.filter(r => !r.fechaRetiro).length ==
+												0 ? (
+											<>
 												<View
 													style={{
 														flexDirection: 'row',
 														justifyContent: 'center',
 													}}
 												>
-													<Button
-														onPress={() => handleEntregada(transaction)}
-														key={`btnEntregar-${idx}`}
-													>
-														Confirmar Entrega
-													</Button>
-												</View>
-											</>
-										) : !transaction.transporte && transaction.residuos.filter(r => !r.fechaRetiro)
-												.length == 0 ? (
-											<>
-												<View style={{ flexDirection: 'row', justifyContent: 'center', }} >
 													<Text
 														textAlign="center"
 														fontSize="sm"
@@ -289,21 +295,35 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 												</View>
 											</>
 										) : transaction.transporte &&
-										  !transaction.transporte.fechaFin && !transaction.transporte.fechaInicio ? (
+										  !transaction.transporte.fechaFin &&
+										  !transaction.transporte.fechaInicio ? (
 											<>
-												<View style={{ flexDirection: 'row', justifyContent: 'center', }} >
+												<View
+													style={{
+														flexDirection: 'row',
+														justifyContent: 'center',
+													}}
+												>
 													<Button
-														onPress={() => handleCancelarTransportista(transaction.id) }
+														onPress={() =>
+															handleCancelarTransportista(transaction.id)
+														}
 														key={`btnCancelar-${idx}`}
 													>
 														Cancelar Transporte
 													</Button>
 												</View>
 											</>
-										)  : transaction.transporte &&
-										!transaction.transporte.fechaFin && transaction.transporte.fechaInicio ? (
-										  <>
-											  <View style={{ flexDirection: 'row', justifyContent: 'center', }}>
+										) : transaction.transporte &&
+										  !transaction.transporte.fechaFin &&
+										  transaction.transporte.fechaInicio ? (
+											<>
+												<View
+													style={{
+														flexDirection: 'row',
+														justifyContent: 'center',
+													}}
+												>
 													<Text
 														textAlign="center"
 														fontSize="sm"
@@ -311,15 +331,20 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 														fontWeight="bold"
 														color="#008000"
 													>
-														El transportista esta retirando tus residuos, 
-														pronto te los entregara y podras confirmar la entrega.
+														El transportista esta retirando tus residuos, pronto
+														te los entregara y podras confirmar la entrega.
 													</Text>
 												</View>
-										  </>
-									  ) : (
+											</>
+										) : (
 											!transaction.transporte && (
 												<>
-													<View style={{ flexDirection: 'row', justifyContent: 'center', }} >
+													<View
+														style={{
+															flexDirection: 'row',
+															justifyContent: 'center',
+														}}
+													>
 														<Button
 															onPress={() =>
 																handleSolicitarTransportista(transaction.id)
@@ -339,7 +364,13 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 					))
 				) : (
 					<>
-						<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', }} >
+						<View
+							style={{
+								flex: 1,
+								justifyContent: 'center',
+								alignItems: 'center',
+							}}
+						>
 							<WarningOutlineIcon size={5} color="red.600" />
 							<Text style={{ fontSize: 14, textAlign: 'center' }}>
 								No dispones de transacciones abiertas

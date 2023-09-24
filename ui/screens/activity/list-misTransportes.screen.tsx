@@ -15,6 +15,7 @@ import {
 	Input,
 	InfoOutlineIcon,
 	CheckCircleIcon,
+	Tooltip,
 } from 'native-base'
 import { match } from '../../../utils/either'
 import { LoadingScreen } from '../../components/loading.component'
@@ -22,6 +23,7 @@ import { TransportistaService } from '../../../services/transportista.service'
 import { Transporte } from '../../../services/types'
 import { UserService } from '../../../services/user.service'
 import * as Location from 'expo-location'
+import { TouchableOpacity } from 'react-native'
 
 type Props = NativeStackScreenProps<ActivityRouteParams, 'ListMisTransportes'>
 
@@ -33,6 +35,8 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 	const [transportePrecio, setTransportePrecio] = React.useState<Transporte>()
 	const [modalPrecio, setModalPrecio] = React.useState(false)
 	const [importe, setImporte] = React.useState('');
+	const [mostrarTooltip, setMostrarTooltip] = React.useState(false)
+	const [idxTooltip, setIdxTooltip] = React.useState<Number>()
 
 	const loadData = async () => {
 		setLoading(true)
@@ -164,6 +168,13 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 		})
 	}
 
+	const handleTooltip = (idx) => {
+		if (mostrarTooltip == false || idx == idxTooltip){
+			setMostrarTooltip(!mostrarTooltip)
+		}
+		setIdxTooltip(idx)
+	  };	
+
 	React.useEffect(() => {
 		const unsubscribeFocus = navigation.addListener('focus', () => {
 			setLoading(true)
@@ -211,11 +222,31 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 										<Text style={{ fontWeight: 'bold' }}>Precio sugerido:</Text>{' '}
 										${transporte.precioSugerido}
 									</Text>
+									<TouchableOpacity
+										onPress={() => handleTooltip(idx)}
+									>
+										<InfoOutlineIcon size={5} color="green.800" />
+									</TouchableOpacity>
+								</HStack>
+								<HStack space={2} mt="0.5" alignItems="center" justifyContent="center">
+									{mostrarTooltip && idx == idxTooltip && (
+										<View
+											style={{
+												backgroundColor: '#C3DABF',
+												padding: 5,
+												borderRadius: 5,
+											}}
+										>
+											<Text fontSize="xs" color='green.800' >Calculado en base a cantidad de residuos y kms a recorrer.</Text>
+										</View>
+									)}
 								</HStack>
 								<HStack space={2} mt="0.5" alignItems="center">
 									<Text fontSize="sm" numberOfLines={4}>
 										<Text style={{ fontWeight: 'bold' }}>Precio acordado:</Text>{' '}
-										{transporte.precioAcordado ? '$' + transporte.precioAcordado : 'Modifica el importe a recibir.'}
+										{transporte.precioAcordado
+											? '$' + transporte.precioAcordado
+											: 'Modifica el importe a recibir.'}
 									</Text>
 								</HStack>
 								<HStack space={2} mt="0.5" alignItems="center">
@@ -243,60 +274,77 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 										{transporte.direccion}
 									</Text>
 								</HStack>
-									<View
-										style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 8}}
-									>
-										{transporte.fechaInicio != null &&
-										transporte.fechaFin == null ? (
-											<Button onPress={() => goMapaRecorrido(transporte)}>
-												Ver en mapa
+								<View
+									style={{
+										flexDirection: 'row',
+										justifyContent: 'center',
+										alignItems: 'center',
+										marginTop: 8,
+									}}
+								>
+									{transporte.fechaInicio != null &&
+									transporte.fechaFin == null ? (
+										<Button onPress={() => goMapaRecorrido(transporte)}>
+											Ver en mapa
+										</Button>
+									) : transporte.fechaInicio != null &&
+									  transporte.fechaFin != null &&
+									  !transporte.pagoConfirmado ? (
+										<Button onPress={() => setPagoConfirmado(transporte)}>
+											Confirmar pago
+										</Button>
+									) : transporte.fechaInicio != null &&
+									  transporte.fechaFin != null &&
+									  !transporte.entregaConfirmada ? (
+										<>
+											<View
+												style={{
+													flex: 1,
+													justifyContent: 'center',
+													alignItems: 'center',
+												}}
+											>
+												<InfoOutlineIcon size={5} color="green.600" />
+												<Text style={{ fontSize: 14, textAlign: 'center' }}>
+													Esperando que confirmen la entrega.
+												</Text>
+											</View>
+										</>
+									) : transporte.fechaInicio != null &&
+									  transporte.fechaFin != null &&
+									  transporte.entregaConfirmada &&
+									  transporte.pagoConfirmado ? (
+										<>
+											<View
+												style={{
+													flex: 1,
+													justifyContent: 'center',
+													alignItems: 'center',
+												}}
+											>
+												<CheckCircleIcon size={5} color="green.600" />
+												<Text style={{ fontSize: 14, textAlign: 'center' }}>
+													Este transporte finalizo con exito.
+												</Text>
+											</View>
+										</>
+									) : (
+										<>
+											<Button
+												onPress={() => {
+													setModalPrecio(true)
+													setTransportePrecio(transporte)
+												}}
+											>
+												Modificar importe
 											</Button>
-										) : transporte.fechaInicio != null &&
-										  transporte.fechaFin != null &&
-										  !transporte.pagoConfirmado ? (
-											<Button onPress={() => setPagoConfirmado(transporte)}>
-												Confirmar pago
+											<View style={{ marginHorizontal: 10 }} />
+											<Button onPress={() => handleComenzar(transporte)}>
+												Comenzar Entrega
 											</Button>
-										) : transporte.fechaInicio != null &&
-										  transporte.fechaFin != null &&
-										  !transporte.entregaConfirmada ? (
-											<>
-												<View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-													<InfoOutlineIcon size={5} color="green.600" />
-													<Text style={{ fontSize: 14, textAlign: 'center' }}>
-														Esperando que confirmen la entrega.
-													</Text>
-												</View>
-											</>
-										) : transporte.fechaInicio != null &&
-										  transporte.fechaFin != null &&
-										  transporte.entregaConfirmada &&
-										  transporte.pagoConfirmado ? (
-											<>
-												<View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-													<CheckCircleIcon  size={5} color="green.600" />
-													<Text style={{ fontSize: 14, textAlign: 'center' }}>
-														Este transporte finalizo con exito.
-													</Text>
-												</View>
-											</>
-										) : (
-											<>
-												<Button
-													onPress={() => {
-														setModalPrecio(true)
-														setTransportePrecio(transporte)
-													}}
-												>
-													Modificar importe
-												</Button>
-												<View style={{ marginHorizontal: 10 }} />
-												<Button onPress={() => handleComenzar(transporte)}>
-													Comenzar Entrega
-												</Button>
-											</>
-										)}
-									</View>
+										</>
+									)}
+								</View>
 							</Box>
 						</View>
 					))
