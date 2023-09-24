@@ -26,7 +26,7 @@ import { Punto, PuntoReciclaje, Residuo, TipoResiduo } from '../../../services/t
 import { LoadingScreen } from '../../components/loading.component'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { ResiduoService } from '../../../services/residuo.service'
-import { Keyboard } from 'react-native'
+import { Keyboard, Image } from 'react-native'
 import { UserService } from '../../../services/user.service'
 import { PuntoService } from '../../../services/punto.service'
 import * as Location from 'expo-location'
@@ -56,6 +56,8 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 	const toast = useToast()
 
 	const loadInitialData = async () => {
+		await ImagePicker.requestCameraPermissionsAsync();
+
 		const tipos = await TipoResiduoService.getAll()
 		match(
 			tipos,
@@ -77,6 +79,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 						tipo: residuo.tipoResiduo.id,
 						descripcion: getDescripcion(residuo.descripcion),
 						fechaLimite: residuo.fechaLimiteRetiro ? new Date(residuo.fechaLimiteRetiro) : null,
+						foto: residuo.base64 ? residuo.base64 : null
 					  });
 					setLoading(false)
 				},
@@ -185,6 +188,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 			tipoResiduoId: form.tipo,
 			fechaLimite: form.fechaLimite?.toISOString() || null,
 			id: residuo? residuo.id : null,
+			base64: formData.foto ? formData.foto : null
 		})
 		match(
 			savedResiduo,
@@ -321,6 +325,7 @@ type FormState = {
 	tipo?: number
 	descripcion?: string
 	fechaLimite?: Date
+	foto?: string
 }
 
 type Errors = {
@@ -346,6 +351,7 @@ const Form = ({
 	const [errors, setErrors] = React.useState<Errors>({ has: false })
 	const [showDatePicker, setShowDatePicker] = React.useState(false)
 	const [loading, setLoading] = React.useState(false)
+	const [image, setImage] = React.useState(formData.foto);
 	const [selectedEntregado, setSelectedEntregado] = React.useState<string[]>(() => 
 	{
 		if (r) {
@@ -364,13 +370,8 @@ const Form = ({
 		
 		  return [];
 	})
-	  
-	const [image, setImage] = React.useState(null);
 
 	const pickImage = async () => {
-			// para poder hacer esto hay que meter en el proyecto expo-image-picker
-			// npx expo install expo-image-picker
-			// Revisar el archivo app.json que sume una config para los permisos
 		let result = await ImagePicker.launchCameraAsync({
 		mediaTypes: ImagePicker.MediaTypeOptions.All,
 		allowsEditing: true,
@@ -379,8 +380,14 @@ const Form = ({
 		quality: 1,
 		});
 	
+		formData.foto = "holi"
 		if (!result.canceled) {
-		setImage(result.assets[0].base64);
+			console.log(result.assets[0].base64.substring(0,999))
+			console.log(result.assets[0].base64.substring(999,3000))
+		setImage(result.assets[0].base64)
+		setFormData({
+			...formData, foto: result.assets[0].base64
+		})
 		// este base64 tiene la imagen encodeada en un string
 		// la idea es mandar este base64 en el POST/PUT
 		// luego, en el GET va a venir un nuevo campo que se va a llamar base64 que va a tener la foto
@@ -568,14 +575,16 @@ const Form = ({
 				>
 					<Button onPress={pickImage}>Tomar foto</Button>
 					{image && (
-						<Image
-							source={{ uri: 'data:image/jpeg;base64,' + image }}
-							style={{ width: 200, height: 200 }}
-						/>
+						<View style={{ borderWidth: 2, borderColor: 'green', padding: 5, marginTop: 5, borderRadius: 5}} >
+							<Image
+								source={{ uri: 'data:image/jpeg;base64,' + image }}
+								style={{ width: 200, height: 200 }}
+							/>
+						</View>
 					)}
 				</View>
 			</FormControl>
-			<Button mt="10" onPress={doSubmit} isLoading={loading}>
+			<Button mt="5" onPress={doSubmit} isLoading={loading}>
 				{r?.id ? 'Editar' : 'Crear'}
 			</Button>
 		</>

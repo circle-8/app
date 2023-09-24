@@ -17,6 +17,7 @@ type ResiduoSave = {
 	puntoResiduoId: number
 	descripcion: string
 	fechaLimite?: string
+	base64?: string
 }
 
 type Filter = {
@@ -80,7 +81,7 @@ const save = async (r: ResiduoSave): Promise<Either<Residuo, ErrorMessage>> => {
 }
 
 const get = async (id: number): Promise<Either<Residuo, ErrorMessage>> => {
-	const url = `/residuo/${id}`
+	const url = `/residuo/${id}?expand=base64`
 	const res = await Http.get<ResiduoResponse>(url)
 	return map(res, mapResponse, err => err.message)
 }
