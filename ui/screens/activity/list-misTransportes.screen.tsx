@@ -308,6 +308,15 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 												<Text style={{ fontSize: 14, textAlign: 'center' }}>
 													Esperando que confirmen la entrega.
 												</Text>
+												<Text
+														textAlign="center"
+														style={{ fontSize: 7 }}
+														numberOfLines={4}
+														fontWeight="bold"
+														color="#41483F"
+													>
+														*Se confirmará automáticamente luego de 15 días.
+													</Text>
 											</View>
 										</>
 									) : transporte.fechaInicio != null &&
