@@ -17,14 +17,20 @@ import {
 	useToast,
 	Text,
 	Checkbox,
+	WarningOutlineIcon,
+	Spinner,
 } from 'native-base'
 import { TipoResiduoService } from '../../../services/tipos.service'
-import { match } from '../../../utils/either'
-import { Residuo, TipoResiduo } from '../../../services/types'
+import { ifLeft, ifRight, match } from '../../../utils/either'
+import { Punto, PuntoReciclaje, Residuo, TipoResiduo } from '../../../services/types'
 import { LoadingScreen } from '../../components/loading.component'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { ResiduoService } from '../../../services/residuo.service'
 import { Keyboard } from 'react-native'
+import { UserService } from '../../../services/user.service'
+import { PuntoService } from '../../../services/punto.service'
+import * as Location from 'expo-location'
+import MapViewDirections from 'react-native-maps-directions';
 
 type Props = NativeStackScreenProps<ActivityRouteParams, 'NewResiduo'>
 
@@ -39,6 +45,13 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 		descripcion: residuo?.descripcion || '',
 		fechaLimite: residuo?.fechaLimiteRetiro ? new Date(residuo.fechaLimiteRetiro) : null,
 	  });
+	const [showModal, setShowModal] = React.useState(false);
+	const [newResiduo, setNewResiduo] = React.useState<Residuo>()
+	const [puntosDirec, setPuntosDirec] = React.useState<PuntoConDireccion[]>()
+	const [loadingModal, setLoadingModal] = React.useState(true)
+	type PuntoConDireccion = Punto & {
+		direccion: string;
+	  };
 	const toast = useToast()
 
 	const loadInitialData = async () => {
@@ -81,7 +94,83 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 		  const partes = cadena.split('\u200B\n');
 		  const descripcion = partes[0].trim();
 		  return descripcion
+	}
+
+	const getPuntos = async (idRes) => {
+		const user = await UserService.getCurrent()
+		const points = await PuntoService.getAll({
+			tipos: ['RECICLAJE'],
+			ciudadanoId: user.ciudadanoId,
+			residuos:[idRes]
+		})
+
+		if (points.length === 0) {
+			setPuntosDirec([])
+			setLoadingModal(false)
+		} else {
+			getDirections(points)
+			.then(() => {
+			  setShowModal(true);
+			})
+			.catch((error) => {
+			  console.error('Error obteniendo direcciones:', error);
+			  setShowModal(true); 
+			}).finally(() => {setLoadingModal(false)})
+		}
+	}
+
+	const getDirections = async (points: Punto[]) => {
+		const updatedPoints: PuntoConDireccion[] = [];
+	  
+		try {
+		  for (const point of points) {
+			const location = await Location.reverseGeocodeAsync({
+			  latitude: point.latitud,
+			  longitude: point.longitud,
+			});
+
+			let address = '';
+			if (location != null && location.length > 0) {
+			  const loc = location[0];
+			  address += loc.name ? loc.name : '';
+			  address += loc.city ? ', ' + loc.city : '';
+			  address += loc.postalCode ? ', ' + loc.postalCode : '';
+			  address += loc.region ? ', ' + loc.region : '';
+			} else {
+			  address = 'No podemos brindar la dirección.';
+			}
+	  
+			updatedPoints.push( {
+			  ...point,
+			  direccion: address,
+			});
+
+		  }
+		} catch (error) {
+		}
+		setPuntosDirec(updatedPoints)
 	  }
+
+	  const handleRealizarSolicitud = async (id, puntoId) => {
+		const result = await ResiduoService.postSolicitarDeposito(id,puntoId)
+		
+		match(
+			result,
+			r => {
+				toast.show({ description: 'Solicitud creada con exito' })
+				closeModal()
+			},
+			err => {
+				toast.show({ description: 'Solicitud creada con exito' })
+				closeModal()
+			},
+		)
+	}
+
+	const closeModal = () => {
+		setShowModal(!showModal);
+		navigation.navigate(ActivityRoutes.listResiduos)
+	  };
 
 	React.useEffect(() => {
 		loadInitialData()
@@ -99,8 +188,16 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 		match(
 			savedResiduo,
 			r => {
-				residuo ? toast.show({ description: 'Residuo editado exitosamente' }) : toast.show({ description: 'Residuo creado exitosamente' })
-				navigation.navigate(ActivityRoutes.listResiduos)
+				if(residuo){
+					toast.show({ description: 'Residuo editado exitosamente' })
+					navigation.navigate(ActivityRoutes.listResiduos)
+				} else{
+					setShowModal(true)
+					toast.show({ description: 'Residuo creado exitosamente' })
+					setNewResiduo(r)
+					getPuntos(r.tipoResiduo.id)
+					return
+				} 
 			},
 			err => {
 				toast.show({ description: err })
@@ -115,10 +212,106 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 			<Center w="100%">
 				<Box p="2" py="2" w="90%" maxW="290">
 					<VStack space={3} mt="4">
-						<Form onSubmit={onSubmit} tipos={tipos} formData={formData} setFormData={setFormData} r={residuo}/>
+						<Form
+							onSubmit={onSubmit}
+							tipos={tipos}
+							formData={formData}
+							setFormData={setFormData}
+							r={residuo}
+						/>
 					</VStack>
 				</Box>
 			</Center>
+			<Modal isOpen={showModal} onClose={closeModal}>
+				<Modal.Content>
+					<Modal.CloseButton />
+					<Modal.Header>
+						<Heading>Entrega tu residuo</Heading>
+					</Modal.Header>
+					<Modal.Body>
+						{loadingModal && (
+							<Spinner color="emerald.800" accessibilityLabel="Loading posts" />
+						)}
+						<View style={{ alignItems: 'center' }}>
+							{puntosDirec && puntosDirec.length != 0 && (
+								<View style={{ flex: 1, marginRight: 10, marginBottom: 5 }}>
+									<Text style={{ fontSize: 10, textAlign: 'center' }}>
+										Todos estos puntos aceptan el residuo que creaste, podes
+										entregarlo al que desees.
+									</Text>
+								</View>
+							)}
+							{puntosDirec && puntosDirec.length != 0 ? (
+								puntosDirec.map((point, idx) => (
+									<Box
+										key={`box-${idx}`}
+										p={2}
+										borderWidth={1}
+										borderColor="gray.300"
+										borderRadius="md"
+										shadow={1}
+										maxWidth={500}
+										bg={'white'}
+										width="90%"
+										marginBottom={2}
+									>
+										<Text fontSize="sm" numberOfLines={4}>
+											<Text style={{ fontWeight: 'bold' }}>Nombre:</Text>{' '}
+											{point.titulo}
+										</Text>
+										<Text fontSize="sm" numberOfLines={4}>
+											<Text style={{ fontWeight: 'bold' }}>Acepta:</Text>{' '}
+											{
+												tipos.filter(r => r.id == newResiduo.tipoResiduo.id)[0]
+													.nombre
+											}
+										</Text>
+										<Text fontSize="sm" numberOfLines={4}>
+											<Text style={{ fontWeight: 'bold' }}>Direccion:</Text>{' '}
+											{point.direccion
+												? point.direccion
+												: 'No se pudo obtener.'}
+										</Text>
+										<Box mb={2} />
+										<View
+											style={{
+												flexDirection: 'row',
+												justifyContent: 'center',
+											}}
+										>
+											<Center justifyContent="space-between">
+												<Button
+													onPress={() =>
+														handleRealizarSolicitud(newResiduo.id, point.id)
+													}
+												>
+													Entregar
+												</Button>
+											</Center>
+										</View>
+									</Box>
+								))
+							) : !loadingModal && (
+								<>
+									<View
+										style={{
+											flex: 1,
+											justifyContent: 'center',
+											alignItems: 'center',
+										}}
+									>
+										<WarningOutlineIcon size={5} color="red.600" />
+										<Text style={{ fontSize: 14, textAlign: 'center' }}>
+											Por el momento no hay puntos donde entregar este tipo de
+											residuo.
+										</Text>
+									</View>
+								</>
+							)}
+						</View>
+					</Modal.Body>
+				</Modal.Content>
+			</Modal>
 		</ScrollView>
 	)
 }

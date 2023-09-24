@@ -206,6 +206,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 		setSelectedUserTransaction(null)
 		setModalAgregar(false)
 		setModalErrorTransaccion(false)
+		loadInitialData()
 	}
 
 	const handleSolicitadoPress = () => {
