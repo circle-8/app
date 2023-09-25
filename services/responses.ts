@@ -106,7 +106,7 @@ export type ResiduoResponse = {
 	tipoResiduo: TipoResiduoResponse
 	transaccionId?: number
 	recorridoId?: number
-
+	base64?: string
 }
 
 export type SolicitudResponse = {

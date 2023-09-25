@@ -1,13 +1,11 @@
 import React from 'react'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { ActivityRouteParams, ActivityRoutes } from '../../../constants/routes'
+import { ActivityRouteParams } from '../../../constants/routes'
 import {
 	HStack,
 	ScrollView,
 	View,
 	Text,
-	WarningOutlineIcon,
-	Card,
 	useToast,
 	Row,
 	Column,
@@ -20,8 +18,7 @@ import { caseMaybe, match } from '../../../utils/either'
 import { TransaccionService } from '../../../services/transaccion.service'
 import { LoadingScreen } from '../../components/loading.component'
 import { Transaccion } from '../../../services/types'
-import { formatFecha } from '../../../utils/days'
-import { TouchableOpacity } from 'react-native'
+import { TouchableOpacity, Image } from 'react-native'
 import { ResiduoService } from '../../../services/residuo.service'
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons'
 
@@ -29,13 +26,11 @@ type Props = NativeStackScreenProps<ActivityRouteParams, 'ViewTransaccion'>
 
 export const ViewTransaccion = ({ navigation, route }: Props) => {
 	const { ciudadanoId, transaccionId } = route.params
-
 	const [isLoading, setLoading] = React.useState(true)
-
 	const [transaction, setTransaction] = React.useState<Transaccion>()
-
 	const [selectedResiduo, setSelectedResiduo] = React.useState<number>()
 	const [selectedAction, setSelectedAction] = React.useState<ActionType>()
+	const [viewImage, setViewImage] = React.useState(false)
 
 	const toast = useToast()
 
@@ -62,6 +57,10 @@ export const ViewTransaccion = ({ navigation, route }: Props) => {
 	const closeAlert = () => {
 		setSelectedResiduo(undefined)
 		setSelectedAction(undefined)
+	}
+
+	const verFoto = () => {
+		setViewImage(!viewImage)
 	}
 
 	React.useEffect(() => {
@@ -149,6 +148,25 @@ export const ViewTransaccion = ({ navigation, route }: Props) => {
 										</Column>
 									</Center>
 								</Row>
+								{r.base64 && (
+									<>
+										<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }} >
+											<View style={{ padding: 5, marginLeft: 15 }}>
+												<TouchableOpacity onPress={verFoto}>
+													<FontAwesome5 name="image" size={28} alignSelf="center" />
+													<Text textAlign="center" style={{ fontSize: 7 }} numberOfLines={4} fontWeight="bold" color="#41483F">
+														{viewImage ? 'Ocultar foto' : 'Ver foto'}
+													</Text>
+												</TouchableOpacity>
+											</View>
+											{viewImage && (
+												<View style={{ borderWidth: 2, borderColor: 'green', padding: 5, marginLeft: 15, borderRadius: 5 }}>
+													<Image source={{ uri: 'data:image/jpeg;base64,' + r.base64 }} style={{ width: 200, height: 200 }} />
+												</View>
+											)}
+										</View>
+									</>
+								)}
 							</Box>
 						</React.Fragment>
 					))}

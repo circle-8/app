@@ -26,7 +26,7 @@ const getAll = async (
 
 const get = async (id: number): Promise<Either<Transaccion, ErrorMessage>> => {
 	const res = await Http.get<TransaccionResponse>(
-		`/transaccion/${id}?expand=residuos&expand=punto_reciclaje`,
+		`/transaccion/${id}?expand=residuos&expand=residuos.base64&expand=punto_reciclaje`,
 	)
 	return map(
 		res,
