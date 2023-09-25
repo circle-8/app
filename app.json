@@ -19,7 +19,10 @@
       "config": {
         "googleMapsApiKey": "AIzaSyDHFfRLpl4t-N-0BGmFN1zvJ7BNpJSSbow"
       },
-      "bundleIdentifier": "com.circle8.app"
+      "bundleIdentifier": "com.circle8.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Esta aplicación necesita acceso a la cámara para tomar fotos."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -47,7 +50,13 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Permitir a Circle8 utilizar su ubicacion."
         }
-      ]
+      ],
+			[
+				"expo-image-picker",
+				{
+					"photosPermission": "Para guardar imagenes de tus residuos"
+				}
+			]
     ],
     "extra": {
       "eas": {

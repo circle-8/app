@@ -21,16 +21,19 @@ import {
 	Spinner,
 } from 'native-base'
 import { TipoResiduoService } from '../../../services/tipos.service'
-import { ifLeft, ifRight, match } from '../../../utils/either'
-import { Punto, PuntoReciclaje, Residuo, TipoResiduo } from '../../../services/types'
+import { match } from '../../../utils/either'
+import { Punto, Residuo, TipoResiduo } from '../../../services/types'
 import { LoadingScreen } from '../../components/loading.component'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { ResiduoService } from '../../../services/residuo.service'
-import { Keyboard } from 'react-native'
+import { Keyboard, Image, TouchableOpacity } from 'react-native'
 import { UserService } from '../../../services/user.service'
 import { PuntoService } from '../../../services/punto.service'
 import * as Location from 'expo-location'
-import MapViewDirections from 'react-native-maps-directions';
+import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
+import { FontAwesome5 } from '@expo/vector-icons'
+
 
 type Props = NativeStackScreenProps<ActivityRouteParams, 'NewResiduo'>
 
@@ -55,6 +58,8 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 	const toast = useToast()
 
 	const loadInitialData = async () => {
+		await ImagePicker.requestCameraPermissionsAsync();
+
 		const tipos = await TipoResiduoService.getAll()
 		match(
 			tipos,
@@ -76,6 +81,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 						tipo: residuo.tipoResiduo.id,
 						descripcion: getDescripcion(residuo.descripcion),
 						fechaLimite: residuo.fechaLimiteRetiro ? new Date(residuo.fechaLimiteRetiro) : null,
+						foto: residuo.base64 ? residuo.base64 : null
 					  });
 					setLoading(false)
 				},
@@ -85,7 +91,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 				},
 			)
 		}
-			
+
 		setLoading(false)
 		setLoading(false)
 	}
@@ -114,14 +120,14 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 			})
 			.catch((error) => {
 			  console.error('Error obteniendo direcciones:', error);
-			  setShowModal(true); 
+			  setShowModal(true);
 			}).finally(() => {setLoadingModal(false)})
 		}
 	}
 
 	const getDirections = async (points: Punto[]) => {
 		const updatedPoints: PuntoConDireccion[] = [];
-	  
+
 		try {
 		  for (const point of points) {
 			const location = await Location.reverseGeocodeAsync({
@@ -139,7 +145,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 			} else {
 			  address = 'No podemos brindar la dirección.';
 			}
-	  
+
 			updatedPoints.push( {
 			  ...point,
 			  direccion: address,
@@ -153,7 +159,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 
 	  const handleRealizarSolicitud = async (id, puntoId) => {
 		const result = await ResiduoService.postSolicitarDeposito(id,puntoId)
-		
+
 		match(
 			result,
 			r => {
@@ -184,6 +190,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 			tipoResiduoId: form.tipo,
 			fechaLimite: form.fechaLimite?.toISOString() || null,
 			id: residuo? residuo.id : null,
+			base64: formData.foto ? formData.foto : null
 		})
 		match(
 			savedResiduo,
@@ -197,7 +204,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 					setNewResiduo(r)
 					getPuntos(r.tipoResiduo.id)
 					return
-				} 
+				}
 			},
 			err => {
 				toast.show({ description: err })
@@ -320,6 +327,7 @@ type FormState = {
 	tipo?: number
 	descripcion?: string
 	fechaLimite?: Date
+	foto?: string
 }
 
 type Errors = {
@@ -345,25 +353,52 @@ const Form = ({
 	const [errors, setErrors] = React.useState<Errors>({ has: false })
 	const [showDatePicker, setShowDatePicker] = React.useState(false)
 	const [loading, setLoading] = React.useState(false)
-	const [selectedEntregado, setSelectedEntregado] = React.useState<string[]>(() => 
+	const [image, setImage] = React.useState(formData.foto);
+	const [selectedEntregado, setSelectedEntregado] = React.useState<string[]>(() =>
 	{
 		if (r) {
 			const partes = r.descripcion.split('\u200B\n');
 			const entregaInfo = partes.slice(1);
 			let values: string[] = [];
-		
+
 			if (entregaInfo[0].includes('caja')) { values.push('0'); }
 			if (entregaInfo[0].includes('bolsa')) { values.push('1'); }
 			if (entregaInfo[0].includes('compacto')) { values.push('2'); }
 			if (entregaInfo[0].includes('Mojado/Húmedo')) { values.push('3'); }
 			if (entregaInfo[0].includes('5kg')) { values.push('4'); }
-		
-			return [...values]; 
+
+			return [...values];
 		  }
-		
+
 		  return [];
-		})
-	  
+	})
+
+	const pickImage = async () => {
+		let result = await ImagePicker.launchCameraAsync({
+		mediaTypes: ImagePicker.MediaTypeOptions.All,
+		allowsEditing: true,
+		base64: false,
+		aspect: [4, 3],
+		quality: 0.3,
+		});
+
+		if (!result.canceled) {
+			const resized = await ImageManipulator.manipulateAsync(
+				result.assets[0].uri,
+				[{ resize: { width: 400 } }],
+				{ base64: true, compress: 1, format: ImageManipulator.SaveFormat.JPEG }
+			);
+
+			setImage(resized.base64)
+			setFormData({...formData, foto: resized.base64})
+		}
+	};
+
+	const deleteImage = () => {
+		setImage(null)
+		setFormData({...formData, foto: null})
+	}
+
 	const isValid = () => {
 		const newErrors: Errors = { has: false }
 		if (!formData.tipo) {
@@ -379,7 +414,7 @@ const Form = ({
 			newErrors.has = true
 			newErrors.entrega =
 				'Seleccione al menos una caracteristica sobre como entregas el residuo.'
-			formData.descripcion = r.descripcion.split('\u200B\n').slice(0)[0] 
+			formData.descripcion = r.descripcion.split('\u200B\n').slice(0)[0]
 			setFormData({
 				...formData,
 			})
@@ -538,7 +573,33 @@ const Form = ({
 					editable={false}
 				/>
 			</FormControl>
-			<Button mt="10" onPress={doSubmit} isLoading={loading}>
+			<FormControl>
+				<FormControl.Label>Agrega una imagen</FormControl.Label>
+				<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }} >
+					<TouchableOpacity onPress={pickImage}>
+						<FontAwesome5 name="camera" size={28} alignSelf="center" />
+						<Text textAlign="center" style={{ fontSize: 7 }} numberOfLines={4} fontWeight="bold" color="#41483F">
+							{image ? 'Editar foto' : 'Tomar foto'}
+						</Text>
+					</TouchableOpacity>
+					{image && (
+						<>
+							<View style={{ padding: 5, marginLeft: 15 }}>
+								<TouchableOpacity onPress={deleteImage}>
+									<FontAwesome5 name="trash" size={28} alignSelf="center" />
+									<Text textAlign="center" style={{ fontSize: 7 }} numberOfLines={4} fontWeight="bold" color="#41483F">
+										Quitar foto
+									</Text>
+								</TouchableOpacity>
+							</View>
+							<View style={{ borderWidth: 2, borderColor: 'green', padding: 5, marginLeft: 15, borderRadius: 5}}>
+								<Image source={{ uri: 'data:image/jpeg;base64,' + image }} style={{ width: 200, height: 200 }} />
+							</View>
+						</>
+					)}
+				</View>
+			</FormControl>
+			<Button mt="5" onPress={doSubmit} isLoading={loading}>
 				{r?.id ? 'Editar' : 'Crear'}
 			</Button>
 		</>

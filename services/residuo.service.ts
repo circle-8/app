@@ -17,6 +17,7 @@ type ResiduoSave = {
 	puntoResiduoId: number
 	descripcion: string
 	fechaLimite?: string
+	base64?: string
 }
 
 type Filter = {
@@ -75,12 +76,14 @@ const mapResponse = (r: ResiduoResponse): Residuo => {
 
 const save = async (r: ResiduoSave): Promise<Either<Residuo, ErrorMessage>> => {
 	const url = '/residuo'
-	const res = r.id ? await Http.put<ResiduoResponse>(url+`/${r.id}`, r) : await Http.post<ResiduoResponse>(url, r)
+	const res = r.id
+		? await Http.put<ResiduoResponse>(url+`/${r.id}`, r)
+		: await Http.post<ResiduoResponse>(url, r)
 	return map(res, mapResponse, err => err.message)
 }
 
 const get = async (id: number): Promise<Either<Residuo, ErrorMessage>> => {
-	const url = `/residuo/${id}`
+	const url = `/residuo/${id}?expand=base64`
 	const res = await Http.get<ResiduoResponse>(url)
 	return map(res, mapResponse, err => err.message)
 }
@@ -96,7 +99,7 @@ type ResiduoFilter = {
 }
 
 const makeParams = (url: string, f: ResiduoFilter): string => {
-	let finalUrl = url + '?'
+	let finalUrl = url
 	for (const p of f.puntosResiduo || []) finalUrl += `puntos_residuo=${p}&`
 	for (const c of f.ciudadano || []) finalUrl += `ciudadanos=${c}&`
 	for (const t of f.tipo || []) finalUrl += `tipos=${t}&`
@@ -113,7 +116,7 @@ const makeParams = (url: string, f: ResiduoFilter): string => {
 const list = async (
 	f: ResiduoFilter,
 ): Promise<Either<Residuo[], ErrorMessage>> => {
-	const url = makeParams('/residuos', f)
+	const url = makeParams('/residuos?expand=base64&', f)
 	const res = await Http.get<ListResponse<ResiduoResponse>>(url)
 	return map(
 		res,

@@ -1,8 +1,8 @@
 import React from 'react'
-import { Platform, TouchableOpacity } from 'react-native'
+import { Platform, TouchableOpacity, Image } from 'react-native'
 import MapView, { Marker, Polygon, Polyline, PROVIDER_DEFAULT, PROVIDER_GOOGLE } from 'react-native-maps'
-import { Box, Center, Flex, Modal, Row, ScrollView, Text, useToast } from 'native-base'
-import { FontAwesome } from '@expo/vector-icons'
+import { Box, Center, Flex, Modal, Row, ScrollView, Text, View, useToast } from 'native-base'
+import { FontAwesome, FontAwesome5 } from '@expo/vector-icons'
 import { colors } from '../../../constants/styles'
 import * as Location from 'expo-location'
 import { LoadingScreen } from '../../components/loading.component'
@@ -40,8 +40,8 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 		latitudeDelta: number
 		longitudeDelta: number
 	}>()
-	const [address, setAddress] =
-		React.useState<Location.LocationGeocodedAddress>()
+	const [address, setAddress] = React.useState<Location.LocationGeocodedAddress>()
+	const [viewImage, setViewImage] = React.useState(false)
 
 	const getRecorridos = async () => {
 		const getTransaction = await TransaccionService.get(transporte.transaccionId)
@@ -100,15 +100,6 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 		  }
 	}
 
-	/* Initial data loading */
-	React.useEffect(() => {
-		initialLoad()
-	}, [])
-
-	if (isLoading) {
-		return <LoadingScreen />
-	}
-
 	const onFinish = async () => {
 		const user = await UserService.getCurrent()
 		const error = await TransportistaService.finish(transporte.id)
@@ -122,6 +113,19 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 				})
 			},
 		)
+	}
+
+	const verFoto = () => {
+		setViewImage(!viewImage)
+	}
+
+	/* Initial data loading */
+	React.useEffect(() => {
+		initialLoad()
+	}, [])
+
+	if (isLoading) {
+		return <LoadingScreen />
 	}
 
 	const mapHeight = transporte?.fechaInicio || false ? '65%' : '85%'
@@ -183,7 +187,7 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 							  latitude: transporte.transaccion.puntoReciclaje.latitud,
 							  longitude: transporte.transaccion.puntoReciclaje.longitud
 							}}
-							apikey={Platform.OS === 'ios' ? "AIzaSyDHFfRLpl4t-N-0BGmFN1zvJ7BNpJSSbow" : "AIzaSyAGId4-rD1cRt0N2dOIADzvaR5j065OevE"}
+							apikey={"AIzaSyAIi9hhuW6G0MPmseIiKQDphVTRC7u3oPU"}
 							strokeWidth={2}
 							strokeColor="green"
 							/>
@@ -208,6 +212,25 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 							<Text>
 								{'\u2022'} <Text style={{ fontWeight: 'bold' }}>Estado:</Text> {transaccion.residuos[currentPoint]?.fechaRetiro? 'Ya ha sido retirado' : 'Todavia no retirado'}
 							</Text>
+							{transaccion.residuos[currentPoint]?.base64 && (
+									<>
+										<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }} >
+											<View style={{ padding: 5, marginLeft: 15 }}>
+												<TouchableOpacity onPress={verFoto}>
+													<FontAwesome5 name="image" size={28} alignSelf="center" />
+													<Text textAlign="center" style={{ fontSize: 7 }} numberOfLines={4} fontWeight="bold" color="#41483F">
+														{viewImage ? 'Ocultar foto' : 'Ver foto'}
+													</Text>
+												</TouchableOpacity>
+											</View>
+											{viewImage && (
+												<View style={{ borderWidth: 2, borderColor: 'green', padding: 5, marginLeft: 15, borderRadius: 5 }}>
+													<Image source={{ uri: 'data:image/jpeg;base64,' + transaccion.residuos[currentPoint]?.base64 }} style={{ width: 200, height: 200 }} />
+												</View>
+											)}
+										</View>
+									</>
+								)}
 						</ScrollView>
 					</Box>
 				)}

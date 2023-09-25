@@ -4,7 +4,7 @@ import { ListResponse, SolicitudResponse } from './responses'
 import { ErrorMessage, Solicitud } from './types'
 
 const getSolicitante = async (ciudadanoId: number): Promise<Either<Solicitud[], ErrorMessage>> => {
-	const res = await Http.get<ListResponse<SolicitudResponse>>(`/solicitudes?expand=residuo&expand=ciudadanos&solicitante_id=${ciudadanoId}`)
+	const res = await Http.get<ListResponse<SolicitudResponse>>(`/solicitudes?expand=residuo&expand=residuo.base64&expand=ciudadanos&solicitante_id=${ciudadanoId}`)
 	return map(
 		res,
 		p => p.data,
@@ -13,7 +13,7 @@ const getSolicitante = async (ciudadanoId: number): Promise<Either<Solicitud[], 
 }
 
 const getSolicitado = async (ciudadanoId: number): Promise<Either<Solicitud[], ErrorMessage>> => {
-	const res = await Http.get<ListResponse<SolicitudResponse>>(`/solicitudes?expand=residuo&expand=ciudadanos&solicitado_id=${ciudadanoId}`)
+	const res = await Http.get<ListResponse<SolicitudResponse>>(`/solicitudes?expand=residuo&expand=residuo.base64&expand=ciudadanos&solicitado_id=${ciudadanoId}`)
 	return map(
 		res,
 		p => p.data,
