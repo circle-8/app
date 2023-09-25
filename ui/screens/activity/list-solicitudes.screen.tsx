@@ -22,7 +22,8 @@ import { ifLeft, ifRight, match } from '../../../utils/either'
 import { Solicitud, Transaccion } from '../../../services/types'
 import { LoadingScreen } from '../../components/loading.component'
 import { SolicitudService } from '../../../services/solicitud.service'
-import { TouchableOpacity } from 'react-native'
+import { FontAwesome, FontAwesome5, MaterialCommunityIcons  } from '@expo/vector-icons'
+import { TouchableOpacity, Image } from 'react-native'
 import { TransaccionService } from '../../../services/transaccion.service'
 import { formatFecha } from '../../../utils/days'
 
@@ -44,6 +45,7 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 	const [modalErrorTransaccion, setModalErrorTransaccion] = React.useState(false)
 	const [showSolicitante, setSolicitante] = React.useState(false)
 	const [showSolicitado, setSolicitado] = React.useState(false)
+	const [viewImage, setViewImage] = React.useState(false)
 	const toast = useToast()
 
 	const loadInitialData = async () => {
@@ -215,6 +217,10 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 
 	const handleSolicitantePress = () => {
 		setSolicitante(!showSolicitante)
+	}
+
+	const verFoto = () => {
+		setViewImage(!viewImage)
 	}
 
 	React.useEffect(() => {
@@ -629,6 +635,25 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 												{getEstado(solicitud, true)}
 											</Text>
 										</HStack>
+										{solicitud.residuo.base64 && (
+										<>
+											<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }} >
+												<View style={{ padding: 5, marginLeft: 15 }}>
+													<TouchableOpacity onPress={verFoto}>
+														<FontAwesome5 name="image" size={28} alignSelf="center" />
+														<Text textAlign="center" style={{ fontSize: 7 }} numberOfLines={4} fontWeight="bold" color="#41483F">
+															{viewImage ? 'Ocultar foto' : 'Ver foto'}
+														</Text>
+													</TouchableOpacity>
+												</View>
+												{viewImage && (
+													<View style={{ borderWidth: 2, borderColor: 'green', padding: 5, marginLeft: 15, borderRadius: 5 }}>
+													<Image source={{ uri: 'data:image/jpeg;base64,' + solicitud.residuo.base64 }} style={{ width: 200, height: 200 }} />
+												</View>
+												)}
+											</View>
+										</>
+										)}
 										{solicitud.estado == 'PENDIENTE' ? (
 											<>
 												<Box mb={2} />
@@ -811,6 +836,25 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 												{getEstado(solicitud, false)}
 											</Text>
 										</HStack>
+										{solicitud.residuo.base64 && (
+										<>
+											<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }} >
+												<View style={{ padding: 5, marginLeft: 15 }}>
+													<TouchableOpacity onPress={verFoto}>
+														<FontAwesome5 name="image" size={28} alignSelf="center" />
+														<Text textAlign="center" style={{ fontSize: 7 }} numberOfLines={4} fontWeight="bold" color="#41483F">
+															{viewImage ? 'Ocultar foto' : 'Ver foto'}
+														</Text>
+													</TouchableOpacity>
+												</View>
+												{viewImage && (
+													<View style={{ borderWidth: 2, borderColor: 'green', padding: 5, marginLeft: 15, borderRadius: 5 }}>
+													<Image source={{ uri: 'data:image/jpeg;base64,' + solicitud.residuo.base64 }} style={{ width: 200, height: 200 }} />
+												</View>
+												)}
+											</View>
+										</>
+										)}
 										{solicitud.estado === 'PENDIENTE' ? (
 											<>
 												<Box mb={2} />

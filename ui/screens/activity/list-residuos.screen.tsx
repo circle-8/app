@@ -19,7 +19,7 @@ import {
 	useToast,
 } from 'native-base'
 import { FontAwesome, FontAwesome5, MaterialCommunityIcons  } from '@expo/vector-icons'
-import { TouchableOpacity } from 'react-native'
+import { TouchableOpacity, Image } from 'react-native'
 import { colors } from '../../../constants/styles'
 import { PuntoService } from '../../../services/punto.service'
 
@@ -31,6 +31,7 @@ export const ListResiduos = ({ navigation }: Props) => {
 	const [isLoading, setLoading] = React.useState(true)
 	const [selectedResiduo, setSelectedResiduo] = React.useState<number>()
 	const [selectedAction, setSelectedAction] = React.useState<ActionType>()
+	const [viewImage, setViewImage] = React.useState(false)
 	const toast = useToast()
 
 	const loadData = async () => {
@@ -96,6 +97,10 @@ export const ListResiduos = ({ navigation }: Props) => {
 			})
 		}
 
+	}
+
+	const verFoto = () => {
+		setViewImage(!viewImage)
 	}
 
 	React.useEffect(() => {
@@ -178,7 +183,25 @@ export const ListResiduos = ({ navigation }: Props) => {
 										en un recorrido
 									</Text>
 								)}
-								<Text></Text>
+								{r.base64 && (
+									<>
+										<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }} >
+											<View style={{ padding: 5, marginLeft: 15 }}>
+												<TouchableOpacity onPress={verFoto}>
+													<FontAwesome5 name="image" size={28} alignSelf="center" />
+													<Text textAlign="center" style={{ fontSize: 7 }} numberOfLines={4} fontWeight="bold" color="#41483F">
+														{viewImage ? 'Ocultar foto' : 'Ver foto'}
+													</Text>
+												</TouchableOpacity>
+											</View>
+											{viewImage && (
+												<View style={{ borderWidth: 2, borderColor: 'green', padding: 5, marginLeft: 15, borderRadius: 5 }}>
+												<Image source={{ uri: 'data:image/jpeg;base64,' + r.base64 }} style={{ width: 200, height: 200 }} />
+											</View>
+											)}
+										</View>
+									</>
+								)}
 								<Center>
 									<Box mb={2} />
 									<View

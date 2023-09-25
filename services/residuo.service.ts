@@ -99,7 +99,7 @@ type ResiduoFilter = {
 }
 
 const makeParams = (url: string, f: ResiduoFilter): string => {
-	let finalUrl = url + '?'
+	let finalUrl = url
 	for (const p of f.puntosResiduo || []) finalUrl += `puntos_residuo=${p}&`
 	for (const c of f.ciudadano || []) finalUrl += `ciudadanos=${c}&`
 	for (const t of f.tipo || []) finalUrl += `tipos=${t}&`
@@ -116,7 +116,7 @@ const makeParams = (url: string, f: ResiduoFilter): string => {
 const list = async (
 	f: ResiduoFilter,
 ): Promise<Either<Residuo[], ErrorMessage>> => {
-	const url = makeParams('/residuos', f)
+	const url = makeParams('/residuos?expand=base64&', f)
 	const res = await Http.get<ListResponse<ResiduoResponse>>(url)
 	return map(
 		res,
