@@ -24,6 +24,7 @@ const token = async (
 }
 
 type UserRequest = {
+	id?: number
 	username?: string
 	password?: string
 	nombre?: string
@@ -41,6 +42,26 @@ const post = async ({
 	const res = await Http.post<UserResponse>('/user', {
 		username,
 		password,
+		nombre,
+		email,
+		tipoUsuario: isTransportista ? 'TRANSPORTISTA' : 'CIUDADANO',
+	})
+	return map(
+		res,
+		usr => usr,
+		err => err.message
+	)
+}
+
+const put = async ({
+	id,
+	username,
+	nombre,
+	email,
+	isTransportista,
+}: UserRequest): Promise<Either<User, ErrorMessage>> => {
+	const res = await Http.put<UserResponse>(`/user/${id}`, {
+		username,
 		nombre,
 		email,
 		tipoUsuario: isTransportista ? 'TRANSPORTISTA' : 'CIUDADANO',
@@ -109,4 +130,6 @@ export const UserService = {
 	logout,
 	getCurrent,
 	get,
+	put,
+	saveLoggedUser,
 }

@@ -1,5 +1,5 @@
 import React from 'react'
-import { ActivityRouteParams, ActivityRoutes, ProfileRoutes, TabRoutes } from '../../../constants/routes'
+import { ActivityRouteParams, ActivityRoutes, ProfileRoutes, ProfileRoutesParams, TabRoutes } from '../../../constants/routes'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { LoadingScreen } from '../../components/loading.component'
 import { PuntoResiduo, Residuo } from '../../../services/types'

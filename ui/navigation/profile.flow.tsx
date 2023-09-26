@@ -5,6 +5,7 @@ import { ProfileRoutes } from '../../constants/routes'
 import { ListPuntoReciclaje } from '../screens/profile/list-punto-reciclaje.screen'
 import { EditPuntoReciclaje } from '../screens/profile/edit-punto-reciclaje.screen'
 import { EditPuntoResiduo } from '../screens/profile/edit-punto-residuo.screen'
+import { EditPerfil } from '../screens/profile/edit-perfil.screen'
 
 const ProfileStack = createNativeStackNavigator()
 
@@ -30,6 +31,11 @@ export const ProfileFlow = () => {
 				name={ProfileRoutes.editPuntoResiduo}
 				component={EditPuntoResiduo}
 				options={{ title: 'Punto de Residuo' }}
+			/>
+			<ProfileStack.Screen
+				name={ProfileRoutes.editPerfil}
+				component={EditPerfil}
+				options={{ title: 'Editar perfil' }}
 			/>
 		</ProfileStack.Navigator>
 	)
