@@ -12,13 +12,11 @@ import {
 	useToast,
 } from 'native-base'
 import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack'
-import { LoginRoutesParams, ProfileRoutes, ProfileRoutesParams, TabRoutes } from '../../../constants/routes'
-import { PuntoService } from '../../../services/punto.service'
+import { ProfileRoutes, ProfileRoutesParams } from '../../../constants/routes'
 import { LoadingScreen } from '../../components/loading.component'
 import { match } from '../../../utils/either'
-import { PuntoResiduo, User } from '../../../services/types'
 import { UserService } from '../../../services/user.service'
-import { Profile } from './profile.screen'
+import { User } from '../../../services/types'
 
 type Props = NativeStackScreenProps<ProfileRoutesParams, 'EditPerfil'>
 
