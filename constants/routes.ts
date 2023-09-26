@@ -1,4 +1,4 @@
-import { PuntoResiduo, Transporte } from '../services/types'
+import { PuntoResiduo, Transporte, User } from '../services/types'
 
 export type LoginRoutesParams = {
 	Login: undefined
@@ -25,6 +25,9 @@ export type ProfileRoutesParams = {
 		ciudadanoId: number
 		punto?: PuntoResiduo
 	}
+	EditPerfil: {
+		userId: number
+	}
 }
 type ProfileRouteName = keyof ProfileRoutesParams
 
@@ -33,11 +36,13 @@ export const ProfileRoutes: {
 	listPuntoReciclaje: 'ListPuntoReciclaje'
 	editPuntoReciclaje: 'EditPuntoReciclaje'
 	editPuntoResiduo: 'EditPuntoResiduo'
+	editPerfil: 'EditPerfil'
 } = {
 	profile: 'Profile',
 	listPuntoReciclaje: 'ListPuntoReciclaje',
 	editPuntoReciclaje: 'EditPuntoReciclaje',
 	editPuntoResiduo: 'EditPuntoResiduo',
+	editPerfil: 'EditPerfil',
 }
 
 export type HomeRoutesParams = {

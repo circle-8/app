@@ -127,7 +127,6 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 
 	const getDirections = async (points: Punto[]) => {
 		const updatedPoints: PuntoConDireccion[] = [];
-
 		try {
 		  for (const point of points) {
 			const location = await Location.reverseGeocodeAsync({
@@ -145,7 +144,6 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 			} else {
 			  address = 'No podemos brindar la dirección.';
 			}
-
 			updatedPoints.push( {
 			  ...point,
 			  direccion: address,
@@ -159,7 +157,6 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 
 	  const handleRealizarSolicitud = async (id, puntoId) => {
 		const result = await ResiduoService.postSolicitarDeposito(id,puntoId)
-
 		match(
 			result,
 			r => {

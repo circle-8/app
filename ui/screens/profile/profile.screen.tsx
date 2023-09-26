@@ -1,10 +1,10 @@
 import React from 'react'
-import { Box, Button, Center, VStack, Text, HStack } from 'native-base'
+import { Box, Center, VStack, Text } from 'native-base'
 import { AuthContext } from '../../../context/auth.context'
 import { UserService } from '../../../services/user.service'
 import { PuntoService } from '../../../services/punto.service'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { ProfileRoutes, ProfileRoutesParams, TabRoutes } from '../../../constants/routes'
+import { ProfileRoutes, ProfileRoutesParams } from '../../../constants/routes'
 import { PuntoResiduo, User } from '../../../services/types'
 import { TouchableOpacity } from 'react-native'
 
@@ -33,14 +33,26 @@ export const Profile = ({navigation}: Props) => {
 		})
 	}
 
+	const onEditPerfil = async () => {
+		const user = await UserService.getCurrent()
+
+		navigation.navigate(ProfileRoutes.editPerfil, {
+			userId: user.id,
+		})
+	}
+
 	const loadInitialData = async () => {
 		const user = await UserService.getCurrent()
 		setUser(user)
 	}
 
 	React.useEffect(() => {
-		loadInitialData()
-	}, [])
+		const unsubscribeFocus = navigation.addListener('focus', () => {
+			loadInitialData()
+		})
+
+		return unsubscribeFocus
+	}, [navigation])
 
 	return (
 		<Center w="100%" mt="10">
@@ -50,6 +62,20 @@ export const Profile = ({navigation}: Props) => {
 				</Text>
 			</Box>
 			<VStack mt="4" width="80%" alignSelf="center">
+			<TouchableOpacity
+					style={{
+						backgroundColor: '#6C796A',
+						padding: 20,
+						marginBottom: 10,
+						alignItems: 'center',
+						width: '100%',
+					}}
+					onPress={onEditPerfil}
+				>
+					<Text style={{ color: 'white', textAlign: 'center' }}>
+						Editar perfil
+					</Text>
+				</TouchableOpacity>
 				<TouchableOpacity
 					style={{
 						backgroundColor: '#6C796A',
