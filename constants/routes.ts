@@ -56,6 +56,33 @@ export const HomeRoutes: {
 	home: 'Home',
 }
 
+export const MessageRoutes : {
+	messages: 'Messages'
+	chats: 'Chats'
+	chat: 'Chat'
+} = {
+	messages: 'Messages',
+	chats: 'Chats',
+	chat: 'Chat',
+}
+
+export type MessageRouteParams = {
+	Messages: undefined
+	Chats: {
+		titulo: string
+		userId: number
+		chatUri: string
+	}
+	Chat: {
+		titulo: string
+		userId: number
+		historyUri: string
+		actionsUri: string
+		wsUri: string
+	}
+}
+type MessageRouteName = keyof MessageRouteParams
+
 export type ActivityRouteParams = {
 	Activity: undefined
 	NewResiduo: {
