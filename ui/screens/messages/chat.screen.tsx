@@ -60,7 +60,7 @@ export const ChatScreen = ({ navigation, route }: Props) => {
 	const initialLoad = async () => {
 		navigation.setOptions({ title: route.params.titulo })
 
-		const ws = new WebSocket("ws://192.168.0.13:8080" + wsUri)
+		const ws = new WebSocket("wss://circle8.germanmerkel.com.ar" + wsUri)
 		ws.onmessage = msg => {
 			const data : MessageResponse = JSON.parse(msg.data)
 			handleIncomingMessage(data)
