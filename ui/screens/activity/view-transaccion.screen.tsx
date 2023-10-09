@@ -13,6 +13,7 @@ import {
 	AlertDialog,
 	Button,
 	Box,
+	WarningOutlineIcon,
 } from 'native-base'
 import { caseMaybe, match } from '../../../utils/either'
 import { TransaccionService } from '../../../services/transaccion.service'
@@ -170,6 +171,14 @@ export const ViewTransaccion = ({ navigation, route }: Props) => {
 							</Box>
 						</React.Fragment>
 					))}
+					{ !transaction.residuos && (
+						<View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 4, maxWidth: '85%' }}>
+								<WarningOutlineIcon size={5} color="red.600" />
+								<Text style={{ fontSize: 14, textAlign: 'center' }}>
+									Esta transaccion no dispone de residuos, podes agregarlos desde tus solicitudes.
+								</Text>
+							</View>
+					)}
 				{transaction.residuos &&
 					transaction.residuos.length > 0 &&
 					transaction.residuos.filter(r => !r.fechaRetiro).length == 0 && !transaction.transporteId && (

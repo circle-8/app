@@ -573,26 +573,31 @@ const Form = ({
 			<FormControl>
 				<FormControl.Label>Agrega una imagen</FormControl.Label>
 				<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }} >
-					<TouchableOpacity onPress={pickImage}>
-						<FontAwesome5 name="camera" size={28} alignSelf="center" />
-						<Text textAlign="center" style={{ fontSize: 7 }} numberOfLines={4} fontWeight="bold" color="#41483F">
-							{image ? 'Editar foto' : 'Tomar foto'}
-						</Text>
-					</TouchableOpacity>
-					{image && (
-						<>
-							<View style={{ padding: 5, marginLeft: 15 }}>
+					<View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginRight: 15, }} >
+						<TouchableOpacity onPress={pickImage} style={{ marginBottom: 10 }}>
+							<FontAwesome5 name="camera" size={28} alignSelf="center" />
+							<Text textAlign="center" style={{ fontSize: 7 }} numberOfLines={4} fontWeight="bold" color="#41483F" >
+								{image ? 'Editar foto' : 'Tomar foto'}
+							</Text>
+						</TouchableOpacity>
+						{image && (
+							<View style={{ padding: 5 }}>
 								<TouchableOpacity onPress={deleteImage}>
 									<FontAwesome5 name="trash" size={28} alignSelf="center" />
-									<Text textAlign="center" style={{ fontSize: 7 }} numberOfLines={4} fontWeight="bold" color="#41483F">
+									<Text textAlign="center" style={{ fontSize: 7 }} numberOfLines={4} fontWeight="bold" color="#41483F" >
 										Quitar foto
 									</Text>
 								</TouchableOpacity>
 							</View>
-							<View style={{ borderWidth: 2, borderColor: 'green', padding: 5, marginLeft: 15, borderRadius: 5}}>
-								<Image source={{ uri: 'data:image/jpeg;base64,' + image }} style={{ width: 200, height: 200 }} />
-							</View>
-						</>
+						)}
+					</View>
+					{image && (
+						<View style={{ borderWidth: 2, borderColor: 'green', padding: 5, borderRadius: 5, }} >
+							<Image
+								source={{ uri: 'data:image/jpeg;base64,' + image }}
+								style={{ width: 200, height: 200 }}
+							/>
+						</View>
 					)}
 				</View>
 			</FormControl>

@@ -907,16 +907,10 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 								</React.Fragment>
 							))
 						) : (
-							<View
-								style={{
-									justifyContent: 'center',
-									alignItems: 'center',
-								}}
-								mb="4"
-							>
+							<View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 4, maxWidth: '85%' }}>
 								<WarningOutlineIcon size={5} color="red.600" />
 								<Text style={{ fontSize: 14, textAlign: 'center' }}>
-									No recibiste ninguna solicitud
+									No tenes solicitudes. Puede que no hayas recibido ninguna o que el solicitante la haya retirado.
 								</Text>
 							</View>
 						)}
