@@ -145,17 +145,7 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 									})
 								}
 							>
-								<Box
-									key={`box-${idx}`}
-									mb={2}
-									p={2}
-									borderWidth={1}
-									borderColor="gray.300"
-									borderRadius="md"
-									shadow={1}
-									width={350}
-									background={'white'}
-								>
+								<Box key={`box-${idx}`} mb={2} p={2} borderWidth={1} borderColor="gray.300" borderRadius="md" shadow={1} width={350} background={'white'} >
 									<HStack
 										space={2}
 										mt="0.5"
@@ -272,7 +262,7 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 													</Text>
 												</View>
 											</>
-										) : !transaction.transporte &&
+										) : !transaction.transporte &&  transaction.residuos &&
 										  transaction.residuos.filter(r => !r.fechaRetiro).length ==
 												0 ? (
 											<>
@@ -337,7 +327,7 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 												</View>
 											</>
 										) : (
-											!transaction.transporte && (
+											!transaction.transporte && transaction.residuos ? (
 												<>
 													<View
 														style={{
@@ -355,6 +345,23 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 														</Button>
 													</View>
 												</>
+											) : (
+												<View
+														style={{
+															flexDirection: 'row',
+															justifyContent: 'center',
+														}}
+													>
+														<Text
+															textAlign="center"
+															fontSize="sm"
+															numberOfLines={6}
+															fontWeight="bold"
+															color="#B8332D"
+														>
+															Esta transaccion no posee residuos
+														</Text>
+													</View>
 											)
 										)}
 									</View>

@@ -8,6 +8,8 @@ type RecorridoFilter = {
 	organizacionId?: number
 	zonaId?: number
 	fechaRetiro?: Date
+	fechaFinNull?: boolean
+	expandZona?: boolean
 }
 
 const get = async(id: number): Promise<Either<Recorrido, ErrorMessage>> => {
@@ -47,9 +49,11 @@ const makeParams = (url: string, f: RecorridoFilter): string => {
 	if (f.recicladorId) finalUrl += `reciclador_id=${f.recicladorId}&`
 	if (f.organizacionId) finalUrl += `organizacion_id=${f.organizacionId}&`
 	if (f.zonaId) finalUrl += `zona_id=${f.zonaId}&`
-	if (f.fechaRetiro)
-		finalUrl += `fecha_retiro=${f.fechaRetiro.toISOString().split('T')[0]}`
-
+	if (f.fechaRetiro) finalUrl += `fecha_retiro=${f.fechaRetiro.toISOString().split('T')[0]}`
+	if(f.fechaFinNull === false) finalUrl += `fecha_fin_null=false&`
+	if(f.fechaFinNull === true) finalUrl += `fecha_fin_null=true&`
+	if(f.expandZona === true) finalUrl += `expand=zona&`
+	
 	return finalUrl
 }
 

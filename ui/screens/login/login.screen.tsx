@@ -132,17 +132,6 @@ const Form = () => {
 				<FormControl.ErrorMessage _text={{ fontSize: 'xs' }}>
 					{errors.password}
 				</FormControl.ErrorMessage>
-				<Link
-					_text={{
-						fontSize: 'xs',
-						fontWeight: '500',
-						color: 'primary.700',
-					}}
-					alignSelf="flex-end"
-					mt="1"
-				>
-					¿Olvidó su contraseña?
-				</Link>
 			</FormControl>
 			<Button
 				mt="2"
