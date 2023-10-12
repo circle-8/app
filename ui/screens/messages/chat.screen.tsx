@@ -45,6 +45,7 @@ export const ChatScreen = ({ navigation, route }: Props) => {
 	const [message, setMessage] = React.useState<string>('')
 	const [component, setComponent] = React.useState<ComponentMessage>()
 	const [messages, setMessages] = React.useState<MessageResponse[]>([])
+	const [inputs, setInputs] = React.useState<object>({})
 	const [ws, setWs] = React.useState<WebSocket>()
 	const flatListRef = React.useRef<any>(null)
 
@@ -54,18 +55,17 @@ export const ChatScreen = ({ navigation, route }: Props) => {
 		switch ( message.type ) {
 			case 'MESSAGE':
 				setMessages(prev => [...prev, message])
+				setActions(message.availableActions)
+				break;
+			case 'COMPONENT':
+				setComponent(message.message as ComponentMessage)
+				setActions(message.availableActions)
+				break;
 		}
 	}
 
 	const initialLoad = async () => {
 		navigation.setOptions({ title: route.params.titulo })
-
-		const ws = new WebSocket("wss://circle8.germanmerkel.com.ar" + wsUri)
-		ws.onmessage = msg => {
-			const data : MessageResponse = JSON.parse(msg.data)
-			handleIncomingMessage(data)
-		}
-		setWs(ws)
 
 		const res = await ChatService.getHistory(historyUri)
 		match(
@@ -78,7 +78,7 @@ export const ChatScreen = ({ navigation, route }: Props) => {
 							(c.message as ComponentMessage).type === 'MESSAGE'),
 				))
 				setComponent(
-					c.filter(c => c.type === 'COMPONENT')[0]?.message as ComponentMessage,
+					c.filter(c => c.type === 'COMPONENT' && c.to == userId)[0]?.message as ComponentMessage,
 				)
 			},
 			err => {
@@ -103,13 +103,19 @@ export const ChatScreen = ({ navigation, route }: Props) => {
 
 	React.useEffect(() => {
 		initialLoad()
+
+		const ws = new WebSocket("ws://192.168.0.13:8080" + wsUri)
+		ws.onmessage = msg => {
+			const data : MessageResponse = JSON.parse(msg.data)
+			handleIncomingMessage(data)
+		}
+		setWs(ws)
+
 		return () => {
 			if ( ws ) ws.close()
 		}
 	}, [])
-	React.useEffect(() => {
-		flatListRef.current?.scrollToEnd({ animated: true })
-	}, [messages])
+
 
 	if (isLoading) {
 		return <LoadingScreen />
@@ -121,13 +127,6 @@ export const ChatScreen = ({ navigation, route }: Props) => {
 				type: "MESSAGE",
 				message: message
 			}))
-			// setMessages(prev => [...prev, {
-			// 	message: { message: message, color: 'primary' },
-			// 	from: userId,
-			// 	to: 1, // TODO
-			// 	type: 'MESSAGE',
-			// 	timestamp: new Date().toISOString(),
-			// }])
 			setMessage('')
 		}
 	}
@@ -135,7 +134,9 @@ export const ChatScreen = ({ navigation, route }: Props) => {
 	const renderMessage = (message: MessageResponse) => {
 		switch (message.type) {
 			case 'MESSAGE':
-				return <Text>{(message.message as Message).message}</Text>
+				const colorMessage = (message.message as Message).color
+				const color = colorMessage === 'primary' ? 'black' : 'white'
+				return <Text color={color}>{(message.message as Message).message}</Text>
 			case 'COMPONENT':
 				return buildComponentMessage(message.message as ComponentMessage)
 		}
@@ -165,13 +166,21 @@ export const ChatScreen = ({ navigation, route }: Props) => {
 
 	const renderMessageItem = ({ item, index }: ListRenderItemInfo<MessageResponse>) => {
 		let color: string
+		let dateColor: string
+
 		let align: FlexAlignType
 		if (item.type === 'MESSAGE') {
 			const colorMessage = (item.message as Message).color
-			if (colorMessage === 'primary')
+			if (colorMessage === 'primary') {
 				color = item.from === userId ? '#DCF8C6' : '#EAEAEA'
+				dateColor = '#777'
+			} else if (colorMessage === 'info') {
+				color = '#57afed'
+				dateColor = 'white'
+			}
 
 			align = item.from === userId ? 'flex-end' : 'flex-start'
+			align = !item.from ? 'center' : align
 		} else {
 			color = '#007BFF'
 			align = 'center'
@@ -190,7 +199,7 @@ export const ChatScreen = ({ navigation, route }: Props) => {
 				key={index.toString()}
 			>
 				{renderMessage(item)}
-				<Text style={{ fontSize: 10, color: '#777' }}>
+				<Text style={{ fontSize: 10, color: dateColor }}>
 					{new Date(item.timestamp).toLocaleString()}
 				</Text>
 			</View>
@@ -213,6 +222,11 @@ export const ChatScreen = ({ navigation, route }: Props) => {
 						key={c.name}
 						keyboardType={c.inputType === 'NUMBER' ? 'numeric' : 'default'}
 						placeholder={c.text}
+						onChangeText={v => setInputs(prev => {
+							const neew = {}
+							neew[c.name] = v
+							return {...prev, ...neew}
+						})}
 					/>
 				)
 			case 'BUTTON':
@@ -220,7 +234,7 @@ export const ChatScreen = ({ navigation, route }: Props) => {
 					<Button
 						key={c.action.send.type}
 						style={{ marginHorizontal: 3 }}
-						onPress={() => {}}
+						onPress={() => executeAction(c.action)}
 					>
 						{c.text}
 					</Button>
@@ -271,6 +285,12 @@ export const ChatScreen = ({ navigation, route }: Props) => {
 		)
 	}
 
+	const executeAction = (action: Action) => {
+		setComponent(null)
+		ws.send(JSON.stringify({...action.send, inputs: inputs}))
+		setInputs({})
+	}
+
 	return (
 		<Box style={{ flex: 1, justifyContent: 'space-between' }}>
 			{!!component && renderModal(component.components)}
@@ -279,9 +299,10 @@ export const ChatScreen = ({ navigation, route }: Props) => {
 					padding: 5,
 				}}
 				ref={flatListRef}
-				data={messages}
+				data={[...messages].filter(m => m.from === userId || m.to === userId).reverse()}
 				keyExtractor={(item, index) => index.toString()}
 				renderItem={renderMessageItem}
+				inverted
 			/>
 			<VStack>
 				<ScrollView
@@ -291,16 +312,17 @@ export const ChatScreen = ({ navigation, route }: Props) => {
 				>
 					{actions
 						.filter(a => a.type === 'ACTION')
-						.map((a, idx) => (
+						.map((a, idx) => {
+							return (
 							<Button
 								style={{ margin: 3, padding: 5 }}
 								size="sm"
 								key={idx.toString()}
-								onPress={() => {}}
+								onPress={() => executeAction(a)}
 							>
 								{a.titulo}
 							</Button>
-						))}
+						)})}
 				</ScrollView>
 				<Box
 					style={{
