@@ -117,7 +117,8 @@ export const ListSolicitudes = ({ navigation, route }: Props) => {
 	const modalAgregarTransaccion = async (solicitud: Solicitud) => {
 		const userTransactions = await TransaccionService.getAll({
 			ciudadanoId: ciudadanoId,
-			puntosReciclaje: [solicitud.puntoReciclajeId]
+			puntosReciclaje: [solicitud.puntoReciclajeId],
+			conTransporte: false
 		})
 		match(
 			userTransactions,

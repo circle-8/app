@@ -327,7 +327,7 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 												</View>
 											</>
 										) : (
-											!transaction.transporte && (
+											!transaction.transporte && transaction.residuos ? (
 												<>
 													<View
 														style={{
@@ -345,6 +345,23 @@ export const ListTransacciones = ({ navigation, route }: Props) => {
 														</Button>
 													</View>
 												</>
+											) : (
+												<View
+														style={{
+															flexDirection: 'row',
+															justifyContent: 'center',
+														}}
+													>
+														<Text
+															textAlign="center"
+															fontSize="sm"
+															numberOfLines={6}
+															fontWeight="bold"
+															color="#B8332D"
+														>
+															Esta transaccion no posee residuos
+														</Text>
+													</View>
 											)
 										)}
 									</View>

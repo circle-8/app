@@ -196,7 +196,7 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 				</Box>
 				{transaccion && transaccion?.residuos && (
 					<Box height="20%" bgColor="white" p="5" borderBottomWidth="0.5">
-						<ScrollView>
+						<ScrollView persistentScrollbar={true}>
 							<Text style={{ fontWeight: 'bold' }}>
 								{'\u2022'}  Residuo {currentPoint + 1} de {transaccion.residuos.length}
 							</Text>
