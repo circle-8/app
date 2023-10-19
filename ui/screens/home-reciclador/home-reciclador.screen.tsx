@@ -152,6 +152,7 @@ export const HomeReciclador = ({ navigation }: Props) => {
 	}
 
 	const onFinish = async () => {
+		setLoading(true)
 		const error = await RecorridoService.finish(todayRecorrido.id)
 		caseMaybe(
 			error,
@@ -161,6 +162,7 @@ export const HomeReciclador = ({ navigation }: Props) => {
 				setTodayRecorrido(undefined)
 			},
 		)
+		setLoading(false)
 	}
 
 	const getAddress = async (coord: Coord) => {
