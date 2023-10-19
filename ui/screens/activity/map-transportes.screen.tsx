@@ -101,6 +101,7 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 	}
 
 	const onFinish = async () => {
+		setLoading(true)
 		const user = await UserService.getCurrent()
 		const error = await TransportistaService.finish(transporte.id)
 		caseMaybe(
@@ -113,6 +114,7 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 				})
 			},
 		)
+		setLoading(false)
 	}
 
 	const verFoto = () => {
@@ -128,7 +130,7 @@ export const MapTransportes = ({ navigation, route }: Props) => {
 		return <LoadingScreen />
 	}
 
-	const mapHeight = transporte?.fechaInicio || false ? '65%' : '85%'
+	const mapHeight = transporte?.fechaInicio || !transporte?.transportistaId || false ? '65%' : '85%'
 	const boxHeight = transporte?.fechaInicio || false ? '15%' : '15%'
 
 	return (
@@ -322,12 +324,14 @@ const BelowBox = ({
 					</TouchableOpacity>
 					<Text fontSize="xs">Siguiente</Text>
 				</Center>
-				<Center w="33%">
-					<TouchableOpacity onPress={onFinish}>
-						<FontAwesome name="close" size={50} color={colors.primary800} />
-					</TouchableOpacity>
-					<Text fontSize="xs">Terminar</Text>
-				</Center>
+				{transporte && transporte.transportistaId && 
+					<Center w="33%">
+						<TouchableOpacity onPress={onFinish}>
+							<FontAwesome name="close" size={50} color={colors.primary800} />
+						</TouchableOpacity>
+						<Text fontSize="xs">Terminar</Text>
+					</Center>
+				}
 			</>
 		)
 
