@@ -134,10 +134,13 @@ export const Home = ({ navigation }: Props) => {
 	}
 
 	const getPoints = async () => {
+		const user = await UserService.getCurrent()
 		const newPoints = await PuntoService.getAll({
 			tipos: selectedPuntos,
 			residuos: selectedTipos,
 			dias: selectedDias,
+			notCiudadanoId: user.ciudadanoId,
+			notRecicladorId: user.ciudadanoId
 		})
 		setPoints(newPoints)
 	}

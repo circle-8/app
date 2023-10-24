@@ -27,7 +27,9 @@ type Filter = {
 	residuos?: string[]
 	dias?: string[]
 	recicladorId?: number
+	notRecicladorId?: number
 	ciudadanoId?: number
+	notCiudadanoId?: number
 }
 
 const getAll = async (f: Filter): Promise<Punto[]> => {
@@ -57,13 +59,17 @@ const getPuntos = async ({
 	residuos,
 	dias,
 	recicladorId,
+	notRecicladorId,
 	ciudadanoId,
+	notCiudadanoId
 }: Filter): Promise<Punto[]> => {
 	let url = mapPoint[tipo].url
 	for (const residuo of residuos || []) url += 'tipos_residuo=' + residuo + '&'
 	for (const dia of dias || []) url += 'dias=' + dia + '&'
 	if (recicladorId) url += 'reciclador_id=' + recicladorId + '&'
-	if (ciudadanoId) url += 'ciudadano_id=' + ciudadanoId
+	if (notRecicladorId) url += 'not_reciclador_id=' + notRecicladorId + '&'
+	if (ciudadanoId) url += 'ciudadano_id=' + ciudadanoId + '&'
+	if (notCiudadanoId) url += 'not_ciudadano_id=' + notCiudadanoId
 
 	const response = await Http.get<ListResponse<PuntoResponse>>(url)
 	const points = []
