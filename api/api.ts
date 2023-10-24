@@ -18,9 +18,9 @@ const doFetch = async <T>(
 			body: bodyJSON,
 		})
 
-		if ( resJSON.status != 200 ) {
-			console.error('status not 200', method, url, await resJSON.text())
-		}
+		// if ( resJSON.status != 200 ) {
+		// 	console.error('status not 200', method, url, await resJSON.text())
+		// }
 
 		return mapResponse(await resJSON.json())
 	} catch (err) {

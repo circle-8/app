@@ -152,6 +152,7 @@ export const HomeReciclador = ({ navigation }: Props) => {
 	}
 
 	const onFinish = async () => {
+		setLoading(true)
 		const error = await RecorridoService.finish(todayRecorrido.id)
 		caseMaybe(
 			error,
@@ -161,6 +162,7 @@ export const HomeReciclador = ({ navigation }: Props) => {
 				setTodayRecorrido(undefined)
 			},
 		)
+		setLoading(false)
 	}
 
 	const getAddress = async (coord: Coord) => {
@@ -254,7 +256,7 @@ export const HomeReciclador = ({ navigation }: Props) => {
 				</Box>
 				{todayRecorrido && todayRecorrido.initDate && (
 					<Box height="20%" bgColor="white" p="5" borderBottomWidth="0.5">
-						<ScrollView>
+						<ScrollView persistentScrollbar={true}>
 							<Text style={{ fontWeight: 'bold' }}>
 								{'\u2022'}  Residuo {currentPoint + 1} de {todayRecorrido.puntos.length}
 							</Text>

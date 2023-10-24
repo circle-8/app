@@ -200,3 +200,70 @@ export type ConsejoResponse = {
 	descripcion: string
 	fechaCreacion: string
 }
+
+export type ConversacionResponse = {
+	id: string
+	titulo: string
+	descripcion: string
+	type: "TRANSACCION" | "RECORRIDO"
+	externalId: number
+	chatsUri: string
+	newMessages?: boolean
+	timestamp?: string
+}
+
+export type ChatResponse = {
+	id: string
+	titulo: string
+	descripcion: string
+	type: TipoUsuario
+	externalId: number
+	chatHistoryUri: string
+	actionsUri: string
+	chatWs: string
+	newMessages?: boolean
+	timestamp?: string
+}
+
+export type Message = {
+	message: string
+	color: string
+}
+
+export type Component = {
+	type: "TITLE" | "TEXT" | "INPUT" | "BUTTON"
+	text: string
+	name?: string // solo INPUT
+	inputType?: string // solo INPUT
+	action?: ActionResponse // solo BUTTON
+}
+
+export type ComponentMessage = {
+	type: "MESSAGE" | "MODAL"
+	components: Component[]
+}
+export type Error = Message
+
+export type IMessage = Message | ComponentMessage | Error
+
+export type MessageResponse = {
+	type: "MESSAGE" | "COMPONENT" | "ERROR"
+	timestamp?: string
+	from?: number
+	to: number
+	message: IMessage
+	availableActions?: ActionResponse[]
+}
+
+export type ActionSend = {
+	type: string
+	message?: string
+	extraData: object
+	inputs?: object
+}
+
+export type ActionResponse = {
+	type: "MESSAGE" | "ACTION"
+	titulo: string
+	send: ActionSend
+}

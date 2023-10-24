@@ -1,30 +1,29 @@
 import React from 'react'
 import { Avatar, Box, Center, FlatList, HStack, Heading, Spacer, Text, VStack, useToast } from 'native-base'
-import { Conversacion } from '../../../services/types';
+import { Chat } from '../../../services/types';
 import { LoadingScreen } from '../../components/loading.component';
 import { ChatService } from '../../../services/chat.service';
-import { UserService } from '../../../services/user.service';
 import { MessageRouteParams, MessageRoutes } from '../../../constants/routes';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { match } from '../../../utils/either';
-import { TouchableOpacity } from 'react-native'
+import { TouchableOpacity } from 'react-native';
 
-type Props = NativeStackScreenProps<MessageRouteParams, 'Messages'>
+type Props = NativeStackScreenProps<MessageRouteParams, 'Chats'>
 
-export const Messages = ({ navigation }: Props) => {
-	const [userId, setUserId] = React.useState<number>()
-	const [conversaciones, setConversaciones] = React.useState<Conversacion[]>([])
+export const Chats = ({ navigation, route }: Props) => {
+	navigation.setOptions({title: route.params.titulo})
+	const uri = route.params.chatUri
+	const userId = route.params.userId
+
 	const [isLoading, setLoading] = React.useState(true)
+	const [chats, setChats] = React.useState<Chat[]>([])
 	const toast = useToast()
 
 	const initialLoad = async () => {
-		const user = await UserService.getCurrent()
-		setUserId(user.id)
-
-		const res = await ChatService.getConversaciones(user.id)
+		const res = await ChatService.getChats(uri)
 		match(
 			res,
-			c => setConversaciones(c),
+			c => setChats(c),
 			err => {
 				toast.show({ description: err })
 				navigation.goBack()
@@ -40,20 +39,21 @@ export const Messages = ({ navigation }: Props) => {
 		return <LoadingScreen/>
 	}
 
-
 	return (
 		<Center w="100%">
 			<Box width="80%">
 				<Heading fontSize="xl" p="4" pb="3">
-					Conversaciones activas
+					Chats
 				</Heading>
 				<FlatList
-					data={conversaciones}
+					data={chats}
 					renderItem={({ item }) => (
-						<TouchableOpacity onPress={() => navigation.navigate(MessageRoutes.chats, {
+						<TouchableOpacity onPress={() => navigation.navigate(MessageRoutes.chat, {
 							titulo: item.titulo,
 							userId: userId,
-							chatUri: item.chatsUri
+							historyUri: item.chatHistoryUri,
+							actionsUri: item.actionsUri,
+							wsUri: item.chatWs
 						})}>
 							<Box
 								borderBottomWidth="1"

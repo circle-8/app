@@ -22,17 +22,18 @@ import {
 } from 'native-base'
 import { TipoResiduoService } from '../../../services/tipos.service'
 import { match } from '../../../utils/either'
-import { Punto, Residuo, TipoResiduo } from '../../../services/types'
+import { Punto, Residuo, TipoResiduo, Zona } from '../../../services/types'
 import { LoadingScreen } from '../../components/loading.component'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { ResiduoService } from '../../../services/residuo.service'
-import { Keyboard, Image, TouchableOpacity } from 'react-native'
+import { Keyboard, Image, TouchableOpacity, DevSettings } from 'react-native'
 import { UserService } from '../../../services/user.service'
 import { PuntoService } from '../../../services/punto.service'
 import * as Location from 'expo-location'
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { FontAwesome5 } from '@expo/vector-icons'
+import { ZonasService } from '../../../services/zonas.service'
 
 
 type Props = NativeStackScreenProps<ActivityRouteParams, 'NewResiduo'>
@@ -51,6 +52,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 	const [showModal, setShowModal] = React.useState(false);
 	const [newResiduo, setNewResiduo] = React.useState<Residuo>()
 	const [puntosDirec, setPuntosDirec] = React.useState<PuntoConDireccion[]>()
+	const [zonas, setZonas] = React.useState<Zona[]>([])
 	const [loadingModal, setLoadingModal] = React.useState(true)
 	type PuntoConDireccion = Punto & {
 		direccion: string;
@@ -170,6 +172,23 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 		)
 	}
 
+	const getZonas = async () => {
+		const user = await UserService.getCurrent()
+
+		const zonas = await ZonasService.getAll({
+			ciudadanoId: user.ciudadanoId,
+		})
+		match(
+			zonas,
+			t => setZonas(t),
+			err => {
+				toast.show({ description: err })
+			},
+		)
+
+		setLoading(false)
+	}
+
 	const closeModal = () => {
 		setShowModal(!showModal);
 		navigation.navigate(ActivityRoutes.listResiduos)
@@ -200,6 +219,7 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 					toast.show({ description: 'Residuo creado exitosamente' })
 					setNewResiduo(r)
 					getPuntos(r.tipoResiduo.id)
+					getZonas()
 					return
 				}
 			},
@@ -237,14 +257,22 @@ export const NewResiduo = ({ navigation, route }: Props) => {
 							<Spinner color="emerald.800" accessibilityLabel="Loading posts" />
 						)}
 						<View style={{ alignItems: 'center' }}>
-							{puntosDirec && puntosDirec.length != 0 && (
+							{zonas && zonas.length != 0 && !loadingModal ? (
+								 <View style={{ flex: 1, marginRight: 10, marginBottom: 5 }}>
+								 <Text style={{ fontSize: 12, textAlign: 'center' }}>
+								  Puedes entregar tus residuos en los puntos sugeridos o puedes incluir este residuo al circuito de reciclaje en el que te encontras desde{' '}
+								   <TouchableOpacity onPress={() => navigation.navigate(ActivityRoutes.listResiduos)}>
+									 <Text style={{ color: 'green', textDecorationLine: 'underline', fontWeight: 'bold' }}>Tus Residuos</Text>
+								   </TouchableOpacity>.
+								 </Text>
+							   </View>
+							) : puntosDirec && puntosDirec.length != 0 && (
 								<View style={{ flex: 1, marginRight: 10, marginBottom: 5 }}>
-									<Text style={{ fontSize: 10, textAlign: 'center' }}>
-										Todos estos puntos aceptan el residuo que creaste, podes
-										entregarlo al que desees.
+									<Text style={{ fontSize: 12, textAlign: 'center' }}>
+									Puedes entregar tus residuos en los puntos sugeridos.
+									Tambien si lo deseas podes hacerlo desde el mapa.
 									</Text>
-								</View>
-							)}
+								</View>)}
 							{puntosDirec && puntosDirec.length != 0 ? (
 								puntosDirec.map((point, idx) => (
 									<Box
@@ -404,17 +432,16 @@ const Form = ({
 		}
 		if (!formData.descripcion || formData.descripcion === '') {
 			newErrors.has = true
-			newErrors.descripcion =
-				'Complete la descripcion indicando que tiene disponible para retirar'
+			newErrors.descripcion = 'Complete la descripcion describiendo el residuo.'
 		}
 		if (selectedEntregado.length === 0) {
 			newErrors.has = true
-			newErrors.entrega =
-				'Seleccione al menos una caracteristica sobre como entregas el residuo.'
-			formData.descripcion = r.descripcion.split('\u200B\n').slice(0)[0]
+			newErrors.entrega = 'Seleccione al menos una caracteristica sobre como entregas el residuo.'
+			formData.descripcion = formData.descripcion.split('\u200B\n').slice(0)[0]
 			setFormData({
 				...formData,
 			})
+			var er = !newErrors.has
 		}
 
 		setErrors(newErrors)
@@ -518,14 +545,13 @@ const Form = ({
 				</Text>
 				<TextArea
 					onChangeText={v => setFormData({ ...formData, descripcion: v })}
-					value={formData.descripcion}
+					value={formData.descripcion.split('\u200B\n').slice(0)[0]}
 					autoCompleteType="none"
 					isInvalid={'descripcion' in errors}
 				/>
 				<Text fontSize="xs" color="red.500">
 					{errors.descripcion}
 				</Text>
-
 				<Text fontSize="sm" color="coolGray.500">
 					Selecciona cómo va a ser entregado
 				</Text>
@@ -573,26 +599,31 @@ const Form = ({
 			<FormControl>
 				<FormControl.Label>Agrega una imagen</FormControl.Label>
 				<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }} >
-					<TouchableOpacity onPress={pickImage}>
-						<FontAwesome5 name="camera" size={28} alignSelf="center" />
-						<Text textAlign="center" style={{ fontSize: 7 }} numberOfLines={4} fontWeight="bold" color="#41483F">
-							{image ? 'Editar foto' : 'Tomar foto'}
-						</Text>
-					</TouchableOpacity>
-					{image && (
-						<>
-							<View style={{ padding: 5, marginLeft: 15 }}>
+					<View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginRight: 15, }} >
+						<TouchableOpacity onPress={pickImage} style={{ marginBottom: 10 }}>
+							<FontAwesome5 name="camera" size={28} alignSelf="center" />
+							<Text textAlign="center" style={{ fontSize: 7 }} numberOfLines={4} fontWeight="bold" color="#41483F" >
+								{image ? 'Editar foto' : 'Tomar foto'}
+							</Text>
+						</TouchableOpacity>
+						{image && (
+							<View style={{ padding: 5 }}>
 								<TouchableOpacity onPress={deleteImage}>
 									<FontAwesome5 name="trash" size={28} alignSelf="center" />
-									<Text textAlign="center" style={{ fontSize: 7 }} numberOfLines={4} fontWeight="bold" color="#41483F">
+									<Text textAlign="center" style={{ fontSize: 7 }} numberOfLines={4} fontWeight="bold" color="#41483F" >
 										Quitar foto
 									</Text>
 								</TouchableOpacity>
 							</View>
-							<View style={{ borderWidth: 2, borderColor: 'green', padding: 5, marginLeft: 15, borderRadius: 5}}>
-								<Image source={{ uri: 'data:image/jpeg;base64,' + image }} style={{ width: 200, height: 200 }} />
-							</View>
-						</>
+						)}
+					</View>
+					{image && (
+						<View style={{ borderWidth: 2, borderColor: 'green', padding: 5, borderRadius: 5, }} >
+							<Image
+								source={{ uri: 'data:image/jpeg;base64,' + image }}
+								style={{ width: 200, height: 200 }}
+							/>
+						</View>
 					)}
 				</View>
 			</FormControl>

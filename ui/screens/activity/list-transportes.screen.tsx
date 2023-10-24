@@ -28,34 +28,44 @@ export const ListTransportes = ({ navigation, route }: Props) => {
 	const [transportes, setTransportes] = React.useState<Transporte[]>([])
 
 	const loadData = async () => {
+		setTransportes([]);
 		const userTransportes = await TransportistaService.getAll({
-			sinTransportista: true,
-            entregaConfirmada: false,
-		})
+		  sinTransportista: true,
+		  entregaConfirmada: false,
+		});
+	  
 		match(
-			userTransportes,
-			async t => {
-				for (const transporte of t) {
-					if (!transporte.transaccion || !transporte.transaccion.puntoReciclaje) {
-						const direccion = 'No pudimos obtener la direccion'
-						transportes.push({ ...transporte, direccion })
-						continue;
-					}
-
-					const direccion = await getDirection(
-						transporte.transaccion.puntoReciclaje.latitud,
-						transporte.transaccion.puntoReciclaje.longitud,
-					)
-
-					transportes.push({ ...transporte, direccion })
-				}
-
-				setTransportes(transportes)
-				setLoading(false)
-			},
-			e => setTransportes([]),
-		)
-	}
+		  userTransportes,
+		  async t => {
+			for (const transporte of t) {
+			  if (!transporte.transaccion || !transporte.transaccion.puntoReciclaje) {
+				const direccion = 'No pudimos obtener la dirección';
+				transportes.push({ ...transporte, direccion });
+				continue;
+			  }
+	  
+			  const direccion = await getDirection(
+				transporte.transaccion.puntoReciclaje.latitud,
+				transporte.transaccion.puntoReciclaje.longitud
+			  );
+	  
+			  transportes.push({ ...transporte, direccion });
+			}
+	  
+			const transportesUnicos = transportes.filter(
+				(transporte, index, self) =>
+				  index ===
+				  self.findIndex(
+					(t) => t.id === transporte.id
+				  )
+			  );
+		
+			  setTransportes(transportesUnicos);
+			setLoading(false);
+		  },
+		  e => setTransportes([])
+		);
+	  };
 
 	const getDirection = async (latitude, longitude) => {
 		try {
@@ -97,6 +107,13 @@ export const ListTransportes = ({ navigation, route }: Props) => {
 			},
 		)
 		loadData()
+	}
+
+	const goMapaRecorrido = async (transporte) => {
+		const user = await UserService.getCurrent()
+		navigation.navigate(ActivityRoutes.mapTransportes, {
+			transporte: transporte,
+		})
 	}
 
 	React.useEffect(() => {
@@ -143,7 +160,7 @@ export const ListTransportes = ({ navigation, route }: Props) => {
 								</HStack>
 								<HStack space={2} mt="0.5" alignItems="center">
 									<Text fontSize="sm" numberOfLines={4}>
-										<Text style={{ fontWeight: 'bold' }}>Direccion:</Text>{' '}
+										<Text style={{ fontWeight: 'bold' }}>Direccion entrega:</Text>{' '}
 										{transporte.direccion}
 									</Text>
 								</HStack>
@@ -155,6 +172,10 @@ export const ListTransportes = ({ navigation, route }: Props) => {
 											marginTop: 8,
 										}}
 									>
+										<Button onPress={() => goMapaRecorrido(transporte)}>
+											Ver en mapa
+										</Button>
+										<View style={{ marginHorizontal: 10 }} />
 										<Button onPress={() => handleTomarTransporte(transporte.id)}>Tomar Transporte</Button>
 									</View>
 							</Box>

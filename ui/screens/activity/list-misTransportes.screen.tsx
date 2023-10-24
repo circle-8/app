@@ -11,11 +11,8 @@ import {
 	Center,
 	Button,
 	useToast,
-	Modal,
-	Input,
 	InfoOutlineIcon,
 	CheckCircleIcon,
-	Tooltip,
 } from 'native-base'
 import { match } from '../../../utils/either'
 import { LoadingScreen } from '../../components/loading.component'
@@ -32,9 +29,6 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 	const { userId } = route.params
 	const [isLoading, setLoading] = React.useState(true)
 	const [transportes, setTransportes] = React.useState<Transporte[]>([])
-	const [transportePrecio, setTransportePrecio] = React.useState<Transporte>()
-	const [modalPrecio, setModalPrecio] = React.useState(false)
-	const [importe, setImporte] = React.useState('');
 	const [mostrarTooltip, setMostrarTooltip] = React.useState(false)
 	const [idxTooltip, setIdxTooltip] = React.useState<Number>()
 
@@ -143,24 +137,6 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 		loadData()
 	}
 
-	const handleModificarImporte = async (id, importe) => {
-		const error = await TransportistaService.modificarImporte(id, importe)
-		match(
-			error,
-			t => {
-				toast.show({ description: 'Modificado correctamente.' })
-			},
-			err => {
-				toast.show({
-					description: 'Ocurrio un error al modificar el precio, reintenta.',
-				})
-			},
-		)
-		setModalPrecio(false)
-		setImporte(null)
-		loadData()
-	}
-
 	const goMapaRecorrido = async (transporte) => {
 		const user = await UserService.getCurrent()
 		navigation.navigate(ActivityRoutes.mapTransportes, {
@@ -246,7 +222,7 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 										<Text style={{ fontWeight: 'bold' }}>Precio acordado:</Text>{' '}
 										{transporte.precioAcordado
 											? '$' + transporte.precioAcordado
-											: 'Modifica el importe a recibir.'}
+											: 'Podes acordarlo con el receptor desde tus mensajes.'}
 									</Text>
 								</HStack>
 								<HStack space={2} mt="0.5" alignItems="center">
@@ -270,7 +246,7 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 								</HStack>
 								<HStack space={2} mt="0.5" alignItems="center">
 									<Text fontSize="sm" numberOfLines={4}>
-										<Text style={{ fontWeight: 'bold' }}>Direccion:</Text>{' '}
+										<Text style={{ fontWeight: 'bold' }}>Direccion entrega:</Text>{' '}
 										{transporte.direccion}
 									</Text>
 								</HStack>
@@ -339,15 +315,6 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 										</>
 									) : (
 										<>
-											<Button
-												onPress={() => {
-													setModalPrecio(true)
-													setTransportePrecio(transporte)
-												}}
-											>
-												Modificar importe
-											</Button>
-											<View style={{ marginHorizontal: 10 }} />
 											<Button onPress={() => handleComenzar(transporte)}>
 												Comenzar Entrega
 											</Button>
@@ -374,52 +341,6 @@ export const ListMisTransportes = ({ navigation, route }: Props) => {
 					</>
 				)}
 			</Center>
-			<Modal
-				isOpen={modalPrecio}
-				onClose={() => setModalPrecio(false)}
-				size="lg"
-			>
-				<Modal.Content>
-					<Modal.CloseButton />
-					<Modal.Header alignItems="center">
-						<Text bold fontSize="xl">
-							Ingresa el importe que consideres apropiado.
-						</Text>
-					</Modal.Header>
-					<Modal.Body>
-						<Input
-							keyboardType="numeric"
-							value={importe}
-							onChangeText={value => setImporte(value)}
-							placeholder="Ingrese el importe"
-						/>
-					</Modal.Body>
-					<Modal.Footer>
-						<Center flex={1}>
-							<View
-								style={{
-									flexDirection: 'row',
-									justifyContent: 'space-between',
-								}}
-							>
-								<Button onPress={() => setModalPrecio(false)}>Cerrar</Button>
-								<View style={{ marginHorizontal: 10 }} />
-								<Button
-									onPress={() =>
-										handleModificarImporte(transportePrecio.id, importe)
-									}
-								>
-									Modificar importe
-								</Button>
-							</View>
-						</Center>
-					</Modal.Footer>
-				</Modal.Content>
-			</Modal>
 		</ScrollView>
 	)
 }
-function wait(arg0: number) {
-	throw new Error('Function not implemented.')
-}
-

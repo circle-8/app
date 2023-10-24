@@ -1,5 +1,8 @@
 import {
+	ActionResponse,
+	ChatResponse,
 	ConsejoResponse,
+	ConversacionResponse,
 	DiaResponse,
 	PuntoReciclajeResponse,
 	PuntoResiduoResponse,
@@ -18,7 +21,7 @@ export type TipoUsuario =
 	| 'CIUDADANO'
 	| 'TRANSPORTISTA'
 	| 'RECICLADOR_URBANO'
-	| 'RECICLADOR_PARTICULAR'
+	| 'RECICLADOR'
 	| 'ORGANIZACION'
 
 export type ErrorMessage = string
@@ -62,3 +65,7 @@ export type Recorrido = RecorridoResponse & {
 }
 export type Transporte = TransporteResponse
 export type Consejo = ConsejoResponse
+
+export type Conversacion = ConversacionResponse
+export type Chat = ChatResponse
+export type Action = ActionResponse

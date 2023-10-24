@@ -95,18 +95,7 @@ export const ListZonas = ({ navigation }: Props) => {
 					</View>
 					{zonas.length != 0 ? (
 						zonas.map((z, idx) => (
-							<Box
-								key={`box-${idx}`}
-								p={2}
-								borderWidth={1}
-								borderColor="gray.300"
-								borderRadius="md"
-								shadow={1}
-								maxWidth={500}
-								bg={'white'}
-								width="90%"
-								marginBottom={2}
-							>
+							<Box key={`box-${idx}`} mb={2} p={2} borderWidth={1} borderColor="gray.300" borderRadius="md" shadow={1} width={350} background={'white'} >
 								<Text fontSize="sm" numberOfLines={4}>
 									<Text style={{ fontWeight: 'bold' }}>Zona #{z.id}</Text>{' '}
 								</Text>
